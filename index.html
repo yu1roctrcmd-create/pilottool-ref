@@ -2,24 +2,79 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NCA Tools - 参照ページ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="NCA Ref">
+  <meta name="theme-color" content="#0d1117">
+  <title>NCA Tools - EMER / QRH / MEL</title>
+  <link rel="stylesheet" href="ref.css">
   <script src="ref-lock.js"></script>
-  <style>
-    body{margin:0;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#060d16;color:#b8cce0;font-family:-apple-system,"SF Pro Text","Helvetica Neue",sans-serif}
-    body.day{background:#f2ede5;color:#181818}
-    h1{font-size:1.1em;letter-spacing:3px;color:#00c8ff;margin:0 0 6px}
-    body.day h1{color:#1264a0}
-    a{display:block;width:240px;text-align:center;padding:12px;border:1px solid #162840;border-radius:10px;color:inherit;text-decoration:none;background:#0b1624}
-    body.day a{background:#faf8f4;border-color:#ccc7bd}
-    p{font-size:.72em;color:#4a6880;margin:8px 0 0}
-  </style>
 </head>
 <body>
-  <h1>NCA TOOLS 参照ページ</h1>
-  <a href="emer.html">EMER</a>
-  <a href="qrh_analysis.html">QRH</a>
-  <a href="mel.html">MEL</a>
-  <p>通常は NCA Tools 本体（pilottool）のタブから開きます</p>
+
+<!-- 本体（NCA Tools）と同じタブバー。EMER / QRH / MEL を単体で開く用 -->
+<div class="tab-bar" id="main-tab-bar">
+  <button class="tab-btn" data-tab="emer">EMER</button>
+  <button class="tab-btn" data-tab="qrh">QRH</button>
+  <button class="tab-btn" data-tab="mel">MEL</button>
+  <button class="theme-btn" id="theme-btn" title="Day / Night">☀️</button>
+</div>
+
+<div class="tab-panel" id="tab-emer">
+  <div class="tab-content" style="max-width:100% !important; margin:0 !important; padding:0; border:none; height:calc(100vh - 56px);">
+    <iframe id="emer-iframe" data-page="emer.html" style="width:100%; height:100%; border:none; display:block;"></iframe>
+  </div>
+</div>
+<div class="tab-panel" id="tab-qrh">
+  <div class="tab-content" style="max-width:100% !important; margin:0 !important; padding:0; border:none; height:calc(100vh - 56px);">
+    <iframe id="qrh-iframe" data-page="qrh_analysis.html" style="width:100%; height:100%; border:none; display:block;"></iframe>
+  </div>
+</div>
+<div class="tab-panel" id="tab-mel">
+  <div class="tab-content" style="max-width:100% !important; margin:0 !important; padding:0; border:none; height:calc(100vh - 56px);">
+    <iframe id="mel-iframe" data-page="mel.html" style="width:100%; height:100%; border:none; display:block;"></iframe>
+  </div>
+</div>
+
+<script>
+/* 各ページは初めて開いたときだけ読み込む（QRHは重いため） */
+function refSwitch(name) {
+  document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.remove('active'); });
+  document.querySelectorAll('#main-tab-bar .tab-btn').forEach(function (b) { b.classList.toggle('active', b.dataset.tab === name); });
+  document.getElementById('tab-' + name).classList.add('active');
+  var f = document.getElementById(name + '-iframe');
+  if (f && !f.getAttribute('src')) f.setAttribute('src', f.dataset.page);
+  try { localStorage.setItem('nca_ref_tab', name); } catch (e) {}
+}
+function refTheme(day) {
+  document.body.classList.toggle('day', day);
+  document.getElementById('theme-btn').textContent = day ? '🌙' : '☀️';
+  ['emer-iframe', 'qrh-iframe', 'mel-iframe'].forEach(function (id) {
+    var f = document.getElementById(id);
+    if (f && f.contentWindow) f.contentWindow.postMessage({ type: 'nca-theme', theme: day ? 'light' : 'dark' }, '*');
+  });
+}
+document.querySelectorAll('#main-tab-bar .tab-btn').forEach(function (b) {
+  b.addEventListener('click', function () { refSwitch(b.dataset.tab); });
+});
+document.getElementById('theme-btn').addEventListener('click', function () {
+  var day = !document.body.classList.contains('day');
+  try { localStorage.setItem('nca_theme', day ? 'day' : 'night'); } catch (e) {}
+  refTheme(day);
+});
+['emer-iframe', 'qrh-iframe', 'mel-iframe'].forEach(function (id) {
+  document.getElementById(id).addEventListener('load', function () {
+    this.contentWindow.postMessage({ type: 'nca-theme', theme: document.body.classList.contains('day') ? 'light' : 'dark' }, '*');
+  });
+});
+(function () {
+  var day = false, tab = 'emer';
+  try { day = localStorage.getItem('nca_theme') === 'day'; tab = localStorage.getItem('nca_ref_tab') || 'emer'; } catch (e) {}
+  if (['emer', 'qrh', 'mel'].indexOf(tab) < 0) tab = 'emer';
+  refTheme(day);
+  refSwitch(tab);
+})();
+</script>
 </body>
 </html>
