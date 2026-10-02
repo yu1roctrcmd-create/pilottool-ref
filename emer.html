@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>NCA Tools - EMER</title>
+  <link rel="stylesheet" href="ref.css">
+  <script src="ref-lock.js"></script>
+</head>
+<body>
+
+<div class="tab-panel active" id="tab-emer">
+<div class="tab-content">
+
+<div class="hdr">
+  <div class="hdr-left">
+    <h2 style="margin:0">🚨 EMER</h2>
+    <p class="lead" style="margin:2px 0 0">Oceanic / Remote Area Contingency Procedures</p>
+  </div>
+</div>
+
+<div class="xw-layout">
+<div class="xw-col">
+
+<div class="card">
+      <div class="card-title">1. Contingency Procedure</div>
+      <div class="formula-box" style="margin-bottom:12px">
+        ATC Clearance（Route / Speed / Flight Level）を維持できない場合の対応手順（Non-weather）。
+        想定要因: Emergency Medical Divert・Engine Failure・Depressurization・Icing・Turbulence
+      </div>
+      <ol style="margin:0;padding-left:1.2em;font-size:0.85em;line-height:2;color:var(--text)">
+        <li><b>Revised Clearance要求</b> — まず改訂クリアランスの取得を試みる。</li>
+        <li><b>クリアランス得られない場合</b> — 可能ならFLを維持（不可なら昇降率を最小限に）。目視・ACAS監視を継続（ACAS装備機はRAモードを維持、機体の運用上の制限がある場合を除く）、機外灯全点灯。可能であれば周囲機に121.5または123.45MHzで通報。可能なら Squawk 7700・ADS-B／ADS-C の緊急機能を選択し、ATCへ逸脱を通報（Voice／CPDLC）。</li>
+        <li><b>オフセットルート確立</b> — クリアされたルートから左右いずれかへ最短30°以上旋回し、5NM以内にオフセットルート（FMS）を確立して飛行。</li>
+        <li><b>FL290未満への降下は独立した判断</b> — Pilotが降下を選択する場合とそうでない場合で、その後の対応が分かれる:
+          <ul style="margin:6px 0 0;padding-left:1.2em;line-height:1.8">
+            <li><b>降下を選択する場合</b> — 同方向のパラレルオフセットを維持したままFL290未満まで降下。FL290未満に達したら、可能な範囲で<b>さらに</b>500ft(150m)の垂直オフセットも確立する（降下は垂直オフセットの代わりにはならない）。</li>
+            <li><b>降下しない場合</b> — 可能な範囲で500ft(150m)の垂直オフセットを確立（FL410以上を飛行中は1000ft／300m）。</li>
+          </ul>
+        </li>
+        <li><b>新クリアランス受領まで継続</b> — オフセットルート＋垂直オフセットの状態を維持し、ATCから新しいクリアランスを受領するまで飛行を継続。</li>
+      </ol>
+      <div class="hint" style="margin-top:8px">Source: ICAO Doc 4444（16th Ed., Amdt 9）— Special Procedures for In-Flight Contingencies in Oceanic Airspace (non-weather)</div>
+
+      <div class="card-title" style="margin-top:16px">地域別 旋回角度／オフセット距離</div>
+      <table style="width:100%;border-collapse:collapse;font-size:0.79em">
+        <thead>
+          <tr style="color:var(--muted);font-size:0.68em;border-bottom:1px solid var(--border)">
+            <th style="text-align:left;padding:4px 0;font-weight:500">REGION</th>
+            <th style="text-align:left;padding:4px 4px;font-weight:500">旋回／オフセット</th>
+            <th style="text-align:left;padding:4px 4px;font-weight:500">垂直オフセット・備考</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid rgba(128,128,128,0.12)"><td style="padding:5px 0;white-space:nowrap">Japan</td><td style="padding:5px 4px;white-space:nowrap"><span style="color:var(--accent);font-weight:600">30° / 5NM</span></td><td style="padding:5px 4px;color:var(--muted)">上記の手順どおり</td></tr>
+          <tr style="border-bottom:1px solid rgba(128,128,128,0.12)"><td style="padding:5px 0;white-space:nowrap">Hong Kong</td><td style="padding:5px 4px;white-space:nowrap"><span style="color:var(--accent);font-weight:600">30° / 5NM</span></td><td style="padding:5px 4px;color:var(--muted)">上記の手順どおり</td></tr>
+          <tr style="border-bottom:1px solid rgba(128,128,128,0.12)"><td style="padding:5px 0;white-space:nowrap">Taipei</td><td style="padding:5px 4px;white-space:nowrap"><span style="color:var(--accent);font-weight:600">30° / 5NM</span></td><td style="padding:5px 4px;color:var(--muted)">Area Guide：記載なし（標準手順）。Vientianeも記載なし</td></tr>
+          <tr style="border-bottom:1px solid rgba(128,128,128,0.12)"><td style="padding:5px 0;white-space:nowrap">Singapore</td><td style="padding:5px 4px;white-space:nowrap"><span style="color:var(--accent);font-weight:600">30° / 5NM</span></td><td style="padding:5px 4px;color:var(--muted)">上記の手順どおり</td></tr>
+          <tr style="border-bottom:1px solid rgba(128,128,128,0.12)"><td style="padding:5px 0;white-space:nowrap">Bangkok</td><td style="padding:5px 4px;white-space:nowrap"><span style="color:var(--accent);font-weight:600">30° / 5NM</span></td><td style="padding:5px 4px;color:var(--muted)">上記の手順どおり</td></tr>
+          <tr style="border-bottom:1px solid rgba(128,128,128,0.12)"><td style="padding:5px 0;white-space:nowrap">Sanya</td><td style="padding:5px 4px;white-space:nowrap"><span style="color:var(--accent);font-weight:600">30° / 5NM</span></td><td style="padding:5px 4px;color:var(--muted)">島嶼管制空域は逸脱前にATCクリアランスを取得。ATCクリアランスに従えない場合は、可能な限り遭難／緊急通報で改訂クリアランスを得てから行動。洋上でATCと通信できない場合はICAO Regional Supplementary Procedures</td></tr>
+          <tr style="border-bottom:1px solid rgba(128,128,128,0.12)"><td style="padding:5px 0;white-space:nowrap">Philippines（Manila）</td><td style="padding:5px 4px;white-space:nowrap"><span style="color:var(--warn);font-weight:600">90° / 25NM</span> <span style="color:var(--muted);font-weight:400">（46km）</span></td><td style="padding:5px 4px;color:var(--muted)">高度維持可：<b>FL410超</b>＝±300m（1000ft）／<b>FL410未満</b>＝±150m（500ft）／<b>FL410</b>＝上昇300mまたは降下150m。93km（50NM）間隔のマルチトラック等では隣接平行ルートとの中間点</td></tr>
+          <tr style="border-bottom:1px solid rgba(128,128,128,0.12)"><td style="padding:5px 0;white-space:nowrap">Ho Chi Minh / Hanoi</td><td style="padding:5px 4px;white-space:nowrap"><span style="color:var(--warn);font-weight:600">90° / 25NM</span></td><td style="padding:5px 4px;color:var(--muted)">オフセット確立後に<b>±500ft（150m）</b></td></tr>
+          <tr style="border-bottom:1px solid rgba(128,128,128,0.12)"><td style="padding:5px 0;white-space:nowrap">Jakarta</td><td style="padding:5px 4px;white-space:nowrap"><span style="color:var(--warn);font-weight:600">90° / 25NM</span></td><td style="padding:5px 4px;color:var(--muted)">オフセット確立後に<b>±500ft（150m）</b></td></tr>
+          <tr style="border-bottom:1px solid rgba(128,128,128,0.12)"><td style="padding:5px 0;white-space:nowrap">Kuala Lumpur</td><td style="padding:5px 4px;white-space:nowrap"><span style="color:var(--warn);font-weight:600">90° / 25NM</span></td><td style="padding:5px 4px;color:var(--muted)">オフセット確立後に<b>±500ft（150m）</b></td></tr>
+          <tr style="border-bottom:1px solid rgba(128,128,128,0.12)"><td style="padding:5px 0;white-space:nowrap">China</td><td style="padding:5px 4px;white-space:nowrap"><span style="color:var(--accent);font-weight:600">30° / 5NM</span> <span style="color:var(--muted);font-weight:400">（Right turn only）</span></td><td style="padding:5px 4px;color:var(--muted)">上記の手順どおり</td></tr>
+          <tr style="border-bottom:1px solid rgba(128,128,128,0.12)"><td style="padding:5px 0;white-space:nowrap">Pacific</td><td style="padding:5px 4px;white-space:nowrap"><span style="color:var(--accent);font-weight:600">30° / 5NM</span></td><td style="padding:5px 4px;color:var(--muted)">上記の手順どおり</td></tr>
+          <tr style="border-bottom:1px solid rgba(128,128,128,0.12)"><td style="padding:5px 0;white-space:nowrap">Canada</td><td style="padding:5px 4px;white-space:nowrap"><span style="color:var(--green);font-weight:600">安全確保に必要な措置を実施</span> <span style="color:var(--muted);font-weight:400">（数値規定なし）</span></td><td style="padding:5px 4px;color:var(--muted)">—</td></tr>
+          <tr style="border-bottom:1px solid rgba(128,128,128,0.12)"><td style="padding:5px 0;white-space:nowrap">North America（Oceanic）</td><td style="padding:5px 4px;white-space:nowrap"><span style="color:var(--accent);font-weight:600">30° / 5NM</span></td><td style="padding:5px 4px;color:var(--muted)">上記の手順どおり</td></tr>
+          <tr style="border-bottom:1px solid rgba(128,128,128,0.12)"><td style="padding:5px 0;white-space:nowrap">Europe</td><td style="padding:5px 4px;white-space:nowrap"><span style="color:var(--accent);font-weight:600">30° / 5NM</span></td><td style="padding:5px 4px;color:var(--muted)">上記の手順どおり</td></tr>
+          <tr><td style="padding:5px 0;white-space:nowrap">Russia</td><td style="padding:5px 4px;white-space:nowrap"><span style="color:var(--error);font-weight:600">30° / 30km（16.2NM）</span></td><td style="padding:5px 4px;color:var(--muted)">—</td></tr>
+        </tbody>
+      </table>
+      <div style="display:flex;flex-wrap:wrap;gap:10px 16px;margin-top:8px;font-size:0.68em;color:var(--muted)">
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);margin-right:4px"></span>30° / 5NM</span>
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--warn);margin-right:4px"></span>90° / 25NM</span>
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:4px"></span>数値規定なし</span>
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--error);margin-right:4px"></span>30° / 30km（他地域と単位が異なる）</span>
+      </div>
+      <div class="hint" style="margin-top:8px"><b>90° / 25NM の地域で高度を維持できない場合</b>：降下率を最小限にしつつ旋回して25NMオフセットを確立し、以降の高度は通常使用高度から500ft（150m）ずらす（Manila は FL410超なら300m）。Asia 各FIRは NCA Area Guide Asia（2026/03/31）、他地域は従来の記載。地域により規定が異なるため、実運航では最新のAIP／Route Manual／AMで要確認。</div>
+</div>
+
+<div class="card">
+      <div class="card-title">2. Weather Deviation</div>
+      <div class="formula-box" style="margin-bottom:12px">
+        悪天回避のための水平/垂直オフセット手順（SLOP）＋ 高度変更ルール（AIP Japan ENR 3.4.3.4.2／NCA Area Guide Asia）
+      </div>
+      <ol style="margin:0;padding-left:1.2em;font-size:0.85em;line-height:2;color:var(--text)">
+        <li><b>SLOP（Strategic Lateral Offset）</b> — トラックからの横方向オフセットは、クリアランス無しで最大2NMまで可能。</li>
+        <li><b>改訂クリアランスを得られない場合の共通行動</b> — 可能なら組織トラック／ATSルート系統から離れる。121.5MHz（予備 123.45MHz）で周辺機へ通報（識別・状況・意図・位置・FL）。ACASと目視でトラフィック監視、機外灯ON。</li>
+        <li><b>逸脱量が基準未満</b> — ATC指定のFLをそのまま維持。<b>基準以上</b>は、トラックから基準距離の地点でレベルチェンジ（下の表）。基準距離はFIRで異なる:
+          <div style="overflow-x:auto"><table class="rte-tbl" style="margin-top:6px">
+            <thead><tr><th>FIR／地域</th><th>基準距離</th><th>備考</th></tr></thead>
+            <tbody>
+              <tr><td>Japan</td><td><b>5NM</b></td><td>AIP Japan ENR 3.4.3.4.2</td></tr>
+              <tr><td>Hong Kong<br>Sanya</td><td><b>5.0NM</b>（9.3km）</td><td>—</td></tr>
+              <tr><td>Singapore</td><td><b>5NM</b></td><td>—</td></tr>
+              <tr><td>Manila</td><td><b>10NM</b>（19km）</td><td>—</td></tr>
+              <tr><td>Ho Chi Minh / Hanoi<br>Jakarta<br>Kuala Lumpur</td><td><b>10NM</b></td><td>—</td></tr>
+              <tr><td>Bangkok</td><td><b>10NM</b></td><td>表なし：トラックから約10NMで降下を開始・維持。逸脱中に対向トラフィックを認識したら、上昇／降下で垂直間隔を確保</td></tr>
+              <tr><td>Taipei<br>Vientiane</td><td colspan="2">Area Guide：記載なし（Nothing in particular）</td></tr>
+            </tbody>
+          </table></div>
+        </li>
+        <li><b>基準以上のディビエーション時の高度変更</b> — 進行方向に対する<b>左右</b>と<b>磁方位</b>で決まる（300ft単位。Bangkok・Taipei・Vientianeを除く）:
+          <table style="width:100%;border-collapse:collapse;font-size:0.92em;margin-top:6px">
+            <thead>
+              <tr style="color:var(--muted);font-size:0.85em;border-bottom:1px solid var(--border)">
+                <th style="text-align:left;padding:4px 0;font-weight:500">交通の向き</th>
+                <th style="text-align:left;padding:4px 4px;font-weight:500">経路の左側へ逸脱</th>
+                <th style="text-align:left;padding:4px 4px;font-weight:500">経路の右側へ逸脱</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid rgba(128,128,128,0.12)">
+                <td style="padding:5px 0">東行（磁方位 000°–179°）</td>
+                <td style="padding:5px 4px">300ft（90m）降下</td>
+                <td style="padding:5px 4px">300ft（90m）上昇</td>
+              </tr>
+              <tr>
+                <td style="padding:5px 0">西行（磁方位 180°–359°）</td>
+                <td style="padding:5px 4px">300ft（90m）上昇</td>
+                <td style="padding:5px 4px">300ft（90m）降下</td>
+              </tr>
+            </tbody>
+          </table>
+        </li>
+        <li><b>トラック復帰時</b> — センターラインから基準距離（上表）以内に入るまでに、指定されたFLへ復帰しておくこと（Bangkokは割当FL／高度）。</li>
+      </ol>
+      <div class="hint" style="margin-top:8px">
+        右の参考図の「SAND（South=Ascend / North=Descend）」は、東西方向の経路（NAT Track等）でのみ上表と数学的に一致する簡易表現。
+        南北方向に近い経路では意味をなさないため、実運用では「進行方向に対する左右」ルールを使用すること。
+        大規模な天候回避が集中した場合の <b>LSWDCP</b> は RTE タブの FLAS カード内に掲載。
+      </div>
+</div>
+
+<div class="card">
+  <div class="card-title">アジア FIR別 特記事項 <span style="font-size:0.72em;font-weight:400;color:var(--muted)">（NCA Area Guide Asia／2026/03/31）</span></div>
+  <div style="overflow-x:auto">
+  <table class="rte-tbl rte-tbl-2" style="margin-top:6px">
+    <thead><tr><th style="width:23%">FIR</th><th>内容</th></tr></thead>
+    <tbody>
+      <tr><td><b>Taipei</b></td><td><b>空襲時の手順</b>：空襲情報を受けると Taipei ACC が A/G周波数で放送し、FIRへの進入を禁止。FIR内の機はACCから反転・FIR外への退避、またはROCAF Air Control Centerが指定する空港への即時着陸を指示される。ROCAFの許可なく管制は出発・到着クリアランスを発出しない。目的地以外に着陸した場合は、空襲解除後に新たなフライトプランを提出。（Jepp Taiwan – ICAO Differences or State special procedures）</td></tr>
+      <tr><td><b>Sanya</b>（RVSM）</td><td><b>高度逸脱報告</b>：割当FLから90m（300ft）以上逸脱した場合、可及的速やかにATCへ報告。飛行後はFlight Dispatchにも報告（AM NCA issue: China）。なお中国CAACの規定では<b>60m（200ft）以上</b>の逸脱が報告対象</td></tr>
+      <tr><td><b>Hong Kong</b><br>（Crew情報）</td><td>台風回避の迂回ルート（RJAA–VHHH）：例 Y60-FU-A593-PUD-A599-PLT-W19-NOMAR-W18-NLG-W23-ZUH-R473。AKARAコリドー・Shanghai FIR・Guangzhou FIRを通過。このルートでは「China」Group Requirementは不要</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="flas-note">RNAV 要件は RTE タブ。通信途絶は「3. Lost Communication Procedure」内のアジアFIR別欄を参照。</div>
+</div>
+
+</div>
+
+</div>
+<div class="xw-col">
+
+<div class="card">
+  <div class="card-title">参考図 1 — ICAO Doc 4444 Contingency Procedure（一次情報源）</div>
+  <img src="./emer_img/icao_doc4444_contingency.webp" alt="ICAO Doc 4444 Special Procedures for In-Flight Contingencies in Oceanic Airspace (non-weather) 参考図" style="width:100%;border-radius:8px;border:1px solid var(--border);display:block">
+</div>
+
+<div class="card">
+  <div class="card-title">参考図 2 — Oceanic Contingencies（簡易まとめ）</div>
+  <img src="./emer_img/oceanic_contingencies.jpeg" alt="Oceanic Contingencies 参考図" style="width:100%;border-radius:8px;border:1px solid var(--border);display:block">
+</div>
+
+<div class="card">
+  <div class="card-title">参考図 3 — Weather Deviation（SAND、NAT Track等の東西経路向け）</div>
+  <img src="./emer_img/weather_deviation.jpeg" alt="Weather Deviation 参考図（NAT Track等、東西経路向けのSAND表現）" style="width:100%;border-radius:8px;border:1px solid var(--border);display:block">
+</div>
+
+<div class="card">
+      <div class="card-title">3. Lost Communication Procedure</div>
+      <div class="formula-box" style="margin-bottom:12px">
+        無線交信不能時の手順。Transponder <b>7600</b> をスコーク。適用ルールはICAO方式（洋上・海外運航）・FAA方式（米国国内空域、14 CFR 91.185）・日本方式（AIP Japan ENR 1.1§18／航空法施行規則第206条）で異なる。
+      </div>
+
+      <div style="font-size:0.68em;font-weight:700;color:var(--muted);letter-spacing:.03em;margin-bottom:6px">▸ 交信回復の試み（本格手順に入る前に、NCAフライトノート）</div>
+      <ol style="margin:0 0 14px;padding-left:1.2em;font-size:0.85em;line-height:1.9;color:var(--text)">
+        <li>自機の無線機に不具合がないか確認（周波数・Stuck状態・電源）</li>
+        <li>10秒ほど待機後、再度送信</li>
+        <li>周波数を切り替え（故障直後の周波数・予想される周波数・121.5MHz）</li>
+        <li>HF/Company Radio・ACARS・SATCOM・CPDLC等、他の通信手段を試みる</li>
+        <li>他機の交信は聞こえるが呼びかけに応答が無い場合は送信機故障と推測 → Transponder 7600へ切り替え（レーダー覆域内であれば故障が管制機関に伝わる）</li>
+      </ol>
+
+      <div style="font-size:0.68em;font-weight:700;color:var(--muted);letter-spacing:.03em;margin-bottom:6px">▸ VMC下（共通）</div>
+      <div style="font-size:0.85em;color:var(--text);line-height:1.8;margin-bottom:14px">
+        VMCを維持し、最寄りの適切な空港に着陸する。
+      </div>
+
+      <div style="font-size:0.68em;font-weight:700;color:var(--muted);letter-spacing:.03em;margin-bottom:6px">▸ ICAO方式（IMC下、Annex 2 / PANS-ATM準拠）</div>
+      <ol style="margin:0 0 14px;padding-left:1.2em;font-size:0.85em;line-height:1.9;color:var(--text)">
+        <li><b>高度</b> — 次のうち最も<b>高い</b>ものを維持: ①最後に指定されたレベル ②ATCから「今後の指示で予期される」と通報されたレベル ③飛行計画上のレベル</li>
+        <li><b>経路</b> — 次の優先順で判断: ①最後に指定された経路 ②レーダーベクター中なら直前のベクターの方向で目的のフィックス/経路まで直行 ③予期されている旨通報された経路 ④飛行計画上の経路</li>
+        <li><b>Clearance Limit到達後</b> — EFC（Expect Further Clearance）があればその時刻付近で降下開始・進入を実施。EFCが無ければ飛行計画から算出したETA付近で降下開始・進入を実施。</li>
+      </ol>
+
+      <div style="font-size:0.68em;font-weight:700;color:var(--muted);letter-spacing:.03em;margin-bottom:6px">▸ FAA方式（IMC下、14 CFR 91.185）</div>
+      <ol style="margin:0;padding-left:1.2em;font-size:0.85em;line-height:1.9;color:var(--text)">
+        <li><b>経路(Route)</b> — 優先順: ①最後に指定された経路 ②レーダーベクター中なら通信途絶地点から直前のベクター方向で目的のフィックス/経路/エアウェイへ ③予期されている旨通報された経路 ④飛行計画上の経路</li>
+        <li><b>高度(Altitude)</b> — 次のうち最も<b>高い</b>ものを維持: ①最後に指定された高度/FL ②当該区間のIFR最低高度(MEA/MOCA等) ③ATCが「今後の指示で予期される」と通報した高度</li>
+        <li><b>Clearance Limit到達後(Leave Clearance Limit)</b> — Limitが進入開始点となるフィックスの場合: EFC付近（無ければ飛行計画のETA付近）で降下開始・進入を実施。Limitが進入開始点でない場合: EFC時刻にLimitを離脱し、飛行計画のETA付近で降下開始・進入を実施。</li>
+      </ol>
+
+      <div style="font-size:0.68em;font-weight:700;color:var(--muted);letter-spacing:.03em;margin-bottom:6px">▸ 日本方式（AIP Japan ENR 1.1§18 / 航空法施行規則第206条）</div>
+      <ol style="margin:0 0 14px;padding-left:1.2em;font-size:0.85em;line-height:1.9;color:var(--text)">
+        <li><b>VMC</b> — 有視界気象状態を維持して飛行を継続し、安全に着陸できると思われる最寄りの空港等に着陸、直ちに管制機関へ通報。</li>
+        <li><b>IMC、または最寄り空港へのVMC着陸が困難な場合</b> — 承認された経路（故障前の指示による一時的な逸脱があれば最寄りの位置通報点で復帰）に従い、目的地上空まで飛行。</li>
+        <li><b>高度/速度</b> — 故障前の指示による高度・最低高度（経路・障害物基準）のいずれか高い方、および故障前の指示速度を維持。</li>
+        <li><b>維持する時間</b> — <b>レーダー覆域外: 義務位置通報点通報不能時点から<span style="color:var(--error)">20分間</span></b> ／ <b>レーダー覆域内: 承認高度・最低高度到達時刻またはTransponder 7600設定時刻のうち最も遅い時刻から<span style="color:var(--error)">7分間</span></b>。その後、通報済み飛行計画の高度・速度を維持して飛行。</li>
+        <li><b>目的地上空到着後</b> — 進入許可を受けていれば速やかに進入。無ければ進入予定時刻（不明なら到着予定通報時刻、それも無ければ離陸時刻+飛行計画所要時間）まで待機後、降下開始。</li>
+      </ol>
+
+      <div style="font-size:0.68em;font-weight:700;color:var(--muted);letter-spacing:.03em;margin-bottom:6px">▸ ターミナルレーダー進入中の通信途絶（NCA拠点空港）</div>
+      <div style="font-size:0.85em;color:var(--text);line-height:1.9;margin-bottom:6px">
+        共通手順: ① LOST 1分経過 → SQ7600、Contact Tower ② Fly By VFR
+      </div>
+      <ul style="margin:0 0 14px;padding-left:1.2em;font-size:0.85em;line-height:1.9;color:var(--text)">
+        <li><b>NRT</b>: 34L/16Rに着陸</li>
+        <li><b>HND</b>: 34Rまたは23に着陸</li>
+      </ul>
+      <div class="hint" style="margin-bottom:14px">夜間はライトガン代わりに着陸灯を2回点滅（無ければ航空灯を2回点滅）。</div>
+
+      <div style="font-size:0.68em;font-weight:700;color:var(--muted);letter-spacing:.03em;margin-bottom:6px">▸ 緊急三角旋回飛行（通信機故障・機位不明時、管制方式基準(Ⅳ)-1-1）</div>
+      <div style="font-size:0.85em;color:var(--text);line-height:1.9">
+        受信状況とパイロットの意図を発信しつつ、可能な限り航空路を避けて実施。
+      </div>
+      <ul style="margin:6px 0 0;padding-left:1.2em;font-size:0.85em;line-height:1.9;color:var(--text)">
+        <li><b>送信機能のみ故障</b> — <span style="color:var(--accent)">右回り</span>、1辺1分の三角飛行を少なくとも2回、元のコースに復帰</li>
+        <li><b>送受信とも故障</b> — <span style="color:var(--warn)">左回り</span>、1辺1分の三角飛行を少なくとも2回、元のコースに復帰</li>
+        <li>この三角飛行を約20分毎に繰り返し、121.5MHzをモニターして管制機関からの呼びかけを待つ</li>
+      </ul>
+
+      <div style="font-size:0.68em;font-weight:700;color:var(--muted);letter-spacing:.03em;margin:14px 0 6px">▸ アジアFIR別（NCA Area Guide Asia）</div>
+      <ul style="margin:0;padding-left:1.2em;font-size:0.85em;line-height:1.9;color:var(--text)">
+        <li><b>Hong Kong</b> — Jeppesen「EMERGENCY (Eastern Europe/Asia) – Hong Kong – ICAO Differences or State Special Procedures」参照</li>
+        <li><b>Manila</b> — Jeppesen EMERGENCY に加え、進入フェーズのレーダーATCクリアランスの標準文言：<b>「IF NO TRANSMISSION ARE RECEIVED FOR ONE MINUTE, MAKE A VISUAL APPROACH. IF UNABLE PROCEED TO THE VOR, MAINTAIN 3,000FT OR LAST ASSIGNED ALTITUDE WHICHEVER HIGHER AND CONTACT TOWER IMMEDIATELY.」</b>（パイロットの要請がない限り、管制官からは発出されない）</li>
+        <li><b>Bangkok</b> — Jeppesen「Emergency (Far East) – Thailand – ICAO Differences or State Special Procedures」参照</li>
+        <li><b>Sanya</b> — Jeppesen「China – ICAO Differences or State Special Procedure（General Procedures）」参照。ZSPD・ZSSS・ZSHCの個別手順は各 Jeppesen Airport Briefing に記載</li>
+        <li>Taipei・Singapore・Ho Chi Minh/Hanoi・Jakarta・Kuala Lumpur・Vientiane — 記載なし</li>
+      </ul>
+</div>
+
+<div class="card">
+      <div class="card-title">4. Light Gun Signal（ICAO / FAA）</div>
+      <div class="formula-box" style="margin-bottom:12px">
+        無線交信不能時、管制塔からの灯火信号（Light Gun）による指示。ICAO Annex 2 Appendix 1とFAA AIM 4-3-13で内容は共通。
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:0.79em">
+        <thead>
+          <tr style="color:var(--muted);font-size:0.68em;border-bottom:1px solid var(--border)">
+            <th style="text-align:left;padding:4px 0;font-weight:500">信号</th>
+            <th style="text-align:left;padding:4px 4px;font-weight:500">地上の航空機へ</th>
+            <th style="text-align:left;padding:4px 4px;font-weight:500">飛行中の航空機へ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid rgba(128,128,128,0.12)"><td style="padding:5px 0;color:#00e698;font-weight:700">Steady Green（連続緑）</td><td style="padding:5px 4px">離陸許可</td><td style="padding:5px 4px">着陸許可</td></tr>
+          <tr style="border-bottom:1px solid rgba(128,128,128,0.12)"><td style="padding:5px 0;color:#00e698;font-weight:700">Flashing Green（点滅緑）</td><td style="padding:5px 4px">地上走行許可</td><td style="padding:5px 4px">場周経路へ戻れ（後にSteady Greenで着陸許可）</td></tr>
+          <tr style="border-bottom:1px solid rgba(128,128,128,0.12)"><td style="padding:5px 0;color:#ff4560;font-weight:700">Steady Red（連続赤）</td><td style="padding:5px 4px">停止</td><td style="padding:5px 4px">他機に進路を譲り場周経路を継続せよ</td></tr>
+          <tr style="border-bottom:1px solid rgba(128,128,128,0.12)"><td style="padding:5px 0;color:#ff4560;font-weight:700">Flashing Red（点滅赤）</td><td style="padding:5px 4px">使用中の滑走路/着陸帯から離れよ</td><td style="padding:5px 4px">空港は危険、着陸するな</td></tr>
+          <tr style="border-bottom:1px solid rgba(128,128,128,0.12)"><td style="padding:5px 0">Flashing White（点滅白）</td><td style="padding:5px 4px">出発地点へ戻れ</td><td style="padding:5px 4px">該当なし</td></tr>
+          <tr style="border-bottom:1px solid rgba(128,128,128,0.12)"><td style="padding:5px 0;color:var(--warn);font-weight:700">Alternating Red/Green（赤緑交互）</td><td style="padding:5px 4px">厳重注意せよ（危険な状況）</td><td style="padding:5px 4px">厳重注意せよ（危険な状況）</td></tr>
+          <tr><td style="padding:5px 0">Red Pyrotechnic（赤色発光信号弾）</td><td style="padding:5px 4px">該当なし</td><td style="padding:5px 4px">直前の指示にかかわらず、当面着陸するな</td></tr>
+        </tbody>
+      </table>
+</div>
+
+<div class="card">
+  <div class="card-title">参考図 4 — ATC Light Gun Signals（FAA）</div>
+  <img src="./emer_img/light_gun_signal.png" alt="ATC Light Gun Signals for Aircraft 参考図" style="width:100%;border-radius:8px;border:1px solid var(--border);display:block">
+</div>
+
+</div>
+</div>
+
+</div>
+
+</body>
+</html>
