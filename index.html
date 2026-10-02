@@ -11,13 +11,15 @@
   <link rel="stylesheet" href="ref.css">
   <script src="ref-lock.js"></script>
 </head>
-<body>
+<body id="ref-shell">
 
 <!-- 本体（NCA Tools）と同じタブバー。EMER / QRH / MEL を単体で開く用 -->
 <div class="tab-bar" id="main-tab-bar">
   <button class="tab-btn" data-tab="emer">EMER</button>
   <button class="tab-btn" data-tab="qrh">QRH</button>
   <button class="tab-btn" data-tab="mel">MEL</button>
+  <button class="reset-btn" id="reset-btn">RESET</button>
+  <button class="theme-btn" id="cache-btn" title="オフライン用キャッシュを更新（QRH画像を含む。数百MB）">📥</button>
   <button class="theme-btn" id="theme-btn" title="Day / Night">☀️</button>
 </div>
 
@@ -67,6 +69,39 @@ document.getElementById('theme-btn').addEventListener('click', function () {
   document.getElementById(id).addEventListener('load', function () {
     this.contentWindow.postMessage({ type: 'nca-theme', theme: document.body.classList.contains('day') ? 'light' : 'dark' }, '*');
   });
+});
+
+/* 📥 一括キャッシュ: 参照ページ本体 + QRH画像（QRHページの先読み関数を利用） */
+document.getElementById('cache-btn').addEventListener('click', async function () {
+  var btn = this; if (btn.disabled) return;
+  btn.disabled = true; btn.textContent = '⏳'; var ok = true;
+  try {
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+      ok = await new Promise(function (res) {
+        var ch = new MessageChannel(); ch.port1.onmessage = function (e) { res(e.data === 'done'); };
+        navigator.serviceWorker.controller.postMessage('FORCE_CACHE', [ch.port2]);
+      });
+    } else { ok = false; }
+  } catch (e) { ok = false; }
+  try {
+    var f = document.getElementById('qrh-iframe');
+    if (!f.getAttribute('src')) {
+      await new Promise(function (res) { f.addEventListener('load', res, { once: true }); f.setAttribute('src', f.dataset.page); });
+    }
+    var w = f.contentWindow;
+    if (w && typeof w.prefetchAllImages === 'function') { var r = await w.prefetchAllImages(); if (r && r.fail) ok = false; }
+  } catch (e) { ok = false; }
+  btn.textContent = ok ? '✅' : '⚠️';
+  setTimeout(function () { btn.textContent = '📥'; btn.disabled = false; }, 2500);
+});
+
+/* RESET: 入力データのリセット（本体のRESETと同様）。参照ページで保存される入力＝QRHの記入内容（localStorage qrh-*） */
+document.getElementById('reset-btn').addEventListener('click', function () {
+  if (!confirm('QRHに保存した入力内容（記入・メモ）をすべてリセットします。よろしいですか？')) return;
+  try {
+    Object.keys(localStorage).filter(function (k) { return k.indexOf('qrh-') === 0 && k.indexOf('migration') < 0; }).forEach(function (k) { localStorage.removeItem(k); });
+  } catch (e) {}
+  location.reload();
 });
 (function () {
   var day = false, tab = 'emer';

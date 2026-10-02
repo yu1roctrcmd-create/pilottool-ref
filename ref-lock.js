@@ -70,6 +70,8 @@
   /* ── Service Worker ＋ 📥 キャッシュボタン ── */
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(function () {});
   document.addEventListener('DOMContentLoaded', function () {
+    // 単体シェル(index.html)に埋め込まれている場合は、シェル側のタブバーに📥があるため出さない
+    try { if (window.parent !== window && window.parent.document.getElementById('ref-shell')) return; } catch (e) {}
     var b = document.createElement('button'); b.id = 'nca-cache-btn'; b.textContent = '📥';
     b.title = 'オフライン用キャッシュを更新（このページ群の画像を保存）';
     b.addEventListener('click', async function () {
