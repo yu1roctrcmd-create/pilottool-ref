@@ -139,6 +139,42 @@
   </ul>
 </div>
 
+<!-- AOR 23-05: "may be displayed" -->
+<div class="card">
+  <div class="card-title">📋 AOR 23-05：OPERATIONS NOTE の "may be displayed" EICAS Message と MEL適用
+    <span style="float:right;font-size:0.7rem;font-weight:400;color:var(--muted)">Bulletin Rev. Orig 16 NOV 23</span>
+  </div>
+  <div style="padding:10px 12px;border-radius:8px;background:rgba(37,99,235,0.08);border:1px solid rgba(37,99,235,0.3);font-size:0.78em;line-height:1.8;margin-bottom:12px">
+    適用した元のMELの OPERATIONS NOTE（または OPERATIONS (O) 内の NOTE）に、他のEICAS Alert/Status Message が <b>"may be displayed"</b> と記載されている場合の、MEL適用手順。
+    同時適用の要否が不明確でFlight Delay・Block-Out後のGTBの原因となっていたため、Boeingの見解に沿って整理されたもの。
+  </div>
+  <div style="overflow-x:auto">
+  <table style="width:100%;border-collapse:collapse;font-size:0.76em;line-height:1.7">
+    <thead><tr><th style="padding:5px 8px;text-align:left;color:var(--muted);border-bottom:1px solid rgba(255,255,255,0.15)">ケース</th><th style="padding:5px 8px;text-align:left;color:var(--muted);border-bottom:1px solid rgba(255,255,255,0.15)">対応</th></tr></thead>
+    <tbody>
+<tr><td style="padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.08);vertical-align:top;white-space:nowrap"><b>① Messageが表示されている</b></td><td style="padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.08);vertical-align:top">元のMELに加え、<b>該当するMessageに対するMELも同時に適用する</b>。</td></tr>
+<tr><td style="padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.08);vertical-align:top;white-space:nowrap"><b>② Block-Out前で未表示</b></td><td style="padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.08);vertical-align:top">Messageが表示されていなくても、<b>予防措置として該当MELをあらかじめ適用してよい</b>（Block-Out後の表示によるGTB・Flight Delay防止のため）。</td></tr>
+<tr><td style="padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.08);vertical-align:top;white-space:nowrap"><b>③ 同時適用が不要</b></td><td style="padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.08);vertical-align:top">NOTEのMessageが、<b>Operation Procedureで指示されたCrew Actionにより</b>表示される場合（例：片側APU発電機不作動でエンジン始動時、L UTILITY switch OFF → WEIGHT/BALANCE status message）。該当MELの適用は<b>不要</b>。</td></tr>
+
+    </tbody>
+  </table>
+  </div>
+
+  <div style="font-size:0.68em;font-weight:700;color:var(--muted);letter-spacing:.03em;margin:14px 0 6px">▸ 例：MEL 31-61-06（EIUs）適用時 — 表示されるMessageと同時適用するMEL</div>
+  <div style="overflow-x:auto">
+  <table style="width:100%;border-collapse:collapse;font-size:0.76em;line-height:1.7">
+    <thead><tr><th style="padding:5px 8px;text-align:left;color:var(--muted);border-bottom:1px solid rgba(255,255,255,0.15)">表示されるMessage</th><th style="padding:5px 8px;text-align:left;color:var(--muted);border-bottom:1px solid rgba(255,255,255,0.15)">同時に適用するMEL</th></tr></thead>
+    <tbody>
+<tr><td style="padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.08);vertical-align:top;white-space:nowrap"><b>YSM GROSS WEIGHT（Status）</b></td><td style="padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.08);vertical-align:top">MEL <b>22-21-03-01</b></td></tr>
+<tr><td style="padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.08);vertical-align:top;white-space:nowrap"><b>NO LAND 3（Status / Advisory）</b></td><td style="padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.08);vertical-align:top">MEL <b>22-13-01-01</b></td></tr>
+<tr><td style="padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.08);vertical-align:top;white-space:nowrap"><b>FSMC B（Status）</b></td><td style="padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.08);vertical-align:top">MEL <b>28-22-06-01</b></td></tr>
+
+    </tbody>
+  </table>
+  </div>
+  <p style="font-size:0.6em;color:var(--muted);margin-top:10px">〔AOR 23-05 "MEL application procedure in case that EICAS messages 'may be displayed' stipulated in an OPERATIONS NOTE/OPERATIONS of original MEL applied"（AOR 23-05.Orig.2）〕</p>
+</div>
+
 <!-- ②.5 Appendix 2-B: Planning in MEL or CDL Applied -->
 <div class="card">
   <div class="card-title">📐 Appendix 2-B: Planning in MEL or CDL Applied
