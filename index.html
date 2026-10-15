@@ -18,6 +18,7 @@
   <button class="tab-btn" data-tab="emer">EMER</button>
   <button class="tab-btn" data-tab="qrh">QRH</button>
   <button class="tab-btn" data-tab="mel">MEL</button>
+  <button class="tab-btn" data-tab="notam">NOTAM</button>
   <button class="reset-btn" id="reset-btn">RESET</button>
   <button class="theme-btn" id="cache-btn" title="オフライン用キャッシュを更新（QRH画像を含む。数百MB）">📥</button>
   <button class="theme-btn" id="theme-btn" title="Day / Night">☀️</button>
@@ -38,6 +39,11 @@
     <iframe id="mel-iframe" data-page="mel.html" style="width:100%; height:100%; border:none; display:block;"></iframe>
   </div>
 </div>
+<div class="tab-panel" id="tab-notam">
+  <div class="tab-content" style="max-width:100% !important; margin:0 !important; padding:0; border:none; height:calc(100vh - 56px);">
+    <iframe id="notam-iframe" data-page="notam.html" style="width:100%; height:100%; border:none; display:block;"></iframe>
+  </div>
+</div>
 
 <script>
 /* 各ページは初めて開いたときだけ読み込む（QRHは重いため） */
@@ -52,7 +58,7 @@ function refSwitch(name) {
 function refTheme(day) {
   document.body.classList.toggle('day', day);
   document.getElementById('theme-btn').textContent = day ? '🌙' : '☀️';
-  ['emer-iframe', 'qrh-iframe', 'mel-iframe'].forEach(function (id) {
+  ['emer-iframe', 'qrh-iframe', 'mel-iframe', 'notam-iframe'].forEach(function (id) {
     var f = document.getElementById(id);
     if (f && f.contentWindow) f.contentWindow.postMessage({ type: 'nca-theme', theme: day ? 'light' : 'dark' }, '*');
   });
@@ -65,7 +71,7 @@ document.getElementById('theme-btn').addEventListener('click', function () {
   try { localStorage.setItem('nca_theme', day ? 'day' : 'night'); } catch (e) {}
   refTheme(day);
 });
-['emer-iframe', 'qrh-iframe', 'mel-iframe'].forEach(function (id) {
+['emer-iframe', 'qrh-iframe', 'mel-iframe', 'notam-iframe'].forEach(function (id) {
   document.getElementById(id).addEventListener('load', function () {
     this.contentWindow.postMessage({ type: 'nca-theme', theme: document.body.classList.contains('day') ? 'light' : 'dark' }, '*');
   });
@@ -106,7 +112,7 @@ document.getElementById('reset-btn').addEventListener('click', function () {
 (function () {
   var day = false, tab = 'emer';
   try { day = localStorage.getItem('nca_theme') === 'day'; tab = localStorage.getItem('nca_ref_tab') || 'emer'; } catch (e) {}
-  if (['emer', 'qrh', 'mel'].indexOf(tab) < 0) tab = 'emer';
+  if (['emer', 'qrh', 'mel', 'notam'].indexOf(tab) < 0) tab = 'emer';
   refTheme(day);
   refSwitch(tab);
 })();
