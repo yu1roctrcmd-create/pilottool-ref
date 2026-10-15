@@ -14,9 +14,9 @@ var NOTAMS = [
 { no: 'NCA 00204/26', sec: 'General', pri: 'mid', cat: ['Company', 'EFB・システム'],
   title: 'EFB バージョン要件（08Oct26 時点）',
   issued: '07-OCT-2026 07:25（改訂 08-OCT-2026 05:19）', valid: '07-OCT-2026 15:00Z 〜 UFN',
-  orig: '///// COMPANY NOTAM /////\nEFB INFORMATION AS OF 08Oct26\nEFF ID OF EFB VERSION INFORMATION IS 261008\n1.SOFTWARE\n MNM VERSION OF IOS(IPADOS): 26.2 or later (For FD Pro 5.1.3)\n                             26.3 or later (For FD Pro 5.2.1)\n2.EFF VERSION OF APPLICATION\n FD PRO: 5.1.3, 5.2.1\n CONTENT: 26.03, 26.05, 26.08\n ACROBAT READER: 26.08.01, 26.08.50, 26.09.00 (*UPDATED)\n eFM: 7.13.0, 7.13.1, 7.14\n OPT: 4.94.2\n\n3.EFF VERSION OF DATABASE\n OPT DATABASE:\n  POLICY: NCA-POLICY-0005 or -0005(G)\n （以降は画面が切れており未取得）',
-  ja: '会社が運用を認める EFB の<b>ソフトウェア・アプリ・データベースのバージョン一覧</b>（EFB 情報 ID 261008）。iPadOS は FD Pro 5.1.3 なら 26.2 以上、FD Pro 5.2.1 なら 26.3 以上が最低要件。Acrobat Reader は 26.09.00 が今回の更新。OPT は 4.94.2。',
-  perf: '直接の影響なし。ただし<b>離着陸性能計算に使う OPT（4.94.2）と OPT データベース（POLICY: NCA-POLICY-0005 / -0005(G)）</b>が一覧の版であることを確認する。［要確認：不一致時の扱いは社内規程で確認］',
+  orig: '///// COMPANY NOTAM /////\nEFB INFORMATION AS OF 08Oct26\nEFF ID OF EFB VERSION INFORMATION IS 261008\n1.SOFTWARE\n MNM VERSION OF IOS(IPADOS): 26.2 or later (For FD Pro 5.1.3)\n                             26.3 or later (For FD Pro 5.2.1)\n2.EFF VERSION OF APPLICATION\n FD PRO: 5.1.3, 5.2.1\n CONTENT: 26.03, 26.05, 26.08\n ACROBAT READER: 26.08.01, 26.08.50, 26.09.00 (*UPDATED)\n eFM: 7.13.0, 7.13.1, 7.14\n OPT: 4.94.2\n\n3.EFF VERSION OF DATABASE\n OPT DATABASE:\n  POLICY: NCA-POLICY-0005 or -0005(G)\n  AIRPORT: NCA-AIRPORT-0024 or -0025\n  DDG: NCA-DDG-0004\n OM: Rev.180\n AM (NCA ISSUE): Rev.10-26\n AOM 8F:Rev.112+Bulletins\n MEL/CDL 8F: Rev.39\n PERFORMANCE HANDBOOK 8F: Rev.20\n OPERATIONS POLICY MANUAL (VOLUME 2): Rev.29',
+  ja: '会社が運用を認める EFB の<b>ソフトウェア・アプリ・データベースのバージョン一覧</b>（EFB 情報 ID 261008）。iPadOS は FD Pro 5.1.3 なら 26.2 以上、FD Pro 5.2.1 なら 26.3 以上が最低要件。Acrobat Reader は 26.09.00 が今回の更新。OPT は 4.94.2。<br>OPT データベース：POLICY＝NCA-POLICY-0005／-0005(G)、<b>AIRPORT＝NCA-AIRPORT-0024 または -0025</b>、DDG＝NCA-DDG-0004。<br>有効なマニュアル版：<b>OM Rev.180、AM（NCA ISSUE）Rev.10-26、AOM 8F Rev.112＋Bulletins、MEL/CDL 8F Rev.39、Performance Handbook 8F Rev.20、Operations Policy Manual（Vol.2）Rev.29</b>。',
+  perf: '直接の影響なし。ただし<b>離着陸性能計算に使う OPT（4.94.2）と OPT データベース（POLICY／AIRPORT／DDG）</b>が一覧の版であることを確認する。<b>AIRPORT DB が 0024／0025 のとき、NCA 00202/26 の「0026 以降で反映」は未反映の版</b>になる点に注意。［要確認：RJAA 16R/34L の GRV 扱いが DB 0025 でどう出るか］',
   nav: 'FD Pro（チャート・航法データ）、eFM、Content（社内マニュアル）の版が対象。iPadOS 26.2／26.3 以上が条件のため、OS 更新時は FD Pro の版との組合せを確認。',
   ops: 'フライト前に、自分の EFB の iPadOS・FD Pro・Content・eFM・OPT の版が一覧に合うか確認。［要確認：不一致時の対応は社内手順で確認］',
   refs: [{ label: 'EFB 運用（社内規程）［要確認：該当章は未特定］' }] },
@@ -76,7 +76,7 @@ var NOTAMS = [
   refs: [{ label: 'QRH：ENG 1,2,3,4 FAIL（NNC）', go: 'qrh' }, { label: 'EMER（参照サイト）', go: 'emer' }] },
 
 { no: 'NCA 00219/22', sec: 'General', pri: 'mid', cat: ['Company', '運航'],
-  title: 'OM S-3-10 の事前指定飛行場：なし／孤立飛行場の扱い',
+  title: 'OM S-3-10 の事前指定飛行場：なし（NIL）／孤立飛行場の扱い',
   issued: '12-DEC-2022 06:55（改訂 23-DEC-2022 04:54）', valid: '12-DEC-2022 07:00Z 〜 UFN',
   orig: '///// COMPANY NOTAM /////\nPRE-DESIGNATED AD STIPULATED BY OM S-3-10\n-NIL-\nNOTE: ISOL AD OPR BY WX RSN SHALL NOT BE APPLIED AT PRE-FLT PLANNING.\nREF. OPS UPDATE 22005',
   ja: 'OM S-3-10 に規定する<b>事前指定飛行場：なし（NIL）</b>。注：気象理由で運用が制限される<b>孤立飛行場（ISOL AD）</b>の扱いは、<b>飛行前の計画では適用しない</b>。OPS UPDATE 22005 参照。',
@@ -318,7 +318,7 @@ var NOTAMS = [
   ja: '<b>CDR（条件付き経路）</b>として開放される経路と、その<b>期間（YYMMDDHHMM/YYMMDDHHMM、Z）</b>。最低の使用高度は <b>MEA</b>。AIP ENR 3.3 参照。<b>CDR 1 は AIP に記載、CDR 2 は NOTAM で通知</b>（使用可能時間を NOTAM で確認する必要）。',
   perf: '', nav: 'ルート計画に、これらの CDR を使う場合は<b>期間内であること</b>が条件。', ops: '会社ルートに Z29／Z31（日本⇔台湾）がある場合は、この NOTAM で使用可能な時間帯を確認。',
   rows: [
-    { no: 'Q2448/26', valid: '14-OCT 2100Z 〜 15-OCT 2100Z', text: 'Z16（15 日 1300–2100Z）、Z17・Z18・Z21・Z162・Z171・Z182（14 日 2100–2200Z と 15 日 1200/1300–2100Z）、Z101、Z102（15 日 1300–2100Z）。すべて MEA' },
+    { no: 'Q2448/26', valid: '14-OCT 2100Z 〜 15-OCT 2100Z', text: 'Z16（15 日 1300–2100Z）、Z17・Z18・Z162（14 日 2100–2200Z と 15 日 1300–2100Z）、Z21・Z171・Z182（14 日 2100–2200Z と 15 日 1200–2100Z）、Z101・Z102（15 日 1300–2100Z）。すべて MEA（画像で確認済み）' },
     { no: 'Q2449/26', valid: '14-OCT 2200Z 〜 15-OCT 2200Z', text: 'L512・Z13・Z14（15 日 1200–2200Z）、Z25・Z26・Z27・Z262（15 日 1330–2200Z）、Z40・Z41（14 日 2200–2300Z と 15 日 1400–2200Z）。すべて MEA' },
     { no: 'Q2443/26', valid: '14-OCT 2100Z 〜 15-OCT 2100Z', text: '<b>Z29・Z31</b>・Z32・Z34（15 日 1500–2100Z）。すべて MEA' }
   ],
@@ -384,7 +384,7 @@ var NOTAMS = [
   orig: 'OPERATORS OF AIRCRAFT REGISTERED IN JAPAN ARE ADVISED NOT TO ENTER MINSK (UMMV) FIR DUE TO SERIOUS SAFETY AND SECURITY CONCERNS TO COMMERCIAL AVIATION.\nEXPLANATION: 17 AUG 26 15:35 UNTIL 17 NOV 26 14:59 ESTIMATED\nNOTE: REF EUR NCA00100/21',
   ja: '<b>日本に登録された航空機の運航者は、安全・保安上の重大な懸念から、ミンスク（UMMV）FIR に入らない</b>よう勧告される。会社の注記：EUR NCA 00100/21 参照。',
   perf: '', nav: '欧州線のルート計画で、<b>ベラルーシ（ミンスク）FIR を通過しない</b>。', ops: '欧州線（EHAM／EDDF／LIMC 方面）の経路が、ミンスク FIR を通らないことを OFP で確認。',
-  refs: [{ label: 'Diversion タブ：Conflict Zone の地図（FD Pro）。<b>ミンスク FIR は地図に未登録</b>', main: 'DIVERSION' }, { label: '会社 NOTAM EUR NCA 00100/21（社内資料）' }] },
+  refs: [{ label: 'Diversion タブ：Conflict Zone の地図（FD Pro）。<b>ミンスク FIR は地図に登録済み（Cat.1・暫定）</b>', main: 'DIVERSION' }, { label: '会社 NOTAM EUR NCA 00100/21（社内資料）' }] },
 
 { no: 'P3999/26', sec: 'RJJJ', pri: 'mid', cat: ['注意喚起'],
   title: '北朝鮮のロケット発射に備え、迎撃ミサイルが発射されることがある（福岡 FIR）',
@@ -405,12 +405,12 @@ var NOTAMS = [
 { no: 'A4484/26・A4646/26', sec: 'ZSHA', pri: 'high', cat: ['中国空域', '空域・軍事', 'ATC・手順'],
   title: '北京周辺の特別制限区域 ZB(SR)801：商業便を除き飛行不可／進入前に保安状態を通報',
   issued: '13-SEP-2026（A4484）／16-SEP-2026（A4646）', valid: '19-SEP-2026 16:00Z 〜 UFN',
-  orig: 'A4484/26: "SPECIAL RESTRICTED AREA ESTABLISHED, THE RELEVANT REQUIREMENTS AS FOLLOWS:\n1. NAME AND IDENTIFICATION: SPECIAL RESTRICTED AREA (ZB(SR) 801)\n2. LATERAL LIMITS: A CIRCLE WITH A RADIUS OF 300KM CENTERED AT N395410E1162327, BEIJING PROHIBITED AREA (ZB(P)801) NOT INCLUDED. VERTICAL LIMITS: SFC-UNL. EFFECTIVE TIME: H24\n3. SPECIAL RESTRICTIONS: NO FLIGHT OPERATIONS SHALL BE PERMITTED EXCEPT COMMERCIAL FLIGHTS (NOTE 1), BUSINESS FLIGHTS (NOTE 2), AND FLIGHTS FOR MILITARY, CUSTOMS, POLICE SERVICES, AND FIRE-FIGHTING RESCUE PURPOSES.\n4. OPERATIONAL REQUIREMENTS\n4.1 MANNED AIRCRAFT SHALL BE EQUIPPED WITH A SSR TRANSPONDER OR OTHER SURVEILLANCE EQUIPMENT OF EQUIVALENT PERFORMANCE, WHICH SHALL REMAIN ACTIVATED THROUGHOUT THE FLIGHT. …\n4.2 PILOTS SHALL MAINTAIN CONTINUOUS TWO-WAY COMMUNICATION WITH ATC. … IN THE EVENT OF LOSS OF TWO-WAY COMMUNICATION, PILOTS … SHALL IMMEDIATELY SET THE SSR TRANSPONDER CODE FOR RADIO COMMUNICATION FAILURE, AND TAKE ALL FEASIBLE MEASURES TO OBTAIN ACKNOWLEDGEMENT FROM ATC UNIT.\n4.3 PRIOR TO ENTERING THE SPECIAL RESTRICTED AREA … (以降は画面が切れており未取得)"\nA4646/26: "PRIOR TO ENTERING THE SPECIAL RESTRICTED AREA (ZB(SR) 801), AIRCRAFT MUST REPORT SECURITY STATUS TO THE ATC UNIT AT THE FOLLOWING REPORTING POINTS: …"',
+  orig: 'A4484/26: "SPECIAL RESTRICTED AREA ESTABLISHED, THE RELEVANT REQUIREMENTS AS FOLLOWS:\n1. NAME AND IDENTIFICATION: SPECIAL RESTRICTED AREA (ZB(SR) 801)\n2. LATERAL LIMITS: A CIRCLE WITH A RADIUS OF 300KM CENTERED AT N395410E1162327, BEIJING PROHIBITED AREA (ZB(P)801) NOT INCLUDED. VERTICAL LIMITS: SFC-UNL. EFFECTIVE TIME: H24\n3. SPECIAL RESTRICTIONS: NO FLIGHT OPERATIONS SHALL BE PERMITTED EXCEPT COMMERCIAL FLIGHTS (NOTE 1), BUSINESS FLIGHTS (NOTE 2), AND FLIGHTS FOR MILITARY, CUSTOMS, POLICE SERVICES, AND FIRE-FIGHTING RESCUE PURPOSES.\n4. OPERATIONAL REQUIREMENTS\n4.1 MANNED AIRCRAFT SHALL BE EQUIPPED WITH A SSR TRANSPONDER OR OTHER SURVEILLANCE EQUIPMENT OF EQUIVALENT PERFORMANCE, WHICH SHALL REMAIN ACTIVATED THROUGHOUT THE FLIGHT. …\n4.2 PILOTS SHALL MAINTAIN CONTINUOUS TWO-WAY COMMUNICATION WITH ATC. … IN THE EVENT OF LOSS OF TWO-WAY COMMUNICATION, PILOTS … SHALL IMMEDIATELY SET THE SSR TRANSPONDER CODE FOR RADIO COMMUNICATION FAILURE, AND TAKE ALL FEASIBLE MEASURES TO OBTAIN ACKNOWLEDGEMENT FROM ATC UNIT.\n4.3 PRIOR TO ENTERING THE SPECIAL RESTRICTED AREA … (以降は画面が切れており未取得)"\nA4646/26: "PRIOR TO ENTERING THE SPECIAL RESTRICTED AREA (ZB(SR) 801), AIRCRAFT MUST REPORT SECURITY STATUS TO THE ATC UNIT AT THE FOLLOWING REPORTING POINTS: (1) B334 TGO (2) W31 CHG (3) G212 VIA TGO: TGO / VIA BESGI: BESGI (4) A575 VIA CHG: CHG / VIA VANVO: VANVO (5) G332 CHG (6) W35 CHG (7) W201 ORAVA (8) W576 JOIN TO W55 ORAVA (9) W200 DOVIV (10) W4 DYN (11) W569 YQG (12) W56 ORODO (13) W62 ORODO (14) W277 OMBIM (15) W69 BAXOD (16) W64 NUTLO (17) W65 TMR (18) B458 TMR (19) W86 TMR (20) B339 ERVEB (21) W33 NUVPU (22) W52 NUVPU (23) W157 DALIM (24) W160 YQG (25) AIRCRAFT TAKING-OFF FROM JINAN/YAOQIANG (ZSJN), TAIYUAN/WUSU (ZBYN), HOHHOT/BAITA (ZBHH) AND ENTERING THE AREA SHALL REPORT TO THE AERODROME ATC UNIT."\nEXPLANATION: NOTE: AFFECT FOR CO-RTE (7) W201 (15) W69  MXP/FRA-NRT ALL CO-RTE. REF NOTAM A4484/26',
   ja: '<b>北京周辺に特別制限区域 ZB(SR)801</b>を設定。<br>・<b>範囲</b>：N39°54\'10"E116°23\'27"（北京）を中心とする<b>半径 300km の円</b>（北京の禁止区域 ZB(P)801 は含まない）。<b>SFC〜UNL、H24</b>。<br>・<b>特別な制限</b>：<b>商業便（注1）、ビジネス便（注2）、軍・税関・警察・消防救助目的を除き飛行不可</b>。<br>・<b>運航要件</b>：<b>有人機は SSR トランスポンダ（または同等の監視装置）を、飛行中ずっと作動</b>。<b>ATC と常時双方向通信</b>を維持し、<b>通信途絶時は直ちに通信途絶のトランスポンダコードにセット</b>し、ATC の確認を得る手段をすべて取る。<br>・<b>進入前の通報（A4646/26）</b>：区域に入る前に、<b>保安状態（security status）を ATC に通報</b>。ルートごとの通報点は下の表。',
   perf: '', nav: '北京周辺を通る経路（欧州線・中国線）が対象。経路ごとに<b>通報点が決まっている</b>。',
   ops: '<b>進入前に保安状態を ATC に通報</b>。トランスポンダは常時 ON。通信途絶時のコードを確認しておく。［要確認：通報の文言・「保安状態」の言い方は ATC の指示・社内資料で確認］',
   rows: [
-    { no: '通報点（A4646）', valid: 'ルート → 通報点', text: 'B334→TGO／W31→CHG／G212（TGO 経由）→TGO、G212（BESGI 経由）→BESGI／A575（CHG 経由）→CHG、A575（VANVO 経由）→VANVO／G332→CHG／W35→CHG／<b>W201→ORAVA</b>／W576（W55 に合流）→ORAVA／W200→DOVIV／W4→DYN／W569→YQG／W56→ORODO／W62→ORODO／W277→OMBIM／W69→BAXOD／W64→NUTLO（以降は画面が切れており未取得）' }
+    { no: '通報点（A4646）', valid: 'ルート → 通報点', text: 'B334→TGO／W31→CHG／G212（TGO 経由）→TGO、G212（BESGI 経由）→BESGI／A575（CHG 経由）→CHG、A575（VANVO 経由）→VANVO／G332→CHG／W35→CHG／<b>W201→ORAVA</b>／W576（W55 に合流）→ORAVA／W200→DOVIV／W4→DYN／W569→YQG／W56→ORODO／W62→ORODO／W277→OMBIM／W69→BAXOD／W64→NUTLO／W65・B458・W86→TMR／B339→ERVEB／W33・W52→NUVPU／W157→DALIM／W160→YQG。<br><b>ZSJN（済南）・ZBYN（太原）・ZBHH（フフホト）から離陸して区域に入る機は、その飛行場の ATC ユニットに通報</b>。<br>会社の注記：<b>会社ルートに影響あり＝W201（ORAVA）と W69（BAXOD）</b>（MXP/FRA→NRT の全会社ルート）。参照 NOTAM A4484/26' }
   ],
   refs: [{ label: 'NCA Tools の RTE タブ：中国 FIR の要点（Area Guide）', main: 'RTE' }, { label: '大連 CTA の飛行指示（A5182/26）', jump: 'A5182/26' }] },
 
