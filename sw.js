@@ -7,6 +7,7 @@ const ASSETS = [
   './notam_img/rjaa_chart.webp',
   './notam_img/zspd_w.jpg',
   './notam_img/zspd_e.jpg',
+  './notam_img/zsss.jpg',
   './qrh_analysis.html',
   './ref.css',
   './ref-lock.js',

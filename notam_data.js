@@ -528,17 +528,32 @@ NOTAM_MAP.items.forEach(function (it) { it.chart = NOTAM_MAP; });
 NOTAM_CHARTS = [NOTAM_MAP, ZSPD_W, ZSPD_E];
 NOTAM_CHARTS.forEach(function (c) { c.items.forEach(function (it) { it.chart = c; }); });
 
+
+/* ZSSS（EFB チャート 1 枚。座標は画像 px） */
+var ZSSS_C = { name: 'ZSSS', img: 'notam_img/zsss.jpg', w: 1410, h: 1998, items: [
+  { n: 1, type: 'closed', label: '東側：TWY A2・A3・A4、K 系（K2・K4〜K7）、TWY A（A2〜H4 間／H4〜H7 間）閉鎖　毎日 1700–2200Z', ids: 'F4290/26（1）（2）（4）', cards: ['F4290/26'], shapes: [{ k: 'poly', pts: [[850, 750], [1000, 750], [1010, 1680], [900, 1690], [880, 1450], [900, 1000]] }], tag: [1080, 1200] },
+  { n: 2, type: 'closed', label: '中央：TWY B1〜B8、TWY B（H1〜H4 間／H4〜H7 間）閉鎖　毎日 1700–2200Z', ids: 'F4290/26（1）（2）（5）', cards: ['F4290/26'], shapes: [{ k: 'polyline', pts: [[770, 444], [780, 613], [788, 765], [737, 847], [750, 1130], [808, 1220], [813, 1366], [822, 1533], [730, 1660]], w: 14 }], tag: [690, 1000] },
+  { n: 3, type: 'closed', label: '西側：TWY H2・H3・H5・H6（RWY 18R/36L〜B 間）閉鎖　毎日 1700–2200Z', ids: 'F4290/26（3）', cards: ['F4290/26'], shapes: [{ k: 'ellipse', c: [548, 372], rx: 55, ry: 28, rot: 0 }, { k: 'ellipse', c: [550, 668], rx: 60, ry: 32, rot: 0 }, { k: 'ellipse', c: [585, 1335], rx: 60, ry: 32, rot: 0 }, { k: 'ellipse', c: [607, 1615], rx: 60, ry: 32, rot: 0 }], tag: [470, 520] },
+  { n: 4, type: 'closed', label: 'TWY H1（RWY 18L/36R〜18R/36L 間）閉鎖　毎日 1700–2200Z', ids: 'F4290/26（6）', cards: ['F4290/26'], shapes: [{ k: 'polyline', pts: [[560, 271], [790, 265]], w: 14 }], tag: [690, 215] },
+  { n: 5, type: 'info', label: '推奨の高速離脱路（RWY 18L：B4 1,850m／A3 1,890m、RWY 36R：B3 1,950m／A2 1,715m。DTHR からの距離）', ids: 'F4301/26', cards: ['F4301/26'], shapes: [{ k: 'pin', c: [808, 1220], r: 30 }, { k: 'pin', c: [940, 1315], r: 30 }, { k: 'pin', c: [788, 765], r: 30 }, { k: 'pin', c: [873, 775], r: 30 }], tag: [1100, 900] },
+  { n: 6, type: 'closed', label: 'TWY A 上の交差点 K1 工事（第1期。工事区域 A・B）', ids: 'F3922/26', cards: ['F3922/26'], shapes: [{ k: 'ellipse', c: [935, 692], rx: 55, ry: 42, rot: 0 }], tag: [1080, 640] }
+] };
+ZSSS_C.items.forEach(function (it) { it.chart = ZSSS_C; });
+NOTAM_CHARTS.push(ZSSS_C);
+
 function nmapSvg(items, hiN) {
   var svg = '';
   items.forEach(function (it) {
-    var c = NMAP_COL[it.type], sh = it.shape, g = '';
+    var c = NMAP_COL[it.type], g = '';
     var dim = (hiN != null && it.n !== hiN) ? ' opacity=".35"' : '';
     var st = 'fill="' + c + '" fill-opacity=".30" stroke="' + c + '" stroke-width="5"' + (it.type === 'light' ? ' stroke-dasharray="14,8"' : '');
-    if (sh.k === 'line') g = '<line x1="' + sh.pts[0][0] + '" y1="' + sh.pts[0][1] + '" x2="' + sh.pts[1][0] + '" y2="' + sh.pts[1][1] + '" stroke="' + c + '" stroke-opacity=".55" stroke-width="' + sh.w + '" stroke-linecap="round" stroke-dasharray="26,14"/>';
-    else if (sh.k === 'ellipse') g = '<ellipse cx="' + sh.c[0] + '" cy="' + sh.c[1] + '" rx="' + sh.rx + '" ry="' + sh.ry + '" transform="rotate(' + sh.rot + ' ' + sh.c[0] + ' ' + sh.c[1] + ')" ' + st + '/>';
-    else if (sh.k === 'poly') g = '<polygon points="' + sh.pts.map(function (p) { return p.join(','); }).join(' ') + '" ' + st + ' stroke-dasharray="14,8"/>';
-    else if (sh.k === 'polyline') g = '<polyline points="' + sh.pts.map(function (p) { return p.join(','); }).join(' ') + '" fill="none" stroke="' + c + '" stroke-width="9" stroke-opacity=".7" stroke-dasharray="14,10" stroke-linecap="round" stroke-linejoin="round"/>';
-    else if (sh.k === 'pin') g = '<circle cx="' + sh.c[0] + '" cy="' + sh.c[1] + '" r="22" ' + st + '/>';
+    (it.shapes || [it.shape]).forEach(function (sh) {
+      if (sh.k === 'line') g += '<line x1="' + sh.pts[0][0] + '" y1="' + sh.pts[0][1] + '" x2="' + sh.pts[1][0] + '" y2="' + sh.pts[1][1] + '" stroke="' + c + '" stroke-opacity=".55" stroke-width="' + sh.w + '" stroke-linecap="round" stroke-dasharray="26,14"/>';
+      else if (sh.k === 'ellipse') g += '<ellipse cx="' + sh.c[0] + '" cy="' + sh.c[1] + '" rx="' + sh.rx + '" ry="' + sh.ry + '" transform="rotate(' + sh.rot + ' ' + sh.c[0] + ' ' + sh.c[1] + ')" ' + st + '/>';
+      else if (sh.k === 'poly') g += '<polygon points="' + sh.pts.map(function (p) { return p.join(','); }).join(' ') + '" ' + st + ' stroke-dasharray="14,8"/>';
+      else if (sh.k === 'polyline') g += '<polyline points="' + sh.pts.map(function (p) { return p.join(','); }).join(' ') + '" fill="none" stroke="' + c + '" stroke-width="' + (sh.w || 9) + '" stroke-opacity=".7" stroke-dasharray="14,10" stroke-linecap="round" stroke-linejoin="round"/>';
+      else if (sh.k === 'pin') g += '<circle cx="' + sh.c[0] + '" cy="' + sh.c[1] + '" r="' + (sh.r || 22) + '" ' + st + '/>';
+    });
     var tg = '<circle cx="' + it.tag[0] + '" cy="' + it.tag[1] + '" r="26" fill="' + c + '" stroke="#fff" stroke-width="4"/><text x="' + it.tag[0] + '" y="' + (it.tag[1] + 11) + '" text-anchor="middle" font-size="32" font-weight="700" fill="#111" font-family="sans-serif">' + it.n + '</text>';
     svg += '<g' + dim + '><title>' + it.n + ' ' + ntEsc(it.label) + '（' + ntEsc(it.ids) + '）</title>' + g + tg + '</g>';
   });
@@ -557,5 +572,5 @@ function nmapRender() {
   var host = document.getElementById('nt-map'); if (!host) return;
   host.innerHTML = '<div class="nm-key"><span style="color:#ef4444">■ 閉鎖</span><span style="color:#f59e0b">■ 灯火不作動</span><span style="color:#fb923c">■ グルービング消失</span><span style="color:#38bdf8">■ その他</span></div>' +
     NOTAM_CHARTS.map(function (c) { return '<div class="nt-h">' + ntEsc(c.name) + '</div>' + nmapHtml(c.items, c); }).join('') +
-    '<div class="nm-note">図に出せないもの：RJAA A1193/26（滑走路誤進入警報の停止）、ZSPD の STAR・VOR・LID・ビジュアルアプローチ関連。各 NOTAM のカードを開くと、その NOTAM の位置だけを表示します。</div>';
+    '<div class="nm-note">図に出せないもの：RJAA A1193/26（滑走路誤進入警報の停止）、ZSPD・ZSSS の STAR・VOR・LID・ビジュアルアプローチ関連。各 NOTAM のカードを開くと、その NOTAM の位置だけを表示します。</div>';
 }
