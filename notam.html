@@ -33,6 +33,14 @@
     #nt-list .nt-empty{grid-column:1/-1}
     #nt-list .nt-item{min-width:0}
     #nt-list .nt-item:not([open])>summary .nt-title{flex-basis:100%;order:2}
+    @media (min-width:768px){#tab-notam .tab-content{max-width:1200px;padding:20px 24px 48px}}
+    .nt-cols{display:block}
+    .nt-right .nt-h:first-child{margin-top:6px}
+    @media (min-width:640px){
+      #nt-list .nt-item.wide[open]{grid-column:1/-1}
+      .nt-cols.has-map{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,380px);gap:20px;align-items:start}
+      .nt-cols.has-map .nt-right{position:sticky;top:8px}
+    }
     .nm-wrap{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start;margin-top:10px}
     .nm-chart{position:relative;flex:0 1 380px;min-width:260px;max-width:100%}
     .nm-chart img{display:block;width:100%;height:auto;border-radius:8px;background:#e8eef4}
@@ -142,16 +150,16 @@ function ntRender() {
     var tbl = '';
     if (n.rows) tbl = '<div class="nt-h">一覧</div><div class="nt-tblw"><table class="nt-tbl"><tr><th>No.</th><th>有効</th><th>内容</th></tr>' +
       n.rows.map(function (r) { return '<tr><td class="nt-no">' + ntEsc(r.no) + ntRowTag(mi, r.no) + '</td><td>' + ntEsc(r.valid) + '</td><td>' + r.text.replace(/\n/g, '<br>') + '</td></tr>'; }).join('') + '</table></div>';
-    return '<details class="nt-item' + (n.pri === 'high' ? ' hi' : '') + '" data-no="' + ntEsc(n.no) + '"' + (rows.length <= 2 ? ' open' : '') + '><summary><span class="nt-no">' + ntEsc(n.no) + '</span><span class="nt-title">' + ntEsc(n.title) + '</span>' +
+    return '<details class="nt-item' + (mp ? ' wide' : '') + (n.pri === 'high' ? ' hi' : '') + '" data-no="' + ntEsc(n.no) + '"' + (rows.length <= 2 ? ' open' : '') + '><summary><span class="nt-no">' + ntEsc(n.no) + '</span><span class="nt-title">' + ntEsc(n.title) + '</span>' +
       '<span class="nt-tag sec">' + ntEsc(n.sec) + '</span>' + (n.pri === 'high' ? '<span class="nt-tag hi">★重要</span>' : '') +
       n.cat.map(function (c) { return '<span class="nt-tag">' + ntEsc(c) + '</span>'; }).join('') + '</summary>' +
       '<div class="nt-body">' +
-      '<div class="nt-h">日本語訳・概要</div><div>' + n.ja + '</div>' + mp + tbl +
+      '<div class="nt-cols' + (mp ? ' has-map' : '') + '"><div class="nt-left"><div class="nt-h" style="margin-top:6px">日本語訳・概要</div><div>' + n.ja + '</div>' + tbl +
       '<div class="nt-h">影響</div><div class="nt-imp">' + ntImp('性能', n.perf) + ntImp('航法要件', n.nav) + ntImp('運航', n.ops) + '</div>' +
       '<div class="nt-h">関連マニュアル・ツール</div><div class="nt-ref">' + (refs || '<span class="nt-none">未登録</span>') + '</div>' +
       '<div class="nt-h">原文（英語）</div><div class="nt-orig">' + ntEsc(n.orig) + '</div>' +
       '<div class="nt-src">発行／改訂：' + ntEsc(n.issued) + '　有効：' + ntEsc(n.valid) + '</div>' +
-      '</div></details>';
+      '</div>' + (mp ? '<div class="nt-right">' + mp + '</div>' : '') + '</div></div></details>';
   }).join('');
 }
 function ntRowTag(mi, rno) {
