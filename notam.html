@@ -28,6 +28,10 @@
     .nt-chk{color:var(--warn);font-weight:700}
     .nt-ref a,.nt-ref button{display:inline-block;margin:4px 8px 4px 0;border:1px solid var(--accent);color:var(--accent);background:transparent;border-radius:6px;padding:2px 9px;font-size:.92em;font-weight:700;cursor:pointer;text-decoration:none;font-family:inherit}
     .nt-src{font-size:.82em;color:var(--muted);margin-top:8px}
+    #nt-list{display:grid;grid-template-columns:1fr;gap:0 14px;align-items:start}
+    @media (min-width:640px){#nt-list{grid-template-columns:1fr 1fr}}
+    #nt-list .nt-item[open],#nt-list .nt-empty{grid-column:1/-1}
+    #nt-list .nt-item:not([open])>summary .nt-title{flex-basis:100%;order:2}
     .nt-item.hi{border-color:var(--warn)}
     .nt-tag.sec{color:var(--accent);border-color:var(--accent)}
     .nt-tag.hi{color:var(--warn);border-color:var(--warn)}
