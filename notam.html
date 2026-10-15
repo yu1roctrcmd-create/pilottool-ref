@@ -28,6 +28,16 @@
     .nt-chk{color:var(--warn);font-weight:700}
     .nt-ref a,.nt-ref button{display:inline-block;margin:2px 6px 2px 0;border:1px solid var(--accent);color:var(--accent);background:transparent;border-radius:6px;padding:2px 9px;font-size:.92em;font-weight:700;cursor:pointer;text-decoration:none;font-family:inherit}
     .nt-src{font-size:.82em;color:var(--muted);margin-top:8px}
+    .nt-item.hi{border-color:var(--warn)}
+    .nt-tag.sec{color:var(--accent);border-color:var(--accent)}
+    .nt-tag.hi{color:var(--warn);border-color:var(--warn)}
+    .nt-main{display:inline-block;margin:2px 6px 2px 0;font-size:.92em;color:var(--text);border:1px dashed var(--border);border-radius:6px;padding:2px 9px}
+    .nt-main small{color:var(--muted);margin-left:4px}
+    .nt-tblw{overflow-x:auto}
+    .nt-tbl{border-collapse:collapse;width:100%;font-size:.95em}
+    .nt-tbl th,.nt-tbl td{border:1px solid var(--border);padding:4px 7px;vertical-align:top;text-align:left}
+    .nt-tbl th{color:var(--muted);font-size:.9em}
+    .nt-tbl td:nth-child(2){white-space:nowrap;font-size:.92em}
     .nt-empty{font-size:.8em;color:var(--muted);padding:12px}
   </style>
 </head>
@@ -44,11 +54,12 @@
 </div>
 
 <div style="font-size:0.62em;color:var(--warn);margin:6px 2px 10px;line-height:1.7">
-  ⚠ 出典は<b>会社貸与EFBのスクリーンショット</b>です。NOTAM は日々変わるため、<b>当日のフライトでは必ず最新のNOTAMを確認</b>してください。「影響」「関連マニュアル」の欄のうち、原文から直接言えない部分は <span style="font-weight:700">［要確認］</span> と表示しています。
+  ⚠ 出典は<b>会社貸与EFBのスクリーンショット</b>（KZ225 RJAA→ZSPD、Oct 15、代替 ZSSS）です。同種の NOTAM は表にまとめています。NOTAM は日々変わるため、<b>当日のフライトでは必ず最新のNOTAMを確認</b>してください。「影響」「関連マニュアル」の欄のうち、原文から直接言えない部分は <span style="font-weight:700">［要確認］</span> と表示しています。
 </div>
 
 <div class="card">
   <div class="card-title">登録 NOTAM <span id="nt-count" style="font-size:.72em;font-weight:400;color:var(--muted)"></span></div>
+  <div class="nt-bar" id="nt-secs"></div>
   <div class="nt-bar" id="nt-chips"></div>
   <div class="nt-bar"><input id="nt-q" class="nt-search" type="search" placeholder="🔍 NOTAM番号 / キーワード（例：GPS、EFB、RWY）" oninput="ntRender()"></div>
   <div id="nt-list"></div>
@@ -57,52 +68,26 @@
 </div>
 </div>
 
+<script src="notam_data.js"></script>
 <script>
-/* ───────── 登録データ ─────────
-   新しい NOTAM は NOTAMS の先頭に追加する。
-   cat: 種別（Company／GPS・航法／EFB・システム／空港／滑走路・誘導路／NAVAID／空域・FIR／燃料・GSE／工事・障害物／その他）
-   perf/nav/ops: 影響（空文字＝影響なし、または「［要確認］…」）
-   refs: 関連マニュアル [{label, go:'qrh'|'mel'|'emer'}]（go を付けると参照サイトの該当タブへ移動）
-*/
-var NOTAMS = [
-  {
-    no: 'NCA 00204/26', cat: ['Company', 'EFB・システム'],
-    title: 'EFB バージョン要件（08Oct26 時点）',
-    issued: '07-OCT-2026 07:25（改訂 08-OCT-2026 05:19）', valid: '07-OCT-2026 15:00 〜 UFN',
-    orig: '///// COMPANY NOTAM /////\n\nEFB INFORMATION AS OF 08Oct26\nEFF ID OF EFB VERSION INFORMATION IS 261008\n1.SOFTWARE\n MNM VERSION OF IOS(IPADOS): 26.2 or later (For FD Pro 5.1.3)\n                             26.3 or later (For FD Pro 5.2.1)\n2.EFF VERSION OF APPLICATION\n FD PRO: 5.1.3, 5.2.1\n CONTENT: 26.03, 26.05, 26.08\n ACROBAT READER: 26.08.01, 26.08.50, 26.09.00 (*UPDATED)\n eFM: 7.13.0, 7.13.1, 7.14\n OPT: 4.94.2\n\n3.EFF VERSION OF DATABASE\n OPT DATABASE:\n  POLICY: NCA-POLICY-0005 or -0005(G)\n （以下、スクリーンショットが途切れているため未取得）',
-    ja: '会社が運用を認める EFB の<b>ソフトウェア・アプリ・データベースのバージョン一覧</b>（EFB 情報ID 261008）。iPadOS は FD Pro 5.1.3 なら 26.2 以上、FD Pro 5.2.1 なら 26.3 以上が最低要件。Acrobat Reader は 26.09.00 が今回更新（*UPDATED）。OPT は 4.94.2。',
-    perf: '直接の影響なし。ただし<b>離陸・着陸性能計算に使う OPT のバージョン（4.94.2）と OPT データベース（POLICY: NCA-POLICY-0005 / -0005(G)）</b>が、この一覧に載る版であることを確認する。［要確認：版が合わない場合の取扱いは社内規程で確認］',
-    nav: 'FD Pro（チャート・航法データ）、eFM、Content（社内マニュアル）の版が対象。iPadOS 26.2／26.3 以上が条件のため、<b>OS を更新する場合は FD Pro の版と組合せを確認</b>。',
-    ops: 'フライト前に、自分の EFB の iPadOS・FD Pro・Content・eFM・OPT の版が一覧に合うかを確認する。［要確認：不一致時の対応（使用可否・連絡先）は社内手順で確認］',
-    refs: [{ label: 'EFB 運用（社内規程）［要確認：該当章は未特定］' }],
-    src: 'EFB スクリーンショット（KZ225 / NCA225 RJAA→ZSPD、Oct 15）。画面下部が切れており DB 項目の後半は未取得。'
-  },
-  {
-    no: 'NCA 00007/19', cat: ['Company', 'GPS・航法'],
-    title: 'GPS 衛星の運用状況（24 機以上が利用可能）',
-    issued: '05-MAY-2019 06:10（改訂 15-OCT-2026 04:36）', valid: '20-JUN-2019 15:00 〜 UFN',
-    orig: '///// COMPANY NOTAM /////\nGPS CONSTELLATION AS FLW\n24 OR MORE GPS SATELLITES ARE AVBL\nEXPLANATION: RVSD AT 0435Z 15OCT2026',
-    ja: '会社 NOTAM。GPS 衛星の配置状況は、<b>24 機以上の衛星が利用可能</b>（通常どおり）。15OCT2026 0435Z に改訂（RVSD）されたことを示す。',
-    perf: '影響なし。',
-    nav: '衛星数が 24 機以上ある通常状態の通知で、<b>GPS を使う RNAV/RNP 運航の制限を示すものではない</b>。衛星数が減った場合は、この文面が変わる（同じ番号で改訂される）。［要確認：衛星数が減ったときの運用上の扱いは AOR/AOM で確認］',
-    ops: '毎フライトで改訂時刻を確認。GPS の異常（衛星不足・妨害）の場合は、GPS Data Unreliable の NNC と MEL の GPS 項目を参照。',
-    refs: [{ label: 'QRH：GPS Data Unreliable（Quick Reference 5）', go: 'qrh' }, { label: 'MEL：GPS', go: 'mel' }],
-    src: 'EFB スクリーンショット（KZ225 / NCA225 RJAA→ZSPD、Oct 15）。'
-  }
-];
-
-var ntCat = '全て';
+var ntCat = '全て', ntSec = '全て', SECS = ['全て','General','RJAA','ZSPD','ZSSS','CHN','ASP','RJJJ','ZSHA','RKRR'];
+var PRI = {high:'重要', mid:'', low:''};
+function ntEsc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 function ntCats() {
   var s = {}; NOTAMS.forEach(function (n) { n.cat.forEach(function (c) { s[c] = 1; }); });
   return ['全て'].concat(Object.keys(s));
 }
 function ntChips() {
+  var cnt = {}; NOTAMS.forEach(function (n) { cnt[n.sec] = (cnt[n.sec] || 0) + 1; });
+  document.getElementById('nt-secs').innerHTML = SECS.map(function (c) {
+    return '<button class="nt-chip' + (c === ntSec ? ' on' : '') + '" onclick="ntSetSec(\'' + c + '\')">' + c + (cnt[c] ? ' ' + cnt[c] : '') + '</button>';
+  }).join('') + '<button class="nt-chip' + (ntSec === '重要' ? ' on' : '') + '" onclick="ntSetSec(\'重要\')">★ 重要のみ</button>';
   document.getElementById('nt-chips').innerHTML = ntCats().map(function (c) {
     return '<button class="nt-chip' + (c === ntCat ? ' on' : '') + '" onclick="ntSetCat(\'' + c.replace(/'/g, "\\'") + '\')">' + c + '</button>';
   }).join('');
 }
 function ntSetCat(c) { ntCat = c; ntChips(); ntRender(); }
-function ntEsc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function ntSetSec(c) { ntSec = c; ntChips(); ntRender(); }
 function ntImp(k, v) {
   var val = v ? v : '<span class="nt-none">影響なし</span>';
   val = val.replace(/［要確認[^］]*］/g, function (m) { return '<span class="nt-chk">' + m + '</span>'; });
@@ -111,28 +96,49 @@ function ntImp(k, v) {
 function ntRender() {
   var q = (document.getElementById('nt-q').value || '').trim().toLowerCase();
   var rows = NOTAMS.filter(function (n) {
+    if (ntSec === '重要') { if (n.pri !== 'high') return false; }
+    else if (ntSec !== '全て' && n.sec !== ntSec) return false;
     if (ntCat !== '全て' && n.cat.indexOf(ntCat) < 0) return false;
     if (!q) return true;
-    return (n.no + ' ' + n.title + ' ' + n.orig + ' ' + n.ja + ' ' + (n.perf || '') + ' ' + (n.nav || '') + ' ' + (n.ops || '') + ' ' + n.cat.join(' ')).toLowerCase().indexOf(q) >= 0;
+    var rt = (n.rows || []).map(function (r) { return r.no + ' ' + r.text; }).join(' ');
+    return (n.no + ' ' + n.title + ' ' + n.orig + ' ' + n.ja + ' ' + (n.perf || '') + ' ' + (n.nav || '') + ' ' + (n.ops || '') + ' ' + n.cat.join(' ') + ' ' + rt).toLowerCase().indexOf(q) >= 0;
   });
-  document.getElementById('nt-count').textContent = '（' + rows.length + ' / ' + NOTAMS.length + ' 件）';
+  document.getElementById('nt-count').textContent = '（' + rows.length + ' / ' + NOTAMS.length + ' 項目）';
   if (!rows.length) { document.getElementById('nt-list').innerHTML = '<div class="nt-empty">該当する NOTAM はありません。</div>'; return; }
-  document.getElementById('nt-list').innerHTML = rows.map(function (n, i) {
+  document.getElementById('nt-list').innerHTML = rows.map(function (n) {
     var refs = (n.refs || []).map(function (r) {
-      return r.go ? '<button onclick="ntGo(\'' + r.go + '\')">' + ntEsc(r.label) + ' ↗</button>' : '<span class="nt-chk">' + ntEsc(r.label) + '</span>';
+      if (r.go) return '<button onclick="ntGo(\'' + r.go + '\')">' + ntEsc(r.label) + ' ↗</button>';
+      if (r.jump) return '<button onclick="ntJump(\'' + r.jump.replace(/'/g, "\\'") + '\')">' + ntEsc(r.label) + ' ↓</button>';
+      if (r.main) return '<span class="nt-main">' + r.label + '<small>（NCA Tools／' + ntEsc(r.main) + '）</small></span>';
+      return '<span class="nt-chk">' + r.label + '</span>';
     }).join('');
-    return '<details class="nt-item"' + (rows.length <= 2 ? ' open' : '') + '><summary><span class="nt-no">' + ntEsc(n.no) + '</span><span class="nt-title">' + ntEsc(n.title) + '</span>' +
+    var tbl = '';
+    if (n.rows) tbl = '<div class="nt-h">一覧</div><div class="nt-tblw"><table class="nt-tbl"><tr><th>No.</th><th>有効</th><th>内容</th></tr>' +
+      n.rows.map(function (r) { return '<tr><td class="nt-no">' + ntEsc(r.no) + '</td><td>' + ntEsc(r.valid) + '</td><td>' + r.text.replace(/\n/g, '<br>') + '</td></tr>'; }).join('') + '</table></div>';
+    return '<details class="nt-item' + (n.pri === 'high' ? ' hi' : '') + '" data-no="' + ntEsc(n.no) + '"' + (rows.length <= 2 ? ' open' : '') + '><summary><span class="nt-no">' + ntEsc(n.no) + '</span><span class="nt-title">' + ntEsc(n.title) + '</span>' +
+      '<span class="nt-tag sec">' + ntEsc(n.sec) + '</span>' + (n.pri === 'high' ? '<span class="nt-tag hi">★重要</span>' : '') +
       n.cat.map(function (c) { return '<span class="nt-tag">' + ntEsc(c) + '</span>'; }).join('') + '</summary>' +
       '<div class="nt-body">' +
-      '<div class="nt-h">日本語訳・概要</div><div>' + n.ja + '</div>' +
+      '<div class="nt-h">日本語訳・概要</div><div>' + n.ja + '</div>' + tbl +
       '<div class="nt-h">影響</div><div class="nt-imp">' + ntImp('性能', n.perf) + ntImp('航法要件', n.nav) + ntImp('運航', n.ops) + '</div>' +
       '<div class="nt-h">関連マニュアル・ツール</div><div class="nt-ref">' + (refs || '<span class="nt-none">未登録</span>') + '</div>' +
       '<div class="nt-h">原文（英語）</div><div class="nt-orig">' + ntEsc(n.orig) + '</div>' +
-      '<div class="nt-src">発行／改訂：' + ntEsc(n.issued) + '　有効：' + ntEsc(n.valid) + '<br>出典：' + ntEsc(n.src) + '</div>' +
+      '<div class="nt-src">発行／改訂：' + ntEsc(n.issued) + '　有効：' + ntEsc(n.valid) + '</div>' +
       '</div></details>';
   }).join('');
 }
-// 参照サイト（親ページ）の他タブへ移動
+function ntJump(no) {
+  ntSec = '全て'; ntCat = '全て'; document.getElementById('nt-q').value = ''; ntChips(); ntRender();
+  var els = document.querySelectorAll('.nt-item');
+  for (var i = 0; i < els.length; i++) {
+    var d = els[i], nos = d.getAttribute('data-no');
+    if (nos === no || nos.indexOf(no) >= 0) { d.open = true; d.scrollIntoView({block: 'start'}); return; }
+  }
+  // グループ内の個別番号を探す
+  for (var j = 0; j < NOTAMS.length; j++) {
+    if ((NOTAMS[j].rows || []).some(function (r) { return r.no === no; })) { ntJump(NOTAMS[j].no); return; }
+  }
+}
 function ntGo(tab) { try { if (parent && parent.refSwitch) parent.refSwitch(tab); } catch (e) {} }
 ntChips(); ntRender();
 </script>

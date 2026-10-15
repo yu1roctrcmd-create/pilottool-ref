@@ -3,6 +3,7 @@ const ASSETS = [
   './emer.html',
   './mel.html',
   './notam.html',
+  './notam_data.js',
   './qrh_analysis.html',
   './ref.css',
   './ref-lock.js',
