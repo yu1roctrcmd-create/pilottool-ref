@@ -4,6 +4,7 @@ const ASSETS = [
   './mel.html',
   './notam.html',
   './notam_data.js',
+  './notam_img/rjaa_chart.webp',
   './qrh_analysis.html',
   './ref.css',
   './ref-lock.js',

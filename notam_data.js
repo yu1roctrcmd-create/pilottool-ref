@@ -489,3 +489,59 @@ var NOTAMS = [
   ], refs: [] }
 
 ];
+
+/* ───────── RJAA チャート上の NOTAM 位置（画像 1472×1998 px の座標）─────────
+   出典：EFB の RJAA Airport Chart（North Up）。位置はチャートのラベルから読み取った概略で、縮尺は目安。
+   type: closed（閉鎖）/ light（灯火不作動）/ groove（グルービング消失）/ info（その他）
+   jump: NOTAM カードの no（notam.html のカードへ移動） */
+var NOTAM_MAP = {
+  img: 'notam_img/rjaa_chart.webp', w: 1472, h: 1998,
+  items: [
+    { n: 1, type: 'closed', label: 'RWY 16R/34L 閉鎖（保守）1510–2030Z', ids: 'A1443/26', cards: ['RJAA 滑走路閉鎖（保守）'], shape: { k: 'line', pts: [[165, 645], [880, 1878]], w: 22 }, tag: [420, 1010] },
+    { n: 2, type: 'closed', label: 'RWY 16L/34R 閉鎖（保守）1410–2030Z', ids: 'A1442/26', cards: ['RJAA 滑走路閉鎖（保守）'], shape: { k: 'line', pts: [[805, 25], [935, 250]], w: 22 }, tag: [880, 110] },
+    { n: 3, type: 'groove', label: '16R THR 付近：グルービング消失（229〜296m）', ids: 'A1275・A1205・A1179', cards: ['RJAA グルービング一部消失（6件）', 'NCA 00202/26'], shape: { k: 'ellipse', c: [212, 726], rx: 26, ry: 40, rot: -30 }, tag: [300, 700] },
+    { n: 4, type: 'groove', label: '34L THR 付近：グルービング消失（14〜49m）', ids: 'A1306・A1388', cards: ['RJAA グルービング一部消失（6件）', 'NCA 00202/26'], shape: { k: 'ellipse', c: [872, 1862], rx: 24, ry: 36, rot: -30 }, tag: [800, 1830] },
+    { n: 5, type: 'groove', label: '34L 滑走路中間：グルービング消失（THRから約1,665〜1,681m）', ids: 'A1483/26（新規）', cards: ['RJAA グルービング一部消失（6件）', 'NCA 00202/26'], shape: { k: 'ellipse', c: [581, 1363], rx: 24, ry: 36, rot: -30 }, tag: [500, 1400] },
+    { n: 6, type: 'info', label: 'RWY 16L PALS 一部不作動（図外・北西側）→ 着陸最低気象 RVR 変更／SFL 不作動', ids: 'A1472/26・A1473/26', cards: ['A1472/26', 'A1473/26'], shape: { k: 'pin', c: [762, 40] }, tag: [610, 60] },
+    { n: 7, type: 'closed', label: 'TWY N1（SPOT 603〜610D）・D3（SPOT 600P〜N1）閉鎖（演習）14-OCT 2300Z〜15-OCT 0830Z', ids: 'A1509/26', cards: ['RJAA 誘導路の閉鎖・灯火不作動'], shape: { k: 'ellipse', c: [1022, 1450], rx: 95, ry: 80, rot: 0 }, tag: [1080, 1360] },
+    { n: 8, type: 'closed', label: 'TWY B・B1〜B9・F・F1〜F5・K（B〜B6）・C（B〜E1）・L（B9〜U5）閉鎖（保守）毎日 1410–2030Z', ids: 'A1445/26', cards: ['RJAA 誘導路の閉鎖・灯火不作動'], shape: { k: 'poly', pts: [[770, 40], [1000, 40], [1250, 330], [1250, 490], [1050, 510], [800, 330]] }, tag: [1130, 140] },
+    { n: 9, type: 'closed', label: 'TWY A2 閉鎖（工事）', ids: 'A1346/26', cards: ['RJAA 誘導路の閉鎖・灯火不作動'], shape: { k: 'ellipse', c: [238, 718], rx: 30, ry: 24, rot: 0 }, tag: [150, 790] },
+    { n: 10, type: 'light', label: 'TWY A・A2 センターライン灯 使用不可', ids: 'A1474/26', cards: ['RJAA 誘導路の閉鎖・灯火不作動'], shape: { k: 'polyline', pts: [[205, 652], [238, 720], [365, 845], [430, 953], [487, 1052], [513, 1094], [527, 1258], [603, 1290], [640, 1355], [722, 1453], [803, 1590], [860, 1688], [915, 1785]] }, tag: [330, 960] },
+    { n: 11, type: 'light', label: 'TWY Q6・Q7（SPOT 11〜16）センターライン灯 使用不可', ids: 'A1349/26', cards: ['RJAA 誘導路の閉鎖・灯火不作動'], shape: { k: 'ellipse', c: [630, 908], rx: 95, ry: 50, rot: -15 }, tag: [700, 840] },
+    { n: 12, type: 'light', label: 'TWY N2・D1・M（D2〜H1）センターライン灯 使用不可', ids: 'A1430/26・A1390/26', cards: ['RJAA 誘導路の閉鎖・灯火不作動'], shape: { k: 'ellipse', c: [915, 1630], rx: 110, ry: 150, rot: 0 }, tag: [1040, 1620] },
+    { n: 13, type: 'info', label: 'TWY B1〜B9 ストップバー灯 使用不可（図は B6〜B9 付近のみ）', ids: 'A1475/26', cards: ['RJAA 誘導路の閉鎖・灯火不作動'], shape: { k: 'pin', c: [890, 175] }, tag: [940, 300] }
+  ]
+};
+var NMAP_COL = { closed: '#ef4444', light: '#f59e0b', groove: '#fb923c', info: '#38bdf8' };
+
+function nmapSvg(items, hiN) {
+  var svg = '';
+  items.forEach(function (it) {
+    var c = NMAP_COL[it.type], sh = it.shape, g = '';
+    var dim = (hiN != null && it.n !== hiN) ? ' opacity=".35"' : '';
+    var st = 'fill="' + c + '" fill-opacity=".30" stroke="' + c + '" stroke-width="5"' + (it.type === 'light' ? ' stroke-dasharray="14,8"' : '');
+    if (sh.k === 'line') g = '<line x1="' + sh.pts[0][0] + '" y1="' + sh.pts[0][1] + '" x2="' + sh.pts[1][0] + '" y2="' + sh.pts[1][1] + '" stroke="' + c + '" stroke-opacity=".55" stroke-width="' + sh.w + '" stroke-linecap="round" stroke-dasharray="26,14"/>';
+    else if (sh.k === 'ellipse') g = '<ellipse cx="' + sh.c[0] + '" cy="' + sh.c[1] + '" rx="' + sh.rx + '" ry="' + sh.ry + '" transform="rotate(' + sh.rot + ' ' + sh.c[0] + ' ' + sh.c[1] + ')" ' + st + '/>';
+    else if (sh.k === 'poly') g = '<polygon points="' + sh.pts.map(function (p) { return p.join(','); }).join(' ') + '" ' + st + ' stroke-dasharray="14,8"/>';
+    else if (sh.k === 'polyline') g = '<polyline points="' + sh.pts.map(function (p) { return p.join(','); }).join(' ') + '" fill="none" stroke="' + c + '" stroke-width="9" stroke-opacity=".7" stroke-dasharray="14,10" stroke-linecap="round" stroke-linejoin="round"/>';
+    else if (sh.k === 'pin') g = '<circle cx="' + sh.c[0] + '" cy="' + sh.c[1] + '" r="22" ' + st + '/>';
+    var tg = '<circle cx="' + it.tag[0] + '" cy="' + it.tag[1] + '" r="26" fill="' + c + '" stroke="#fff" stroke-width="4"/><text x="' + it.tag[0] + '" y="' + (it.tag[1] + 11) + '" text-anchor="middle" font-size="32" font-weight="700" fill="#111" font-family="sans-serif">' + it.n + '</text>';
+    svg += '<g' + dim + '><title>' + it.n + ' ' + ntEsc(it.label) + '（' + ntEsc(it.ids) + '）</title>' + g + tg + '</g>';
+  });
+  return svg;
+}
+function nmapItemsFor(no) { return NOTAM_MAP.items.filter(function (it) { return it.cards.indexOf(no) >= 0; }); }
+function nmapHtml(items, onlyThis) {
+  var M = NOTAM_MAP;
+  var leg = items.map(function (it) {
+    return '<li><span class="nm-n" style="background:' + NMAP_COL[it.type] + '">' + it.n + '</span><span><b>' + ntEsc(it.ids) + '</b>　' + ntEsc(it.label) + '</span></li>';
+  }).join('');
+  return '<div class="nm-wrap"><div class="nm-chart"><img src="' + M.img + '" alt="RJAA Airport Chart" loading="lazy"><svg viewBox="0 0 ' + M.w + ' ' + M.h + '" preserveAspectRatio="none">' + nmapSvg(items) + '</svg></div>' +
+    '<div class="nm-side"><ol class="nm-leg">' + leg + '</ol>' +
+    '<div class="nm-note">位置は EFB の RJAA チャート（North Up）のラベルから読み取った<b>概略</b>。範囲・縮尺は目安です（グルービング消失は実際は幅数 m のため強調表示）。</div></div></div>';
+}
+function nmapRender() {
+  var host = document.getElementById('nt-map'); if (!host) return;
+  host.innerHTML = '<div class="nm-key"><span style="color:#ef4444">■ 閉鎖</span><span style="color:#f59e0b">■ 灯火不作動</span><span style="color:#fb923c">■ グルービング消失</span><span style="color:#38bdf8">■ その他</span></div>' +
+    nmapHtml(NOTAM_MAP.items) + '<div class="nm-note">図に出せないもの：A1193/26（滑走路誤進入警報の停止）。各 NOTAM のカードを開くと、その NOTAM の位置だけを表示します。</div>';
+}
