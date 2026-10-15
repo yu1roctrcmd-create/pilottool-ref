@@ -499,9 +499,9 @@ var NOTAM_MAP = {
   items: [
     { n: 1, type: 'closed', label: 'RWY 16R/34L 閉鎖（保守）1510–2030Z', ids: 'A1443/26', cards: ['RJAA 滑走路閉鎖（保守）'], shape: { k: 'line', pts: [[165, 645], [880, 1878]], w: 22 }, tag: [420, 1010] },
     { n: 2, type: 'closed', label: 'RWY 16L/34R 閉鎖（保守）1410–2030Z', ids: 'A1442/26', cards: ['RJAA 滑走路閉鎖（保守）'], shape: { k: 'line', pts: [[805, 25], [935, 250]], w: 22 }, tag: [880, 110] },
-    { n: 3, type: 'groove', label: '16R THR 付近：グルービング消失（229〜296m）', ids: 'A1275・A1205・A1179', cards: ['RJAA グルービング一部消失（6件）', 'NCA 00202/26'], shape: { k: 'ellipse', c: [212, 726], rx: 26, ry: 40, rot: -30 }, tag: [300, 700] },
-    { n: 4, type: 'groove', label: '34L THR 付近：グルービング消失（14〜49m）', ids: 'A1306・A1388', cards: ['RJAA グルービング一部消失（6件）', 'NCA 00202/26'], shape: { k: 'ellipse', c: [872, 1862], rx: 24, ry: 36, rot: -30 }, tag: [800, 1830] },
-    { n: 5, type: 'groove', label: '34L 滑走路中間：グルービング消失（THRから約1,665〜1,681m）', ids: 'A1483/26（新規）', cards: ['RJAA グルービング一部消失（6件）', 'NCA 00202/26'], shape: { k: 'ellipse', c: [581, 1363], rx: 24, ry: 36, rot: -30 }, tag: [500, 1400] },
+    { n: 3, type: 'groove', label: '16R THR 付近：Non Grooved Runway（THR から 229〜296m）', ids: 'A1275・A1205・A1179', cards: ['RJAA グルービング一部消失（6件）', 'NCA 00202/26'], shape: { k: 'ellipse', c: [212, 726], rx: 26, ry: 40, rot: -30 }, tag: [300, 700] },
+    { n: 4, type: 'groove', label: '34L THR 付近：Non Grooved Runway（THR から 14〜49m）', ids: 'A1306・A1388', cards: ['RJAA グルービング一部消失（6件）', 'NCA 00202/26'], shape: { k: 'ellipse', c: [872, 1862], rx: 24, ry: 36, rot: -30 }, tag: [800, 1830] },
+    { n: 5, type: 'groove', label: '34L 滑走路中間：Non Grooved Runway（THR から約 1,665〜1,681m）', ids: 'A1483/26（新規）', cards: ['RJAA グルービング一部消失（6件）', 'NCA 00202/26'], shape: { k: 'ellipse', c: [581, 1363], rx: 24, ry: 36, rot: -30 }, tag: [500, 1400] },
     { n: 6, type: 'info', label: 'RWY 16L PALS 一部不作動（図外・北西側）→ 着陸最低気象 RVR 変更／SFL 不作動', ids: 'A1472/26・A1473/26', cards: ['A1472/26', 'A1473/26'], shape: { k: 'pin', c: [762, 40] }, tag: [610, 60] },
     { n: 7, type: 'closed', label: 'TWY N1（SPOT 603〜610D）・D3（SPOT 600P〜N1）閉鎖（演習）14-OCT 2300Z〜15-OCT 0830Z', ids: 'A1509/26', cards: ['RJAA 誘導路の閉鎖・灯火不作動'], shape: { k: 'ellipse', c: [1022, 1450], rx: 95, ry: 80, rot: 0 }, tag: [1080, 1360] },
     { n: 8, type: 'closed', label: 'TWY B・B1〜B9・F・F1〜F5・K（B〜B6）・C（B〜E1）・L（B9〜U5）閉鎖（保守）毎日 1410–2030Z', ids: 'A1445/26', cards: ['RJAA 誘導路の閉鎖・灯火不作動'], shape: { k: 'poly', pts: [[770, 40], [1000, 40], [1250, 330], [1250, 490], [1050, 510], [800, 330]] }, tag: [1130, 140] },
@@ -566,11 +566,11 @@ function nmapHtml(items, M) {
   }).join('');
   return '<div class="nm-wrap"><div class="nm-chart"><img src="' + M.img + '" alt="' + M.name + ' Airport Chart" loading="lazy"><svg viewBox="0 0 ' + M.w + ' ' + M.h + '" preserveAspectRatio="none">' + nmapSvg(items) + '</svg></div>' +
     '<div class="nm-side"><ol class="nm-leg">' + leg + '</ol>' +
-    '<div class="nm-note">位置は EFB の Airport Chart（North Up）のラベルから読み取った<b>概略</b>。範囲・縮尺は目安です（グルービング消失は実際は幅数 m のため強調表示）。</div></div></div>';
+    '<div class="nm-note">位置は EFB の Airport Chart（North Up）のラベルから読み取った<b>概略</b>。範囲・縮尺は目安です（Non Grooved 区間は実際は幅数 m のため強調表示）。</div></div></div>';
 }
 function nmapRender() {
   var host = document.getElementById('nt-map'); if (!host) return;
-  host.innerHTML = '<div class="nm-key"><span style="color:#ef4444">■ 閉鎖</span><span style="color:#f59e0b">■ 灯火不作動</span><span style="color:#fb923c">■ グルービング消失</span><span style="color:#38bdf8">■ その他</span></div>' +
+  host.innerHTML = '<div class="nm-key"><span style="color:#ef4444">■ 閉鎖</span><span style="color:#f59e0b">■ 灯火不作動</span><span style="color:#fb923c">■ Non Grooved Runway</span><span style="color:#38bdf8">■ その他</span></div>' +
     NOTAM_CHARTS.map(function (c) { return '<div class="nt-h">' + ntEsc(c.name) + '</div>' + nmapHtml(c.items, c); }).join('') +
     '<div class="nm-note">図に出せないもの：RJAA A1193/26（滑走路誤進入警報の停止）、ZSPD・ZSSS の STAR・VOR・LID・ビジュアルアプローチ関連。各 NOTAM のカードを開くと、その NOTAM の位置だけを表示します。</div>';
 }
