@@ -287,13 +287,13 @@ var NOTAMS = [
 
 /* ───────────── ASP（エリア） ───────────── */
 { no: 'NCA 00078/25', sec: 'ASP', pri: 'high', cat: ['Company', 'GPS・航法'],
-  title: 'RAIM 欠測予測（IAP 用）：RNP 0.3／1.0、改訂から 48 時間有効',
+  title: 'RAIM 欠測予測（IAP＝進入フェーズ用）：RNP 0.3／1.0、改訂から 48 時間有効',
   issued: '11-JUN-2025 08:13（改訂 15-OCT-2026 04:39）', valid: '12-JUN-2025 00:00Z 〜 UFN',
   orig: '///// COMPANY NOTAM /////\nRAIM OUTAGE PREDICTION FOR IAP AS FLW\n(RNP VALUE 0.3, 1.0, VALID 48H FM RVSD TIME)\n0.3 FOR FINAL APPROACH SEGMENT IN RNAV/RNP APCH\n1.0 OTHER THAN FINAL APPROACH SEGMENT IN IAP\nJAPAN KOREA THAILAND VIETNAM: REF GOVERMENT NOTAM\nVHHH: 0.3/15-10-2026 15:46:30 UTC - 15-10-2026 15:53:30 UTC   1.0/NIL\nRCKH: 0.3/NIL 1.0/NIL\nRCTP: 0.3/NIL 1.0/NIL\nWSSS: 0.3/NIL 1.0/NIL\nWSAP: 0.3/NIL 1.0/NIL\nWMKK: 0.3/NIL 1.0/NIL\nWMKP: 0.3/NIL 1.0/NIL\nZSPD: 0.3/NIL 1.0/NIL\nZSSS: 0.3/NIL 1.0/NIL\nZSHC: 0.3/NIL 1.0/NIL\nZGSZ: 0.3/15-10-2026 15:46:30 UTC - 15-10-2026 15:54:30 UTC   1.0/NIL\nZGGG: NOT SUITABLE AS ALTN\nRPLL: 0.3/NIL 1.0/NIL',
-  ja: '計器進入方式（IAP）の<b>RAIM（GPS の完全性監視）が成立しない時間帯の予測</b>。改訂時刻から <b>48 時間有効</b>。<b>RNP 0.3</b>は RNAV/RNP 進入の最終進入区間、<b>RNP 1.0</b>は最終進入区間以外。<br>今回：<b>VHHH の RNP 0.3 が 15-OCT 15:46:30〜15:53:30Z</b>、<b>ZGSZ の RNP 0.3 が 15:46:30〜15:54:30Z</b> に欠測。他空港（RCKH、RCTP、WSSS、WSAP、WMKK、WMKP、ZSPD、ZSSS、ZSHC、RPLL）は NIL（欠測なし）。日本・韓国・タイ・ベトナムは各国政府の NOTAM を参照。<b>ZGGG は代替に不適</b>。',
-  perf: '', nav: '<b>RNAV(GNSS)／RNP 進入の使用可否</b>に直結。到着時刻が欠測の時間帯と重なる空港では、<b>その進入方式は使えない</b>ため、別の進入方式（ILS 等）の準備が必要。',
-  ops: '目的地・代替の ETA が欠測時間帯に入っていないか確認。この便（ZSPD ETA 04:46Z、ZSSS 代替）は両方 NIL で影響なし。',
-  refs: [{ label: 'QRH：GPS Data Unreliable', go: 'qrh' }, { label: '会社 NOTAM：GPS 衛星状況（NCA 00007/19）', jump: 'NCA 00007/19' }, { label: 'AOM：RAIM 予測［要確認：該当章は未特定］' }] },
+  ja: '計器進入方式（IAP）の<b>RAIM（GPS の完全性監視）が成立しない時間帯の予測</b>。改訂時刻から <b>48 時間有効</b>。<b>RNP 0.3</b>は RNAV/RNP 進入の最終進入区間、<b>RNP 1.0</b>は最終進入区間以外。<br>今回：<b>VHHH の RNP 0.3 が 15-OCT 15:46:30〜15:53:30Z</b>、<b>ZGSZ の RNP 0.3 が 15:46:30〜15:54:30Z</b> に欠測。他空港（RCKH、RCTP、WSSS、WSAP、WMKK、WMKP、ZSPD、ZSSS、ZSHC、RPLL）は NIL（欠測なし）。日本・韓国・タイ・ベトナムは各国政府の NOTAM を参照。<b>ZGGG は代替に不適</b>。<div class="nt-h">AM RULES AND REGULATIONS 1-4「ABAS AVAILABILITY INFORMATION」</div><ul style="margin:0;padding-left:1.3em"><li>運航管理者は、<b>必要な進入方式の RAIM 予測</b>を入手して NOTAM に掲載する。</li><li><b>公式の RAIM NOTAM を出す国：日本・韓国・タイ・ベトナム・ドイツ・スイス</b>（本 NOTAM でも「各国政府の NOTAM を参照」）。それ以外の国は、RAIM 予測システムの結果を<b>会社 NOTAM または OFP の運航管理者コメント</b>で提供する。</li><li><b>予測の設定条件：</b>Mask Angle 5°、GPS Algorithm＝FDE（Fault Detection and Exclusion）、RNP 値＝<b>0.3：RNAV/RNP APCH の最終進入区間／1.0：IAP の最終進入区間以外</b>。</li><li>OM 4-4-5・4-4-6：GPS を使う区間で、飛行予定時刻に RAIM が<b>5 分を超えて連続して失われる</b>予測なら、GPS を使わない進入方式を計画するか、到着予定時間を変更する。</li></ul><div class="nt-h">この NOTAM でカバーされる範囲</div>RAIM 予測は<b>進入フェーズ</b>（Approach＝RAIM）の確認。<b>Terminal・Enroute（SID/STAR・洋上）は RAIM ではなく GPS CONSTELLATION STATUS（NAIM）</b>で見る＝<b>会社 NOTAM NCA 00007/19</b>（AM 1-4・1-5、OM 4-4-6 ②）。',
+  perf: '', nav: '<b>RNAV(GNSS)／RNP 進入の使用可否</b>に直結（RNP APCH は RAIM で確認。OM 4-4-6 ②の衛星数の表は計器進入方式で GPS を使う場合は対象外）。到着時刻が欠測の時間帯と重なる空港では、<b>その進入方式は使えない</b>ため、別の進入方式（ILS 等）の準備が必要。',
+  ops: '目的地・代替の ETA が欠測時間帯に入っていないか確認。この便（ZSPD ETA 04:46Z、ZSSS 代替）は両方 NIL で影響なし。<b>NIL は進入フェーズの確認のみ。</b>SID/STAR・Enroute の RNAV は衛星数（NCA 00007/19：RNAV 1/2・RNP 1/2 は 24 個、RNAV 5・RNP 4 は 23 個以上）で確認する。',
+  refs: [{ label: 'QRH：GPS Data Unreliable', go: 'qrh' }, { label: '会社 NOTAM：GPS 衛星状況（NCA 00007/19）', jump: 'NCA 00007/19' }, { label: 'AM RULES AND REGULATIONS 1-4（ABAS AVAILABILITY INFORMATION）／OM 4-4-5・4-4-6' }, { label: 'RNAV/RNP 運航の必要機上装置・必要衛星数（OM 第4章）', main: 'RTE' }] },
 
 /* ───────────── RJJJ（福岡 FIR）：流量規制・CDR・トラック ───────────── */
 { no: '福岡FIR 流量規制（5件）', sec: 'RJJJ', pri: 'mid', cat: ['流量規制・CDR・トラック'],
