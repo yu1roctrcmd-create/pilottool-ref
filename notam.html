@@ -78,7 +78,7 @@
 
 <div class="card">
   <details id="nt-mapbox" open>
-  <summary class="card-title" style="cursor:pointer">🗺 RJAA NOTAM マップ（KZ225・15-OCT）</summary>
+  <summary class="card-title" style="cursor:pointer">🗺 NOTAM マップ（RJAA・ZSPD／KZ225・15-OCT）</summary>
   <div id="nt-map"></div>
   </details>
 </div>
@@ -138,7 +138,7 @@ function ntRender() {
       if (r.main) return '<span class="nt-main">' + r.label + '<small>（NCA Tools／' + ntEsc(r.main) + '）</small></span>';
       return '<span class="nt-chk">' + r.label + '</span>';
     }).join('');
-    var mi = nmapItemsFor(n.no), mp = mi.length ? '<div class="nt-h">位置（RJAA チャート）</div>' + nmapHtml(mi) : '';
+    var mg = nmapItemsFor(n.no), mi = [].concat.apply([], mg.map(function (g) { return g.items; })), mp = mg.map(function (g) { return '<div class="nt-h">位置（' + ntEsc(g.chart.name) + ' チャート）</div>' + nmapHtml(g.items, g.chart); }).join('');
     var tbl = '';
     if (n.rows) tbl = '<div class="nt-h">一覧</div><div class="nt-tblw"><table class="nt-tbl"><tr><th>No.</th><th>有効</th><th>内容</th></tr>' +
       n.rows.map(function (r) { return '<tr><td class="nt-no">' + ntEsc(r.no) + ntRowTag(mi, r.no) + '</td><td>' + ntEsc(r.valid) + '</td><td>' + r.text.replace(/\n/g, '<br>') + '</td></tr>'; }).join('') + '</table></div>';

@@ -5,6 +5,8 @@ const ASSETS = [
   './notam.html',
   './notam_data.js',
   './notam_img/rjaa_chart.webp',
+  './notam_img/zspd_w.jpg',
+  './notam_img/zspd_e.jpg',
   './qrh_analysis.html',
   './ref.css',
   './ref-lock.js',
