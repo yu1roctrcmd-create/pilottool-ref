@@ -945,3 +945,75 @@ NOTAMS.push(
   ZSPD_E.items.push({ n: 4, type: 'info', label: 'RWY 16R の IM・MM・DME「IZZ」試験中・使用しない（飛行検査）16-OCT 1700–2330Z', ids: 'F4362〜F4364/26', cards: ['ZSPD 16R・17L/35R の計器着陸施設（試験・使用不可）'], shapes: [{ k: 'pin', c: [478, 250], r: 34 }, { k: 'ellipse', c: [440, 200], rx: 70, ry: 60, rot: -30 }], tag: [560, 330], chart: ZSPD_E });
   ZSPD_W.items.push({ n: 6, type: 'info', label: 'RWY 17L/35R の ILS 使用不可 16-OCT 1730–2230Z', ids: 'F4365/26', cards: ['ZSPD 16R・17L/35R の計器着陸施設（試験・使用不可）'], shapes: [{ k: 'pin', c: [415, 283], r: 30 }, { k: 'pin', c: [885, 1720], r: 30 }], tag: [510, 330], chart: ZSPD_W });
 })();
+
+
+/* ═════════ KZ228（ZSPD→RJAA、16-OCT ETD 19:40Z ― ETA 22:32Z、代替 RJTT）を最新として反映 ═════════
+   取得済みの画面：General／ZSPD（出発）／RJAA（到着）／RJTT（代替）／CHN。Area（ASP）・Airspace（ZSHA・RJJJ・RKRR）の画面は未取得 */
+NOTAM_FLIGHTS.KZ228 = { label: 'KZ228（最新）', route: 'ZSPD→RJAA', time: 'Oct 16 ETD 19:40Z（PVG）― ETA 22:32Z（NRT）', altn: 'RJTT', partial: true };
+NOTAM_LATEST = 'KZ228';
+var KZ228_IDS = ["00007/19", "00011/20", "00017/21", "00020/26", "00022/25", "00091/25", "00155/26", "00195/26", "00202/26", "00204/26", "00219/22", "A1179/26", "A1193/26", "A1205/26", "A1275/26", "A1306/26", "A1346/26", "A1349/26", "A1388/26", "A1390/26", "A1430/26", "A1442/26", "A1443/26", "A1445/26", "A1472/26", "A1473/26", "A1474/26", "A1475/26", "A1483/26", "A1552/26", "E5299/26", "E5300/26", "E5302/26", "E5305/26", "E5310/26", "E5311/26", "E5312/26", "E5593/26", "E5720/26", "E5721/26", "E5740/26", "E5894/26", "E5895/26", "E5896/26", "E5897/26", "E5900/26", "F2442/26", "F3193/26", "F3220/26", "F3286/26", "F3458/26", "F3772/26", "F4328/26", "F4329/26", "F4330/26", "F4331/26", "F4361/26", "F4362/26", "F4363/26", "F4364/26", "F4365/26", "J1623/26", "J1678/26", "J1958/26", "J1959/26", "J1960/26", "J1963/26", "J1979/26", "J1980/26", "J1982/26", "J1987/26", "J1988/26", "J2007/26", "J2008/26", "J2009/26", "J2010/26", "J2011/26", "J2012/26", "J2023/26", "J2108/26", "J2109/26", "J2110/26", "00008/20"];
+(function () {
+  var idre = /[A-Z]?\d{3,5}\/\d{2}/g;
+  function present(text) { var ids = String(text).match(idre) || []; return ids.some(function (i) { return KZ228_IDS.indexOf(i) >= 0; }); }
+  NOTAMS.forEach(function (n) {
+    n.legs = n.legs || [];
+    var rowsHit = (n.rows || []).some(function (r) { return present(r.no); });
+    (n.rows || []).forEach(function (r) { r.legs = r.legs || []; if (present(r.no) && r.legs.indexOf('KZ228') < 0) r.legs.push('KZ228'); });
+    var noHasId = /\d{3,5}\/\d{2}/.test(n.no);
+    if ((present(n.no) || (!noHasId && rowsHit)) && n.legs.indexOf('KZ228') < 0) n.legs.push('KZ228');
+  });
+})();
+
+/* ── KZ228 の内容反映 ── */
+NOTAMS.forEach(function (n) {
+  if (n.no === 'ZSPD 16R・17L/35R の計器着陸施設（試験・使用不可）') {
+    n.legs = ['KZ228'];
+    n.title = 'ZSPD：RWY 16R の ILS・IM・MM・DME「IZZ」は飛行検査のため試験中、RWY 17L/35R の ILS は使用不可（16-OCT 夕〜夜）';
+    n.orig = 'F4365/26 RWY17L/35R ILS U/S.\nF4364/26 IM 16R ON TEST DO NOT USE DUE TO FLTCK.\nF4363/26 MM 16R ON TEST DO NOT USE DUE TO FLTCK.\nF4362/26 DME 16R \'IZZ\' CH24X ON TEST DO NOT USE DUE TO FLTCK.\nF4361/26 RWY16R ILS ON TEST DO NOT USE DUE TO FLTCK.';
+    n.ja = '<b>RWY 16R の ILS 自体が試験中で使用しない</b>（F4361/26）。あわせて <b>16R の IM（インナーマーカー）、MM（ミドルマーカー）、DME「IZZ」（CH24X）も、飛行検査（FLTCK）のため試験中で使用しない</b>（F4364・F4363・F4362）。<b>RWY 17L/35R の ILS は使用不可</b>（F4365/26）。';
+    n.nav = '<b>16R は ILS・マーカー・DME がすべて使えない</b>。<b>17L/35R も ILS なし</b>。ILS を使う進入は、使える他の滑走路（16L/34R、17R/35L の ILS）に限られる。［要確認：他の滑走路の ILS が NOTAM 上で使用不可になっていないか（この画面に掲載なし）。16R の RNP 等の方式の可否］';
+    n.ops = '<b>KZ228 は ZSPD 出発（ETD 1940Z）で、有効時間帯（1700〜2330Z／1730〜2230Z）の中</b>。出発後に ZSPD へ引き返す場合や、出発代替の選定で、<b>ILS が使える滑走路を確認</b>。<b>RWY 17L/35R は閉鎖中でもあり（F4328/26）、使える進入は 16L/34R・17R/35L</b>。';
+    n.rows.unshift({ no: 'F4361/26', legs: ['KZ228'], valid: '16-OCT 1700Z 〜 2330Z', text: '<b>RWY 16R の ILS</b> 試験中・使用しない（飛行検査）' });
+    n.rows.forEach(function (r) { r.legs = ['KZ228']; });
+  }
+  if (n.no === 'ZSPD 滑走路・誘導路の閉鎖（16-OCT 夜）') {
+    n.legs = ['KZ227', 'KZ228'];
+    n.rows.forEach(function (r) { r.legs = ['KZ227', 'KZ228']; });
+    n.ops = n.ops + '<br><b>KZ228（ZSPD 出発、ETD 1940Z）：</b>閉鎖の時間帯（1730Z／1800Z〜2230Z）の<b>中</b>。<b>RWY 17L/35R は閉鎖で、横断は P6・P5・P3・P2 経由</b>。スポットから使用滑走路までのタキシールートに、閉鎖した TWY P1・P4・A（B8〜P1）、L22・L25・L26 が含まれないか確認。';
+  }
+});
+NOTAMS.push(
+{ no: 'F4331/26', sec: 'ZSPD', pri: 'low', cat: ['滑走路・誘導路'], legs: ['KZ228'],
+  title: 'TWY L15（スポット 326〜328 間）の閉鎖（17-OCT 0200–0900Z）',
+  issued: '15-OCT-2026（改訂 16-OCT 06:01）', valid: '17-OCT-2026 02:00Z 〜 09:00Z',
+  orig: '"TWY L15 BTN PARKING STAND NR.326 AND NR.328. INTERSECTION CLSD BTN PARKING STAND NR.326 AND TWY L15, BTN PARKING STAND NR.328 AND TWY L15."\nEXPLANATION: NOTE:PLEASE BE AWARE OF JET BLAST WHILE CONSTRUCTION EQUIPMENT AND WORKERS ARE ACTIVE IN THE AREA.\nIF YOU FEEL INSUFFICIENT MARGIN FROM THIS AREA, REQ GND TO PULL FORWARD.',
+  ja: '<b>TWY L15（スポット 326〜328 間）と、スポット 326・328 との交差点が閉鎖</b>。工事機材・作業員がいるため<b>ジェットブラストに注意</b>。余裕が足りないときは、地上管制にプルフォワードを要求。往路・復路で出た F4303/26（313〜315）、F4317/26（322〜325）と同種の工事の続き。',
+  perf: '', nav: '', ops: '<b>KZ228 の ETD 1940Z（16 日）は、有効時間帯（17 日 0200〜0900Z）の前</b>＝本便には影響しない。', refs: [{ label: '同種：F4317/26（TWY Q4・L15、スポット 322〜325）', jump: 'F4317/26' }] }
+);
+/* RJTT：16-OCT の追加 NOTAM（誘導路の閉鎖）。ETA 2232Z（代替の到着）はいずれも終了後 */
+NOTAMS.forEach(function (n) {
+  if (n.no === 'RJTT 誘導路の閉鎖・制限') {
+    n.legs = ['KZ226', 'KZ227', 'KZ228'];
+    n.rows.push(
+      { no: 'E5900/26', legs: ['KZ228'], valid: '16-OCT 1500Z 〜 2100Z', text: 'TWY <b>J（A〜R 間）、J1・J2（J〜K 間）、W（J〜R 間）閉鎖</b>（工事）' },
+      { no: 'E5897/26', legs: ['KZ228'], valid: '16-OCT 1600Z 〜 2100Z', text: 'TWY <b>B（B13〜B14 間）、B（B14 交差）、C（B〜C12 間）、J（C〜E 間）、K（C〜E 間）、R（B〜Y 間・K〜Y 間）、Y（C〜Y1 間）閉鎖</b>（工事）' },
+      { no: 'E5895/26', legs: ['KZ228'], valid: '16-OCT 1600Z 〜 2100Z', text: 'TWY <b>C（E8〜E10 間）、C（E8 交差）、E8（C〜E 間）、E9（C〜E 間）、M2（C〜E 間）閉鎖</b>（工事）' },
+      { no: 'E5894/26', legs: ['KZ228'], valid: '16-OCT 1600Z 〜 2100Z', text: 'TWY <b>C（C1 交差）、C（C1〜E8 間）、E1・E2・E3（C〜E 間）、E4・E5、G（C〜E 間）、H（C〜E 間）閉鎖</b>（工事）' }
+    );
+    n.ops = n.ops + '<br><b>KZ228（代替 RJTT、RJAA の ETA 2232Z）：</b>16-OCT の閉鎖（E5900・E5897・E5895・E5894・E5896・E5716 ほか）は<b>すべて 2100〜2130Z までで、ETA の前に終了</b>。17-OCT 以降は、この画面に載っていない。';
+  }
+  if (n.sec === 'RJTT' && n.legs.indexOf('KZ228') < 0 && ['NCA 00017/21', 'RJTT 滑走路閉鎖（保守）', 'RJTT ILS（LOC/GP/DME）使用不可', 'RJTT 灯火・標識の不作動', 'RJTT RWY 16L/34R グルービング → Non-Grooved を適用'].indexOf(n.no) >= 0) n.legs.push('KZ228');
+});
+/* 位置図 */
+(function () {
+  RJTT_N.items.forEach(function (it) { if (it.ids === 'E5716/26') it.ids = 'E5716/26・E5900/26'; });
+  RJTT_N.items.push(
+    { n: 12, type: 'closed', label: 'TWY B13〜B14、C（B〜C12）、J・K（C〜E）、R、Y（C〜Y1）閉鎖（工事）16-OCT 1600–2100Z', ids: 'E5897/26', cards: ['RJTT 誘導路の閉鎖・制限'], shapes: [{ k: 'ellipse', c: [925, 172], rx: 85, ry: 62, rot: 0 }, { k: 'ellipse', c: [1130, 270], rx: 120, ry: 85, rot: 0 }], tag: [1000, 60], chart: RJTT_N },
+    { n: 13, type: 'closed', label: 'TWY C（E8〜E10）、E8・E9・M2（C〜E）閉鎖（工事）16-OCT 1600–2100Z', ids: 'E5895/26', cards: ['RJTT 誘導路の閉鎖・制限'], shapes: [{ k: 'ellipse', c: [1450, 700], rx: 115, ry: 95, rot: 0 }], tag: [1350, 620], chart: RJTT_N }
+  );
+  RJTT_S.items.push({ n: 9, type: 'closed', label: 'TWY C（C1〜E8）、E1〜E5、G・H（C〜E）閉鎖（工事）16-OCT 1600–2100Z', ids: 'E5894/26', cards: ['RJTT 誘導路の閉鎖・制限'], shapes: [{ k: 'ellipse', c: [1300, 470], rx: 150, ry: 125, rot: 0 }], tag: [1480, 400], chart: RJTT_S });
+  ZSPD_E.items.forEach(function (it) { if (it.ids === 'F4362〜F4364/26') { it.ids = 'F4361〜F4364/26'; it.label = 'RWY 16R の ILS・IM・MM・DME「IZZ」試験中・使用しない（飛行検査）16-OCT 1700–2330Z'; } });
+  ZSPD_W.items.forEach(function (it) { if (it.ids === 'F4365/26') it.label = 'RWY 17L/35R の ILS 使用不可 16-OCT 1730–2230Z（閉鎖中でもある：F4328/26）'; });
+})();
+
+NOTAM_FLIGHTS.KZ227.label = 'KZ227';
