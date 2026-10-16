@@ -8,6 +8,8 @@ const ASSETS = [
   './notam_img/zspd_w.jpg',
   './notam_img/zspd_e.jpg',
   './notam_img/zsss.jpg',
+  './notam_img/rjtt_n.jpg',
+  './notam_img/rjtt_s.jpg',
   './qrh_analysis.html',
   './ref.css',
   './ref-lock.js',

@@ -574,3 +574,213 @@ function nmapRender() {
     NOTAM_CHARTS.map(function (c) { return '<div class="nt-h">' + ntEsc(c.name) + '</div>' + nmapHtml(c.items, c); }).join('') +
     '<div class="nm-note">図に出せないもの：RJAA A1193/26（滑走路誤進入警報の停止）、ZSPD・ZSSS の STAR・VOR・LID・ビジュアルアプローチ関連。各 NOTAM のカードを開くと、その NOTAM の位置だけを表示します。</div>';
 }
+
+/* ═════════ 往復（NRT-PVG-NRT）対応：KZ226（ZSPD→RJAA、15/16-OCT 往復の復路）の追加 ═════════
+   legs: ['KZ225'] 往路のみ／['KZ226'] 復路のみ／両方
+   KZ226：Oct 16 ETD 07:20Z（ZSPD）― ETA 10:12Z（RJAA）、代替 RJTT・ZSSS（EFB 画面 2026-10-16 18:37 取得） */
+var NOTAM_FLIGHTS = {
+  KZ225: { label: 'KZ225 往路', route: 'RJAA→ZSPD', time: 'Oct 15 ETD 01:30Z（NRT）― ETA 04:46Z（PVG）', altn: 'ZSSS' },
+  KZ226: { label: 'KZ226 復路', route: 'ZSPD→RJAA', time: 'Oct 16 ETD 07:20Z（PVG）― ETA 10:12Z（NRT）', altn: 'RJTT・ZSSS' }
+};
+/* 復路の画面（KZ226）に見当たらなかった ID ＝ 往路のみ（期間切れ・15 日限定・後継 NOTAM に置換） */
+var KZ225_ONLY_IDS = ['A1509/26', '00210/23', 'F4303/26', 'F4290/26', 'F4251/26', 'Z1819/26', 'Z1820/26', 'Z1821/26', 'Z1822/26', 'Y1154/26',
+  'Q2448/26', 'Q2449/26', 'Q2443/26', 'Q2450/26', 'Q2452/26', 'P5072/26', 'P5067/26', 'P4984/26', 'P4983/26', 'P5052/26', 'P5051/26',
+  'P5048/26', 'P5039/26', 'E4768/26', 'E4795/26', 'E4794/26', 'A5144/26', 'Z0624/26'];
+(function () {
+  var idre = /[A-Z]?\d{3,5}\/\d{2}/g;
+  function legsFor(text) {
+    var ids = String(text).match(idre) || [];
+    if (!ids.length) return ['KZ225', 'KZ226'];
+    var only = ids.filter(function (i) { return KZ225_ONLY_IDS.indexOf(i) >= 0; }).length;
+    if (only === ids.length) return ['KZ225'];
+    return ['KZ225', 'KZ226'];
+  }
+  NOTAMS.forEach(function (n) {
+    if (!n.legs) n.legs = legsFor(n.no);
+    (n.rows || []).forEach(function (r) { if (!r.legs) r.legs = legsFor(r.no); });
+  });
+})();
+function ntAddRows(no, rows) { NOTAMS.forEach(function (n) { if (n.no === no) { n.rows = (n.rows || []).concat(rows); } }); }
+
+/* ── 既存カードへ復路分の行を追加 ── */
+ntAddRows('Q2448/26・Q2449/26・Q2443/26', [
+  { no: 'Q2456/26', legs: ['KZ226'], valid: '15-OCT 2100Z 〜 16-OCT 2100Z', text: '<b>復路用（16 日）</b>Z16・Z101・Z102（16 日 1300–2100Z）、Z17・Z18・Z162（15 日 2100–2200Z と 16 日 1300–2100Z）、Z21・Z171・Z182（15 日 2100–2200Z と 16 日 1200–2100Z）。すべて MEA' },
+  { no: 'Q2469/26', legs: ['KZ226'], valid: '16-OCT 0832Z 〜 16-OCT 2200Z', text: '<b>復路用</b>L512・Z13・Z14（1200–2200Z）、Z25・Z26・Z27・Z262（1330–2200Z）、<b>Z40・Z41（0845–2200Z）</b>。すべて MEA' },
+  { no: 'Q2453/26', legs: ['KZ226'], valid: '15-OCT 2100Z 〜 16-OCT 2100Z', text: '<b>復路用</b>Z29・Z31・Z32・Z34（16 日 1500–2100Z）。すべて MEA' }
+]);
+ntAddRows('Q2450/26・Q2452/26', [
+  { no: 'Q2461/26', legs: ['KZ226'], valid: '16-OCT 0700Z 〜 2100Z', text: '<b>16 日分（日本⇔北米）</b>Track 1：KALNA→…→ROUKE（KSEA/KPDX は DOLFF TOU、CYVR は 47N150W 48N140W PRETY GOVAD）。Track 2：EMRON→TRYSH（KSFO＝AMAKR BGGLO、KLAX＝ENI OAK BURGL IRNMN）。Track 3：LEPKI→DACEM（KLAX＝PAINT PIRAT BURGL IRNMN、KSFO＝PAINT PIRAT OSI）。ATM センター TEL 81-92-608-8870。<b>東行き（日本発）のため、復路（PVG→NRT）には直接関係なし</b>' }
+]);
+ntAddRows('P5048/26・P5039/26・P4921/26', [
+  { no: 'P5063/26', legs: ['KZ226'], valid: '15-OCT 2200Z 〜 16-OCT 1330Z', text: '<b>岩国 ITRA（臨時の留保空域）</b>ITRA-E（SFC〜FL250）、N1（〜FL180）、N2（〜FL600）、N3（〜FL240）、S10〜S16（〜FL600）、S20〜S25（〜FL450）、S30〜S33（〜FL250）。<b>復路の飛行時間帯（〜1330Z）に重なる</b>。AIP SUP 023/26。経路が交差する場合は ATC の迂回指示。［要確認：会社ルートとの交差の有無］' }
+]);
+ntAddRows('仁川FIR 臨時制限空域（8件）', [
+  { no: 'E4835/26', legs: ['KZ226'], valid: '16-OCT 0600Z 〜 0900Z', text: '<b>黄海の韓国西方（約 34°24\'N〜36°39\'N、124°〜126°E）</b>SFC〜UNL。<b>復路の飛行時間帯（0600–0900Z）に重なる</b>が、<b>会社ルートに影響なし</b>（注記）' },
+  { no: 'E4853/26', legs: ['KZ226'], valid: '15-OCT 2320Z 〜 17-OCT 2100Z（15 日 2320–2350、17 日 2030–2100）', text: '韓国南部（34°〜35°N、127°〜128°E）FL200〜FL430。<b>16 日は有効でない</b>。会社ルートに影響なし' },
+  { no: 'E4854/26', legs: ['KZ226'], valid: '15-OCT 2320Z 〜 17-OCT 2100Z（15 日 2320–2350、17 日 2030–2100）', text: '韓国南部（35°〜36°N、127°〜128°E）FL200〜FL430。<b>16 日は有効でない</b>。会社ルートに影響なし' }
+]);
+
+/* ── Z0624/26 は Z0764/26 に置換（同内容・期限延長）── */
+NOTAMS.forEach(function (n) {
+  if (n.no === 'Z0624/26') {
+    n.no = 'Z0624/26・Z0764/26'; n.legs = ['KZ225', 'KZ226'];
+    n.valid = 'Z0624/26：31-AUG 〜 20-OCT-2026／Z0764/26（後継）：15-OCT 0725Z 〜 30-DEC-2026';
+    n.title = 'VORTAC「SOT」116.9：置換のため使用不可（Z0624/26 → Z0764/26 に置換）→ DME/DME 航法に制限';
+  }
+});
+
+/* ── KZ226（復路）で新規に登場した NOTAM ── */
+NOTAMS.push(
+{ no: 'F4317/26', sec: 'ZSPD', pri: 'mid', cat: ['滑走路・誘導路'], legs: ['KZ226'],
+  title: 'TWY Q4・L15 の一部閉鎖（スポット 322／325 付近）— 復路の出発時間帯に有効',
+  issued: '14-OCT-2026（改訂 15-OCT-2026 03:08）', valid: '16-OCT-2026 02:00Z 〜 09:00Z',
+  orig: '"FLW TWY CLSD:\n1.TWY Q4 BTN TWY L15 AND TWY C, INTERSECTION CLSD BTN TWY L15 AND TWY Q4.\n2.TWY L15 BTN PARKING STAND NR.322 AND NR.325. INTERSECTION CLSD BTN PARKING STAND NR.322 AND TWY L15, BTN PARKING STAND NR.325 AND TWY L15."\nEXPLANATION: NOTE:PLEASE BE AWARE OF JET BLAST WHILE CONSTRUCTION EQUIPMENT AND WORKERS ARE ACTIVE IN THE AREA.\nIF YOU FEEL INSUFFICIENT MARGIN FROM THIS AREA, REQ GND TO PULL FORWARD.',
+  ja: '<b>TWY Q4（L15〜C 間）と TWY L15（スポット 322〜325 間）、およびそれらの交差点が閉鎖</b>。往路の F4303/26（Q5・L15、スポット 313〜315）と<b>同種の工事で、場所が隣の区画に移った</b>もの。<b>工事機材・作業員がいるため、ジェットブラストに注意</b>。余裕が足りないと感じたら、<b>地上管制にプルフォワードを要求</b>する。',
+  perf: '', nav: '', ops: '<b>復路の出発（ETD 0720Z）は有効時間帯（0200〜0900Z）の中</b>。スポット 322〜325 付近から出る／近くを通る場合は閉鎖範囲と余裕に注意。', refs: [{ label: '往路の同種 NOTAM（F4303/26）', jump: 'F4303/26' }] },
+
+{ no: 'F4252/26', sec: 'ZSSS', pri: 'low', cat: ['灯火・NAVAID'], legs: ['KZ226'],
+  title: 'JIUTING VOR/DME「JTN」109.6：試験中・使用しない（16-OCT 0100–1200Z）',
+  issued: '10-OCT-2026', valid: '16-OCT-2026 01:00Z 〜 12:00Z',
+  orig: "JIUTING VOR/DME 'JTN' 109.6MHZ/CH33X ON TEST DO NOT USE DUE TO MAINT.",
+  ja: '<b>JIUTING VOR/DME「JTN」（109.6MHz／CH33X）は、保守のため試験中で、使用しない</b>。',
+  perf: '', nav: '<b>JTN を DME/DME の更新局として使う場合は除外</b>。上海周辺の RNAV（出発・到着）で、JTN が Critical DME になる経路では、RNAV 1（DME/DME/IRU）への Revert の余裕が減る。［要確認：ZSPD の SID/STAR での JTN の使用］', ops: '<b>復路の出発（ETD 0720Z）は有効時間帯の中</b>。', refs: [{ label: '上海周辺の経路変更（A3194/26：JTN 以遠の経路を含む）', jump: 'A3194/26' }, { label: 'RTE タブ：RNAV 1 への Revert・Critical DME', main: 'RTE' }] },
+
+{ no: 'A5239/26', sec: 'ZSHA', pri: 'low', cat: ['中国空域', 'ATC・手順'], legs: ['KZ226'],
+  title: 'ATS ルート A599（PANLONG〜SHANGRAO）一時閉鎖 → V171 に迂回（16-OCT）',
+  issued: '15-OCT-2026', valid: '16-OCT-2026 01:10Z 〜 07:10Z（0110–0340、0440–0710）',
+  orig: '0110-0340 0440-0710\n"1.FLW SEGMENT OF ATS RTE TEMPORARY CLSD:\nA599: PANLONG VOR\'PLT\'- SHANGRAO VOR\'SHR\'.\n2.FLIGHT ROUTES TEMPORARY ADJUSTED AS FLW, DIVERSION FLW ATC INSTRUCTION, FPL FOR RELATED SCHEDULE FLIGHT ACCORDING TO ORIGINAL PLAN:\nA599: PANLONG VOR\'PLT\'- SHANGRAO VOR\'SHR\' ADJUST TO PANLONG VOR\'PLT\'-V171- SHANGRAO VOR \'SHR\',AND VICE VERSA."\nEXPLANATION: NOTE:NOT AFFECT CO-RTE',
+  ja: '<b>ATS ルート A599 の PANLONG VOR（PLT）〜SHANGRAO VOR（SHR）区間が一時閉鎖</b>。<b>PLT–V171–SHR に迂回</b>し、迂回は ATC の指示に従う。<b>飛行計画（FPL）は元の経路のまま</b>でよい。<b>会社ルートに影響なし</b>（注記）。',
+  perf: '', nav: '', ops: '復路の ETD 0720Z は、有効時間（〜0710Z）の<b>直後</b>。会社ルートに影響なし。', refs: [] }
+);
+
+/* ── RJTT（復路の代替）。NOTAM は RJAA（成田の NOTAM 事務所）発行、AIP RJTT AD2.23・A/M RJTT 10-8B（11SEP26）参照 ── */
+NOTAMS.push(
+{ no: 'NCA 00017/21', sec: 'RJTT', pri: 'high', cat: ['Company', '代替空港'], legs: ['KZ226'],
+  title: 'RJTT を代替に使う場合：0600–1000UTC は RWY 16L/R 運用が予想されるとき第1代替にしない',
+  issued: '27-JAN-2021 07:03（改訂 11-OCT-2022 05:49）', valid: '27-JAN-2021 15:00Z 〜 UFN',
+  orig: '///// COMPANY NOTAM /////\nUSE AS ALTN APT.\nDO NOT SELECT AS 1st ALTN APO BTN 0600-1000UTC WHEN RJTT RWY16L/R OPS IS EXPECTED.\nNOTE:UNDER INVESTIGATION FOR UTILIZATION OF RJTT RWY16L/R RNP APCH.',
+  ja: '<b>RJTT は代替飛行場として使用してよい</b>。ただし<b>0600〜1000UTC の間に、RJTT で RWY 16L/R の運用が予想される場合は、第1代替には選ばない</b>。注：RJTT RWY 16L/R の <b>RNP APCH の利用を検討中</b>。',
+  perf: '', nav: '<b>RWY 16L/R 運用時は、RNP APCH が使えない前提</b>（利用を検討中の段階）。ILS が使えない時間帯・滑走路の組合せがあると、代替としての成立が難しくなる（下の ILS 使用不可の NOTAM）。', ops: '<b>復路（KZ226）：RJAA の ETA 10:12Z</b>。代替として RJTT に向かう到着は 1000Z より後になるため、<b>この時間帯の制限（0600–1000Z）の外側だが、境界に近い</b>。［要確認：制限の判定は代替の選定時刻か、代替への到着予定時刻か。運航管理者に確認］',
+  refs: [{ label: 'RJTT 滑走路閉鎖・ILS 使用不可（下のカード）', jump: 'RJTT ILS（LOC/GP/DME）使用不可' }, { label: 'RTE タブ：RNP APCH の機器要件（GPS 2 式）', main: 'RTE' }] },
+
+{ no: 'RJTT 滑走路閉鎖（保守）', sec: 'RJTT', pri: 'mid', cat: ['滑走路・誘導路'], legs: ['KZ226'],
+  title: 'RJTT：RWY 16R/34L、04/22、05/23、16L/34R の夜間閉鎖（10 月の指定日）',
+  issued: '23-SEP 〜 09-OCT-2026', valid: '各 NOTAM 参照（01〜31-OCT）',
+  orig: 'J1979/26 RWY 16R/34L CLSD DUE TO MAINT  RMK: 1.AVBL CROSS RWY 16R/34L VIA TWY OTHER THAN CLSD TWY 2.SEE AIP RJTT AD2.23  03-05 07 10-12 14 17-19 21 24-26 28 31 1430-2100\nJ1980/26 RWY 04/22 CLSD DUE TO MAINT ... 01-02 04-06 08-09 11-13 15-16 18-20 22-23 25-27 29-30 1430-2100\nJ1982/26 RWY 05/23 CLSD DUE TO MAINT ... OCT 03 07 10 14 17 21 24 28 31 1430-2100\nJ2108/26 RWY 16L/34R CLSD  RMK: SEE AIP RJTT AD2.23  13 15-16 20 22-23 27 29-30 1530-2130',
+  ja: '保守のため、指定日の<b>1430–2100Z（16L/34R は 1530–2130Z）</b>に滑走路が閉鎖。閉鎖滑走路は、閉鎖誘導路以外の経由で横断できる（J1979・J1980）。詳細は AIP RJTT AD2.23。<br><b>16-OCT の状況：</b>04/22（J1980）と 16L/34R（J2108）が閉鎖、16R/34L（J1979）と 05/23（J1982）は開いている。',
+  perf: '', nav: '', ops: '復路の ETA 10:12Z は、いずれの閉鎖時間帯（1430Z 以降）より前。ただし<b>代替で遅れて到着する場合、1430Z 以降は 04/22・16L/34R が使えない</b>。',
+  rows: [
+    { no: 'J1979/26', valid: '03〜31-OCT 1430–2100Z（日：03-05 07 10-12 14 17-19 21 24-26 28 31）', text: 'RWY <b>16R/34L</b> 閉鎖（保守）。閉鎖誘導路以外で横断可。<b>16 日は対象外（開）</b>' },
+    { no: 'J1980/26', valid: '01〜30-OCT 1430–2100Z（日：01-02 04-06 08-09 11-13 15-16 18-20 22-23 25-27 29-30）', text: 'RWY <b>04/22</b> 閉鎖（保守）。閉鎖誘導路以外で横断可。<b>16 日は有効</b>' },
+    { no: 'J1982/26', valid: '03〜31-OCT 1430–2100Z（日：03 07 10 14 17 21 24 28 31）', text: 'RWY <b>05/23</b> 閉鎖（保守）。<b>16 日は対象外（開）</b>' },
+    { no: 'J2108/26', valid: '13〜30-OCT 1530–2130Z（日：13 15-16 20 22-23 27 29-30）', text: 'RWY <b>16L/34R</b> 閉鎖。<b>16 日は有効（1530–2130Z）</b>' }
+  ],
+  refs: [{ label: 'AIP RJTT AD2.23' }] },
+
+{ no: 'RJTT ILS（LOC/GP/DME）使用不可', sec: 'RJTT', pri: 'mid', cat: ['灯火・NAVAID', '進入'], legs: ['KZ226'],
+  title: 'RJTT：各滑走路の TLS（LOC・GP・DME）使用不可（工事）— 閉鎖と同じ日時',
+  issued: '21-SEP 〜 09-OCT-2026', valid: '各 NOTAM 参照（01〜31-OCT）',
+  orig: 'J1958/26 TLS-LOCALIZER, GP, DME FOR RWY 16R U/S DUE TO CONST. 03-05 07 10-12 14 17-19 21 24-26 28 31 1430-2100\nJ1959/26 ... RWY 34L ... 同上\nJ1960/26 ... RWY 22 ... 01-02 04-06 08-09 11-13 15-16 18-20 22-23 25-27 29-30 1430-2100\nJ1963/26 ... RWY 23 ... 03 07 10 14 17 21 24 28 31 1430-2100\nJ2109/26 TLS-LOC, GP, DME, IM FOR RWY 34R U/S DUE TO CONST  09 1600-2130, 13 15-16 20 22-23 27 29-30 1530-2130\nJ2110/26 TLS-LOC, GP, DME FOR RWY 16L U/S DUE TO CONST  同上',
+  ja: '工事のため、<b>ILS（LOC・GP・DME。34R は IM も）が使用不可</b>。使用不可の日時は、<b>同じ滑走路の閉鎖（保守）の日時と同じ</b>。',
+  perf: '', nav: '<b>16 日の 1430〜2100Z は 22（J1960）、1530〜2130Z は 16L・34R（J2110・J2109）の ILS が使えない</b>。16R・34L・23 は 16 日は対象外。', ops: '復路の ETA 10:12Z は、いずれの時間帯（1430Z 以降）より前。代替として遅れて到着する場合は、この時間帯の ILS を確認。',
+  rows: [
+    { no: 'J1958/26', valid: '03〜31-OCT 1430–2100Z（03-05 07 10-12 14 17-19 21 24-26 28 31）', text: 'RWY <b>16R</b> の LOC・GP・DME 使用不可。16 日は対象外' },
+    { no: 'J1959/26', valid: '同上', text: 'RWY <b>34L</b> の LOC・GP・DME 使用不可。16 日は対象外' },
+    { no: 'J1960/26', valid: '01〜30-OCT 1430–2100Z（01-02 04-06 08-09 11-13 15-16 18-20 22-23 25-27 29-30）', text: 'RWY <b>22</b> の LOC・GP・DME 使用不可。<b>16 日は有効</b>' },
+    { no: 'J1963/26', valid: '03〜31-OCT 1430–2100Z（03 07 10 14 17 21 24 28 31）', text: 'RWY <b>23</b> の LOC・GP・DME 使用不可。16 日は対象外' },
+    { no: 'J2109/26', valid: '09〜30-OCT 1530–2130Z（09 は 1600–2130。13 15-16 20 22-23 27 29-30）', text: 'RWY <b>34R</b> の LOC・GP・DME・IM 使用不可。<b>16 日は有効</b>' },
+    { no: 'J2110/26', valid: '同上', text: 'RWY <b>16L</b> の LOC・GP・DME 使用不可。<b>16 日は有効</b>' }
+  ], refs: [{ label: 'AIP RJTT AD2.23' }] },
+
+{ no: 'RJTT 誘導路の閉鎖・制限', sec: 'RJTT', pri: 'mid', cat: ['滑走路・誘導路'], legs: ['KZ226'],
+  title: 'RJTT：誘導路の閉鎖（保守・工事）／翼幅制限（W は 65m 超、N は 52m 超で使用不可）',
+  issued: '23-SEP 〜 16-OCT-2026', valid: '各 NOTAM 参照',
+  orig: 'E5300/26 TWY B3,B4,B6,B8,B13,T3,T4,T6,T8 CLSD DUE TO MAINT … 1430-2100 ／ E5299/26 TWY A1,A2,A5,A7,A8,A10,A12,A13,L5,L10,L12 CLSD ／ E5302/26 TWY D1 THRU D7,D,S,S1,S2,S3,E(BTN A AND D),R(BTN A AND D) CLSD ／ E5305/26 TWY A4,A6,A9,A11,A14,L4,L6,L9,L11,L13,L14 CLSD ／ E5310/26 TWY B5,B9 THRU B11,T5,T9,T11,A16,L16,Q CLSD ／ E5312/26 TWY B1,B2,B5,B(BTN B1 AND B2),B(INT OF B1),T1,T2,T5 CLSD ／ E5311/26 TWY B14,T14 CLSD ／ E5593/26 TWY A3,A6,A9,A11,A14,L3,L6,L9,L11,L13,L14 CLSD ／ E5740/26 TWY C1 THRU C14 CLSD DUE TO CONST ／ E5896/26 TWY B14,T14 CLSD DUE TO CONST ／ E5716/26 TWY J(BTN R AND W),J1,J2 CLSD ／ E5721/26 TWY G(BTN H2 AND W),H1 CLSD ／ E5719/26 TWY W(BTN K AND W13) RESTRICTED: NOT AVBL FOR ACFT WITH WINGSPAN MORE THAN 65.0M ／ E5720/26 TWY N(FM N5 TO N7),N5,N7 RESTRICTED: NOT AVBL FOR ACFT WITH WINGSPAN MORE THAN 52.0M',
+  ja: '指定日の夜間（<b>1430〜2100Z</b>。C 系は 1530〜2130Z）に誘導路が閉鎖。<b>16-OCT に有効なのは、E5300（B 系・T 系）、E5740（C1〜C14）、E5896（B14・T14）、E5716（J 系）、E5721（G・H1）、E5719（W の翼幅制限）、E5720（N の翼幅制限）</b>。他は 16 日は対象外。<b>B747-8F（翼幅 68.4m）は、W（K〜W13 間・65m 超不可）と N（N5〜N7・52m 超不可）を使用できない</b>。',
+  perf: '', nav: '', ops: '<b>復路の ETA 10:12Z は、いずれの時間帯（1430Z 以降）より前</b>。代替として遅れて到着する場合のみ、スポット・タキシールートに影響する。E5719・E5720 は、<b>16 日 1500〜2100Z</b>。',
+  rows: [
+    { no: 'E5300/26', valid: '01〜30-OCT 1430–2100Z（01-02 04-06 08-09 11-13 15-16 18-20 22-23 25-27 29-30）', text: 'TWY B3・B4・B6（OCR「B0」）・B8・B13、T3・T4・T6・T8 閉鎖（保守）。［要確認：B6・T8 は OCR］<b>16 日は有効</b>' },
+    { no: 'E5299/26', valid: '03〜31-OCT 1430–2100Z（03-05 07 10-12 14 17-19 21 24-26 28 31）', text: 'TWY A1・A2・A5・A7・A8・A10・A12・A13、L5・L10・L12 閉鎖（保守）。16 日は対象外' },
+    { no: 'E5302/26', valid: '03〜31-OCT 1430–2100Z（03 07 10 14 17 21 24 28 31）', text: 'TWY D1〜D7、D、S、S1〜S3、E（A〜D 間）、R（A〜D 間）閉鎖（保守）。16 日は対象外' },
+    { no: 'E5305/26', valid: '12・21-OCT 1430–2100Z', text: 'TWY A4・A6・A9・A11・A14、L4・L6・L9・L11・L13・L14 閉鎖（保守）。16 日は対象外' },
+    { no: 'E5310/26', valid: '04・11・18・25-OCT 1430–2100Z', text: 'TWY B5・B9〜B11、T5・T9・T11、A16、L16、Q 閉鎖（保守）。16 日は対象外' },
+    { no: 'E5312/26', valid: '15・22・29-OCT 1430–2100Z', text: 'TWY B1・B2・B5、B（B1〜B2 間）、B（B1 交差）、T1・T2・T5 閉鎖（保守）。16 日は対象外' },
+    { no: 'E5311/26', valid: '01・08・27-OCT 1430–2100Z（日付は OCR。［要確認］）', text: 'TWY B14・T14 閉鎖（保守）。16 日は対象外' },
+    { no: 'E5593/26', valid: '04〜31-OCT 1430–2100Z（04 10-11 14 17-18 24-25 28 31）', text: 'TWY A3・A6・A9・A11・A14、L3・L6・L9・L11・L13・L14 閉鎖（保守）。16 日は対象外' },
+    { no: 'E5740/26', valid: '13〜30-OCT 1530–2130Z（13 15-16 20 22-23 27 29-30）', text: 'TWY <b>C1〜C14 閉鎖</b>（工事）。<b>16 日は有効</b>' },
+    { no: 'E5896/26', valid: '16-OCT 1430–2100Z', text: 'TWY <b>B14・T14 閉鎖</b>（工事）' },
+    { no: 'E5716/26', valid: '16-OCT 1500–2100Z', text: 'TWY <b>J（R〜W 間）、J1（J〜K 間）、J2（J〜K 間）閉鎖</b>（工事）' },
+    { no: 'E5721/26', valid: '16-OCT 1500–2100Z', text: 'TWY <b>G（H2〜W 間）、H1 閉鎖</b>（工事）' },
+    { no: 'E5719/26', valid: '16-OCT 1500–2100Z', text: 'TWY <b>W（K〜W13 間）制限：翼幅 65.0m 超の機は使用不可</b>（工事）。<b>B747-8F は使用不可</b>' },
+    { no: 'E5720/26', valid: '16-OCT 1500–2100Z', text: 'TWY <b>N（N5〜N7 間）、N5、N7 制限：翼幅 52.0m 超の機は使用不可</b>（工事）。<b>B747-8F は使用不可</b>' }
+  ], refs: [{ label: 'A/M RJTT 10-8B／AIP SUP 212/26' }] },
+
+{ no: 'RJTT 灯火・標識の不作動', sec: 'RJTT', pri: 'mid', cat: ['灯火・NAVAID', '着陸最低気象'], legs: ['KZ226'],
+  title: 'RJTT：RWY 34R の CAT-2/3 → CAT-1 に格下げ、16L/34R のセンターライン灯 使用不可 ほか（H24 〜 28-OCT）',
+  issued: '25-SEP 〜 30-SEP-2026', valid: '30-SEP-2026 1500Z 〜 28-OCT-2026 1500Z（J1678 は 04-AUG 〜 28-OCT）',
+  orig: 'J2007/26 RWY-THR-ID-LGT FOR RWY 16L U/S; SEQUENCED-FLG-LGT FOR RWY 34L U/S; REDL FOR RWY 16L/34R PARTLY U/S; APCH-GUIDANCE-LGT FOR RWY 16R/16L(NR.4) U/S; APCH-GUIDANCE-LGT FOR RWY 16R/16L(NR.6,NR.8) PARTLY U/S; LIGHTING SYSTEM CAT-2,3 FOR RWY 34R DOWNGRADED TO CAT-1; SEQUENCED-FLG-LGT FOR RWY 34R U/S\n  RMK: REF AIP SUP 212/26 ITEM RWY:30,49,52,54,55,56,57 ／ 49 SFL for RWY 34L: NOT AFFECT WX MINIMA ／ 52 REDL for RWY 16L/34R: NOT AFFECT WX MINIMA ／ 56 CAT2,3 for RWY 34R: DOWN GRADE TO CAT1 ／ 57 SFL for RWY 34R: NOT AFFECT WX MINIMA\nJ2008/26 RCLL FOR RWY 16L/34R U/S  → RCLL for RWY 16L/34R: APPLY CL OUT\nJ2009/26・J2010/26・J2011/26・J2012/26 TWY-CL-LGT／TAXIING-GUIDANCE-SIGN／RAPID-EXIT-TWY-INDICATOR-LGT／TWY-EDGE-LGT ほか\nJ2023/26 VMS FOR TWY L9 U/S ／ J1988/26 TWY CL MARKING・SURFACE PAINTED DIRECTION SIGN PARTLY ERASED ／ J1678/26 RWY INCURSION WARNING OPERATION SUSPENDED DUE TO MAINT.',
+  ja: '<b>着陸の最低気象に関わるもの：</b>RWY <b>34R の照明システムが CAT-2/3 から CAT-1 に格下げ</b>（J2007・項目 56）。<b>RWY 16L/34R のセンターライン灯（RCLL）が使用不可 → 「CL OUT」を適用</b>（J2008）。SFL（34L・34R）と REDL（16L/34R）は<b>最低気象に影響なし</b>。16L のしきい値識別灯（THR-ID）使用不可、16R/16L 側の進入灯の一部使用不可（項目 54・55）は、最低気象への影響の記載なし［要確認］。<br>誘導路・標識：誘導路のセンターライン灯・案内標識・縁灯・VMS・CL 標示の不作動（J2009〜J2012・J2023・J1988）。滑走路誤進入警報は保守のため停止（J1678）。',
+  perf: '', nav: '<b>34R は CAT-1 の最低気象まで</b>（CAT-2/3 の進入は不可）。<b>16L/34R は RCLL が使えないため CL OUT の RVR を適用</b>。', ops: '代替として RJTT を選ぶ場合は、<b>使う滑走路（16L/34R ほか）の最低気象に、CAT-1・CL OUT の制限を反映</b>。これらは<b>終日（H24）有効</b>で、復路の到着時間帯にも効く。',
+  rows: [
+    { no: 'J2007/26', valid: '30-SEP 1500Z 〜 28-OCT 1500Z', text: '16L THR-ID 灯・34L SFL・34R SFL 使用不可、16L/34R の REDL 一部使用不可、16R/16L の進入ガイダンス灯（No.4）使用不可（No.6・8 は一部）、<b>34R は CAT-2/3 → CAT-1 に格下げ</b>。SFL・REDL は最低気象に影響なし' },
+    { no: 'J2008/26', valid: '30-SEP 1500Z 〜 28-OCT 1500Z', text: '<b>RCLL（16L/34R）使用不可 → 「CL OUT」を適用</b>' },
+    { no: 'J2009/26', valid: '30-SEP 1500Z 〜 28-OCT 1500Z', text: 'TWY センターライン灯 使用不可：R1、W11（W〜R1）、K（C〜R）、E（K 交差）、A16、T12・T14・Q・Q1・Q2、C（C3・C5 交差）、C7・C8・C9、J・J1・J2、M1' },
+    { no: 'J2010/26', valid: '30-SEP 1500Z 〜 28-OCT 1500Z', text: '誘導案内標識（T12・T14・O・O1・O2）使用不可、C10 の高速離脱路指示灯 使用不可' },
+    { no: 'J2011/26', valid: '30-SEP 1500Z 〜 28-OCT 1500Z', text: 'TWY J（R〜J1 間）の縁灯：一部を臨時設置' },
+    { no: 'J2012/26', valid: '30-SEP 1500Z 〜 28-OCT 1500Z', text: 'TWY センターライン灯 使用不可：C（C14 交差）、J1（J〜K）、B（B9〜B10）、W11・W9（W 交差）、A・W（スポット 201 の後方）、E3（E〜R）、E（スポット 808〜809）、R（A〜スポット 709）' },
+    { no: 'J2023/26', valid: '30-SEP 1352Z 〜 30-NOV 2100Z', text: 'TWY L9 の可変メッセージ標識（VMS）使用不可' },
+    { no: 'J1988/26', valid: '30-SEP 1500Z 〜 28-OCT 1500Z', text: 'TWY の CL 標示（N2、F、T・N の F 交差）と路面標示の方向標識（N5：スポット 941 の後方）が一部消失' },
+    { no: 'J1678/26', valid: '04-AUG 〜 28-OCT-2026', text: '<b>滑走路誤進入警報の運用を保守のため停止</b>' }
+  ], refs: [{ label: 'A/M RJTT 10-8B・10-8B1（11SEP26）／AIP SUP 212/26' }] },
+
+{ no: 'RJTT RWY 16L/34R グルービング → Non-Grooved を適用', sec: 'RJTT', pri: 'high', cat: ['滑走路・誘導路', '性能'], legs: ['KZ226'],
+  title: 'RJTT RWY 16L/34R：グルービングが一部消失・施工中 → Non-Grooved を適用',
+  issued: '29-JUL 〜 29-SEP-2026', valid: 'J1623/26：30-JUL 2130Z 〜 28-OCT 2130Z／J1987/26：30-SEP 1500Z 〜 28-OCT 1500Z',
+  orig: 'J1623/26 GROOVING FOR RWY 16L/34R PARTLY ERASED DUE TO MAINT\n1.LEN: 98.0M (BTN 1004.8M AND 1102.8M FM RWY 34R THR)  WID: 11.0M (BTN 1.0M AND 12.0M ON THE EAST SIDE OF RCL)\n2.LEN: 98.0M (BTN 1004.8M AND 1102.8M FM RWY 34R THR)  WID: 11.0M (BTN 1.0M AND 12.0M ON THE WEST SIDE OF RCL)\nEXPLANATION: NOTE:APPLY NON-GROOVED\nJ1987/26 GROOVING FOR RWY 16L/34R PARTLY, GRADUALLY ERASED OR INSTALLED\nRMK: (1)REF AIP SUP 212/26 ITEM RWY:53,58 (2) THE EXACT TIME OF NEXT PERIOD WILL BE NOTIFIED BY FURTHER NOTAM\nEXPLANATION: NOTE:REF A/M RJTT 10-8B DATED 11SEP26  APPLY NON-GROOVED',
+  ja: 'RJTT の <b>RWY 16L/34R のグルービングが、一部消失（J1623）／一部で段階的に消失・施工中（J1987）</b>。J1623：<b>34R のしきい値から 1,004.8〜1,102.8m（長さ 98.0m）の区間、中心線の東側・西側とも幅 11.0m（1.0〜12.0m）</b>。会社の注記：<b>NON-GROOVED を適用する</b>（APPLY NON-GROOVED）。',
+  perf: '<b>離着陸の性能計算では Non-Grooved を使う</b>。WET（濡れた滑走路）では、Grooved より制限が厳しい。', nav: '',
+  ops: '<b>RJTT 16L/34R を使う場合は Non-Grooved で計算</b>。RJAA 16R/34L（NCA 00202/26）と同様に、WET 時の扱い（横風・副操縦士の操縦可否）が変わる点を確認。［要確認：RJTT に同じ扱い（WET Non-Grooved は機長のみ・横風 20kt）を適用するか。OPT の RWY 名称・RWY COND は OPT／A/M RJTT 10-8B で確認］',
+  refs: [{ label: 'TO タブ：RJAA 16R/34L の Grooved vs Non-Grooved（運用上の判断基準）', main: 'TO' }, { label: 'RJAA の同種：NCA 00202/26', jump: 'NCA 00202/26' }, { label: 'A/M RJTT 10-8B（11SEP26）／AIP SUP 212/26' }] }
+);
+
+NOTAMS.push(
+{ no: 'Z0765/26', sec: 'RKRR', pri: 'low', cat: ['流量規制・CDR・トラック'], legs: ['KZ226'],
+  title: '韓国：条件付き経路（CDR2）の開放（16-OCT 1300–2100Z）',
+  issued: '15-OCT-2026 08:14', valid: '16-OCT-2026 13:00Z 〜 21:00Z',
+  orig: '"CONDITIONAL ROUTE (CDR2) AVBL AS FLW, NEW\nNR ROUTE TIME FM TIME TO LOWER LVL UPPER LVL\n1 MASTA-UPGOS 10161330 10162100 6,000FT AMSL FL600\n2 RUGMA-ANROD 10161300 10162100 11,000FT AMSL FL600\n3 BOPTA-PONIK 10161300 10162100 FL150 FL600\n4 KARBU-LANAT 10161400 10161845 FL150 FL600"',
+  ja: '<b>韓国 FIR の条件付き経路（CDR2）</b>が開放される。<b>MASTA–UPGOS（1330–2100Z、6,000ft AMSL〜FL600）</b>、<b>RUGMA–ANROD（1300–2100Z、11,000ft AMSL〜FL600）</b>、<b>BOPTA–PONIK（1300–2100Z、FL150〜FL600）</b>、<b>KARBU–LANAT（1400–1845Z、FL150〜FL600）</b>。',
+  perf: '', nav: '', ops: '復路（ETD 0720Z〜ETA 1012Z）の飛行時間帯（〜1012Z）より<b>後</b>（1300Z〜）に開放されるため、この便には直接関係なし。', refs: [] }
+);
+
+/* ── RJTT の位置図（EFB チャート 2 枚：北側／南側。座標は各画像の表示サイズ 2000 px 幅基準）── */
+var RJTT_N = { name: 'RJTT（北側）', img: 'notam_img/rjtt_n.jpg', w: 2000, h: 1146, items: [
+  { n: 1, type: 'closed', label: 'RWY 04/22 閉鎖（保守）1430–2100Z（16 日は有効）', ids: 'J1980/26', cards: ['RJTT 滑走路閉鎖（保守）'], shapes: [{ k: 'line', pts: [[395, 925], [960, 110]], w: 22 }], tag: [560, 700] },
+  { n: 2, type: 'closed', label: 'RWY 16R/34L 閉鎖（保守）1430–2100Z（16 日は対象外）', ids: 'J1979/26', cards: ['RJTT 滑走路閉鎖（保守）'], shapes: [{ k: 'line', pts: [[750, 580], [1065, 1125]], w: 22 }], tag: [950, 940] },
+  { n: 3, type: 'closed', label: 'RWY 16L/34R 閉鎖 1530–2130Z（16 日は有効）', ids: 'J2108/26', cards: ['RJTT 滑走路閉鎖（保守）'], shapes: [{ k: 'line', pts: [[1320, 300], [1800, 1120]], w: 22 }], tag: [1560, 700] },
+  { n: 4, type: 'info', label: 'ILS（LOC・GP・DME）使用不可（22：J1960 16 日有効／16L：J2110・34R：J2109 16 日有効／16R：J1958・34L：J1959 16 日は対象外）', ids: 'J1958〜J1960・J2109・J2110', cards: ['RJTT ILS（LOC/GP/DME）使用不可'], shapes: [{ k: 'pin', c: [750, 580], r: 26 }, { k: 'pin', c: [960, 110], r: 26 }, { k: 'pin', c: [1320, 300], r: 26 }, { k: 'pin', c: [1065, 1125], r: 26 }, { k: 'pin', c: [1800, 1120], r: 26 }], tag: [1200, 140] },
+  { n: 5, type: 'closed', label: 'TWY B14・T14 閉鎖（工事）16-OCT 1430–2100Z', ids: 'E5896/26・E5311/26', cards: ['RJTT 誘導路の閉鎖・制限'], shapes: [{ k: 'ellipse', c: [915, 135], rx: 80, ry: 60, rot: 0 }], tag: [800, 70] },
+  { n: 6, type: 'closed', label: 'TWY C1〜C14 閉鎖（工事）1530–2130Z（16 日は有効）', ids: 'E5740/26', cards: ['RJTT 誘導路の閉鎖・制限'], shapes: [{ k: 'polyline', pts: [[1270, 160], [1330, 340], [1440, 548], [1550, 745], [1700, 990]], w: 16 }], tag: [1500, 440] },
+  { n: 7, type: 'closed', label: 'TWY J・J1・J2 閉鎖（工事）16-OCT 1500–2100Z', ids: 'E5716/26', cards: ['RJTT 誘導路の閉鎖・制限'], shapes: [{ k: 'polyline', pts: [[1050, 378], [940, 440], [830, 552]], w: 16 }], tag: [1080, 470] },
+  { n: 8, type: 'info', label: 'TWY W（K〜W13）翼幅 65m 超は使用不可（B747-8F 不可）16-OCT 1500–2100Z', ids: 'E5719/26', cards: ['RJTT 誘導路の閉鎖・制限'], shapes: [{ k: 'ellipse', c: [930, 690], rx: 120, ry: 70, rot: 0 }], tag: [1040, 760] },
+  { n: 9, type: 'info', label: 'TWY N（N5〜N7）・N5・N7 翼幅 52m 超は使用不可（B747-8F 不可）16-OCT 1500–2100Z', ids: 'E5720/26', cards: ['RJTT 誘導路の閉鎖・制限'], shapes: [{ k: 'ellipse', c: [430, 470], rx: 125, ry: 52, rot: 0 }], tag: [300, 380] },
+  { n: 10, type: 'closed', label: 'TWY B3・B4・B6・B8・B13・T3・T4・T6・T8 閉鎖（保守）1430–2100Z（16 日は有効）', ids: 'E5300/26', cards: ['RJTT 誘導路の閉鎖・制限'], shapes: [{ k: 'ellipse', c: [490, 805], rx: 85, ry: 75, rot: 0 }, { k: 'ellipse', c: [610, 620], rx: 95, ry: 95, rot: 0 }, { k: 'ellipse', c: [935, 198], rx: 55, ry: 32, rot: 0 }], tag: [420, 920] },
+  { n: 11, type: 'closed', label: '西側の A 系・L 系（A1〜A14、L3〜L16）閉鎖（保守）1430–2100Z（16 日は対象外）', ids: 'E5299/26・E5305/26・E5593/26', cards: ['RJTT 誘導路の閉鎖・制限'], shapes: [{ k: 'polyline', pts: [[800, 512], [845, 590], [826, 668], [900, 800], [985, 895], [1060, 1075]], w: 12 }], tag: [740, 960] }
+] };
+var RJTT_S = { name: 'RJTT（南側）', img: 'notam_img/rjtt_s.jpg', w: 2000, h: 1144, items: [
+  { n: 1, type: 'closed', label: 'RWY 16R/34L 閉鎖（保守）1430–2100Z（16 日は対象外）', ids: 'J1979/26', cards: ['RJTT 滑走路閉鎖（保守）'], shapes: [{ k: 'line', pts: [[375, 40], [740, 670]], w: 22 }], tag: [600, 300] },
+  { n: 2, type: 'closed', label: 'RWY 16L/34R 閉鎖 1530–2130Z（16 日は有効）', ids: 'J2108/26', cards: ['RJTT 滑走路閉鎖（保守）'], shapes: [{ k: 'line', pts: [[1090, 40], [1310, 430]], w: 22 }], tag: [1220, 190] },
+  { n: 3, type: 'closed', label: 'RWY 05/23 閉鎖（保守）1430–2100Z（16 日は対象外）', ids: 'J1982/26', cards: ['RJTT 滑走路閉鎖（保守）'], shapes: [{ k: 'line', pts: [[1330, 1125], [1935, 460]], w: 22 }], tag: [1640, 790] },
+  { n: 4, type: 'info', label: 'ILS（LOC・GP・DME）使用不可（23：J1963／34L：J1959／16R：J1958 は 16 日対象外、16L：J2110・34R：J2109 は 16 日有効）', ids: 'J1958・J1959・J1963・J2109・J2110', cards: ['RJTT ILS（LOC/GP/DME）使用不可'], shapes: [{ k: 'pin', c: [375, 40], r: 26 }, { k: 'pin', c: [740, 670], r: 26 }, { k: 'pin', c: [1090, 40], r: 26 }, { k: 'pin', c: [1310, 430], r: 26 }, { k: 'pin', c: [1935, 460], r: 26 }], tag: [900, 330] },
+  { n: 5, type: 'closed', label: 'TWY C3〜C7 付近の C 系 閉鎖（工事）1530–2130Z（16 日は有効）', ids: 'E5740/26', cards: ['RJTT 誘導路の閉鎖・制限'], shapes: [{ k: 'polyline', pts: [[1110, 115], [1200, 177], [1215, 298], [1268, 385]], w: 16 }], tag: [1320, 250] },
+  { n: 6, type: 'closed', label: 'TWY G（H2〜W）・H1 閉鎖（工事）16-OCT 1500–2100Z', ids: 'E5721/26', cards: ['RJTT 誘導路の閉鎖・制限'], shapes: [{ k: 'ellipse', c: [850, 350], rx: 125, ry: 62, rot: 0 }], tag: [740, 270] },
+  { n: 7, type: 'closed', label: '東側の D 系・S 系・E・R（D1〜D7、S1〜S3）閉鎖（保守）1430–2100Z（16 日は対象外）', ids: 'E5302/26', cards: ['RJTT 誘導路の閉鎖・制限'], shapes: [{ k: 'ellipse', c: [1340, 985], rx: 165, ry: 150, rot: 0 }, { k: 'polyline', pts: [[1887, 461], [1757, 577], [1583, 741], [1408, 935]], w: 12 }], tag: [1560, 640] },
+  { n: 8, type: 'closed', label: '西側の A 系・L 系（A1〜A10、L5・L10 ほか）閉鎖（保守）1430–2100Z（16 日は対象外）', ids: 'E5299/26・E5305/26・E5593/26', cards: ['RJTT 誘導路の閉鎖・制限'], shapes: [{ k: 'polyline', pts: [[480, 85], [530, 240], [630, 400], [700, 530], [752, 620]], w: 12 }], tag: [330, 300] }
+] };
+RJTT_N.items.concat(RJTT_S.items).forEach(function (it) { it.chart = null; });
+[RJTT_N, RJTT_S].forEach(function (c) { c.items.forEach(function (it) { it.chart = c; }); NOTAM_CHARTS.push(c); });
+
+/* ZSPD 西側チャートに F4317/26（TWY Q4・L15、スポット 322〜325）を追加 */
+ZSPD_W.items.push({ n: 2, type: 'closed', label: 'TWY Q4（L15〜C 間）と TWY L15（スポット 322〜325 間）閉鎖（復路・16-OCT 0200–0900Z）。ジェットブラスト注意', ids: 'F4317/26', cards: ['F4317/26'], shape: { k: 'ellipse', c: [410, 1075], rx: 80, ry: 120, rot: 0 }, tag: [310, 960], chart: ZSPD_W });
+
+/* 行の legs が未設定のもの（新規カード）は、カードの legs を引き継ぐ */
+NOTAMS.forEach(function (n) { (n.rows || []).forEach(function (r) { if (!r.legs) r.legs = n.legs || ['KZ225', 'KZ226']; }); });

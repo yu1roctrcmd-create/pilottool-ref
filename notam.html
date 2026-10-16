@@ -57,6 +57,11 @@
     .nm-note{font-size:.7em;color:var(--muted);line-height:1.8;margin-top:10px}
     .nt-item.hi{border-color:var(--warn)}
     .nt-tag.sec{color:var(--accent);border-color:var(--accent)}
+    .nt-tag.leg{color:#a78bfa;border-color:#a78bfa}
+    .nt-tag.leg.both{color:var(--muted);border-color:var(--border)}
+    .nt-leg{font-size:.78em;font-weight:700;color:#a78bfa;white-space:nowrap}
+    .nt-sum h4{margin:12px 0 4px;font-size:.84em;color:var(--accent)}
+    .nt-sum ul{margin:0;padding-left:1.3em;font-size:.78em;line-height:1.95}
     .nt-tag.hi{color:var(--warn);border-color:var(--warn)}
     .nt-main{display:inline-block;margin:2px 6px 2px 0;font-size:.92em;color:var(--text);border:1px dashed var(--border);border-radius:6px;padding:2px 9px}
     .nt-main small{color:var(--muted);margin-left:4px}
@@ -84,6 +89,48 @@
   ⚠ 出典は<b>会社貸与EFBのスクリーンショット</b>（KZ225 RJAA→ZSPD、Oct 15、代替 ZSSS）です。同種の NOTAM は表にまとめています。NOTAM は日々変わるため、<b>当日のフライトでは必ず最新のNOTAMを確認</b>してください。「影響」「関連マニュアル」の欄のうち、原文から直接言えない部分は <span style="font-weight:700">［要確認］</span> と表示しています。
 </div>
 
+<div class="card nt-sum">
+  <details id="nt-sumbox" open>
+  <summary class="card-title" style="cursor:pointer">🧭 往復（NRT-PVG-NRT）NOTAM 分析：KZ225／KZ226</summary>
+  <div style="font-size:.74em;line-height:1.9;margin:6px 0 4px;color:var(--muted)">
+    <b>KZ225（往路）</b>RJAA→ZSPD　Oct 15　ETD 01:30Z ― ETA 04:46Z　代替 ZSSS<br>
+    <b>KZ226（復路）</b>ZSPD→RJAA　Oct 16　ETD 07:20Z ― ETA 10:12Z　代替 RJTT・ZSSS<br>
+    画面上部の「往復すべて／KZ225／KZ226」で絞り込み、カードの印（往復／往路のみ／復路のみ）で区別できます。
+  </div>
+  <h4>① 往復で効く性能・最低気象（最優先）</h4>
+  <ul>
+    <li><b>RJAA RWY 16R/34L のグルービング一部消失（NCA 00202/26、A1179・A1205・A1275・A1306・A1388・A1483）</b>：OPT は GRV 系が使用不可で、WET は <b>Non-Grooved</b> で計算。<b>往路は離陸、復路は 16R/34L に着陸する場合の着陸性能</b>に効く。OPT 空港 DB は 0026 以降で反映（本便の EFB は 0024/0025）。</li>
+    <li><b>RJAA RWY 16L の PALS 一部不作動（A1472/26）</b>：ILS は RVR 700m、LOC・RNP は RVR 1,600m。<b>復路の RJAA 到着で 16L を使う場合</b>に効く（往路は出発のみ）。</li>
+    <li><b>RJTT（復路の代替）：</b>RWY 16L/34R は<b>グルービング一部消失 → Non-Grooved を適用</b>（J1623・J1987）、RWY 34R は <b>CAT-2/3 → CAT-1 に格下げ</b>、16L/34R の <b>RCLL 使用不可 → CL OUT</b>（J2007・J2008）。<b>代替の最低気象・性能は、これらを反映して確認</b>。</li>
+  </ul>
+  <h4>② 航法・GPS（往復共通）</h4>
+  <ul>
+    <li><b>NCA 00007/19：</b>GPS 24 機以上（0448〜0449Z 改訂）。衛星数は OM 4-4-6 ②（RNAV 1/2・RNP 1/2＝24、RNAV 5・RNP 4＝23）。<b>NCA 00078/25（RAIM）：</b>ZSPD・ZSSS は 0.3・1.0 とも NIL（往復とも）。</li>
+    <li><b>日本（RJAA・RJTT）の RAIM 予測は、NCA 00078/25 では「各国政府の NOTAM を参照」</b>。EFB の RJAA・RJTT の NOTAM 一覧に RAIM NOTAM は見当たらない。［要確認：復路の RJAA・RJTT 進入の RAIM 予測は、別途 RAIM NOTAM／運航管理者で確認］</li>
+    <li><b>仁川 FIR：</b>Z0718/26（GPS 信号が不安定・断続的）＝往復とも。<b>VORTAC「SOT」使用不可（Z0624/26 → Z0764/26 に置換）</b>＝SOT が Critical DME の航空路は DME/DME 不可。<b>NCA 00011/20：</b>ZGGG は代替に使えない。</li>
+    <li><b>ZSPD：</b>LID（F3193/26）とビジュアルアプローチ（F3220/26）は<b>着陸側の運用</b>で、往路（PVG 着）に効く（復路は出発のみ）。TWY R6 閉鎖（F3772/26）と T5 の翼幅 36m 未満制限（F3286/26）は往復とも有効。</li>
+    <li><b>大連 CTA・北京周辺（A5182/26・A4484/26・A4646/26）</b>：会社ルート（欧州線）に影響あり、ZB(SR)801 進入前に保安状態を通報。本便の中国空域での影響は上記カードを参照。</li>
+  </ul>
+  <h4>③ 往路のみ</h4>
+  <ul>
+    <li>RJAA の <b>TSAT 運用（NCA 00210/23）</b>と、<b>TWY N1・D3 閉鎖（A1509/26）</b>。ZSPD の <b>TWY Q5・L15 閉鎖（F4303/26）</b>。ZSSS の誘導路閉鎖（F4290/26）と <b>CGT VOR 試験中（F4251/26）</b>。</li>
+    <li>福岡 FIR：<b>流量規制（Z1819〜Z1822・Y1154）</b>、15 日分の CDR（Q2443・Q2448・Q2449）と PACOTS（Q2450・Q2452）、米軍・自衛隊の訓練空域の 15 日分、<b>K-1-2/K-1-3</b>。</li>
+  </ul>
+  <h4>④ 復路のみ</h4>
+  <ul>
+    <li><b>出発時間帯（ETD 0720Z）に有効：</b>ZSPD の <b>TWY Q4・L15 閉鎖（F4317/26、0200〜0900Z）</b>、<b>JIUTING VOR「JTN」試験中（F4252/26、0100〜1200Z）</b>。<b>ZSHA の A599 閉鎖（A5239/26）は 0710Z で終了</b>＝ETD の直前。</li>
+    <li><b>飛行時間帯に重なる：</b>黄海の臨時制限空域（<b>E4835/26、0600〜0900Z。会社ルートに影響なし</b>）、<b>岩国 ITRA（P5063/26、〜1330Z）</b>。CDR の Q2456・Q2469・Q2453 と韓国の Z0765 は 1200〜1500Z 以降が中心（Z40・Z41 は 0845Z〜）。</li>
+    <li><b>RJTT を代替に使う場合（NCA 00017/21）：</b>0600〜1000UTC は RWY 16L/R 運用が予想されるとき第 1 代替にしない。<b>ETA 10:12Z の後の到着なので範囲外だが近接</b>。［要確認：判定の基準時刻］</li>
+    <li><b>RJTT の滑走路閉鎖・ILS 使用不可・誘導路閉鎖は、ほとんどが 1430Z 以降</b>（復路の ETA 10:12Z より後）。16 日に有効なのは、04/22 閉鎖、16L/34R 閉鎖・ILS 使用不可（1530Z〜）、22 の ILS、誘導路の B14・T14・C 系・J 系・G/H1、<b>W（65m 超）・N（52m 超）の翼幅制限（B747-8F は不可）</b>。</li>
+  </ul>
+  <h4>⑤ 時間帯で効かないもの</h4>
+  <ul>
+    <li>RJAA の夜間閉鎖（RWY 16L/34R は 1410Z、16R/34L は 1510Z〜2030Z）と RJAA の夜間誘導路閉鎖は、往復とも<b>運航時間外</b>（Curfew 1500〜2100Z も同様）。</li>
+  </ul>
+  <div style="font-size:.66em;color:var(--warn);margin-top:8px;line-height:1.8">⚠ EFB の画面を OCR で読み取り、画像で確認した内容です。<b>当日は必ず最新の NOTAM を確認</b>してください。復路の画面に見当たらなかった NOTAM は「往路のみ」と整理していますが、<b>画面の取り漏れの可能性</b>があります（［要確認］）。</div>
+  </details>
+</div>
+
 <div class="card">
   <details id="nt-mapbox" open>
   <summary class="card-title" style="cursor:pointer">🗺 NOTAM マップ（RJAA・ZSPD・ZSSS／KZ225・15-OCT）</summary>
@@ -93,6 +140,7 @@
 
 <div class="card">
   <div class="card-title">登録 NOTAM <span id="nt-count" style="font-size:.72em;font-weight:400;color:var(--muted)"></span></div>
+  <div class="nt-bar" id="nt-legs"></div>
   <div class="nt-bar" id="nt-secs"></div>
   <div class="nt-bar" id="nt-chips"></div>
   <div class="nt-bar"><input id="nt-q" class="nt-search" type="search" placeholder="🔍 NOTAM番号 / キーワード（例：GPS、EFB、RWY）" oninput="ntRender()"></div>
@@ -104,7 +152,7 @@
 
 <script src="notam_data.js"></script>
 <script>
-var ntCat = '全て', ntSec = '全て', SECS = ['全て','General','RJAA','ZSPD','ZSSS','CHN','ASP','RJJJ','ZSHA','RKRR'];
+var ntCat = '全て', ntSec = '全て', ntLeg = '全て', SECS = ['全て','General','RJAA','ZSPD','ZSSS','RJTT','CHN','ASP','RJJJ','ZSHA','RKRR'];
 var PRI = {high:'重要', mid:'', low:''};
 function ntEsc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 function ntCats() {
@@ -112,7 +160,12 @@ function ntCats() {
   return ['全て'].concat(Object.keys(s));
 }
 function ntChips() {
-  var cnt = {}; NOTAMS.forEach(function (n) { cnt[n.sec] = (cnt[n.sec] || 0) + 1; });
+  var lg = document.getElementById('nt-legs');
+  if (lg) lg.innerHTML = ['全て', 'KZ225', 'KZ226'].map(function (c) {
+    var lab = c === '全て' ? '往復すべて' : (NOTAM_FLIGHTS[c].label + '（' + NOTAM_FLIGHTS[c].route + '）');
+    return '<button class="nt-chip' + (c === ntLeg ? ' on' : '') + '" onclick="ntSetLeg(\'' + c + '\')">' + lab + '</button>';
+  }).join('');
+  var cnt = {}; NOTAMS.forEach(function (n) { if (ntLeg === '全て' || (n.legs || []).indexOf(ntLeg) >= 0) cnt[n.sec] = (cnt[n.sec] || 0) + 1; });
   document.getElementById('nt-secs').innerHTML = SECS.map(function (c) {
     return '<button class="nt-chip' + (c === ntSec ? ' on' : '') + '" onclick="ntSetSec(\'' + c + '\')">' + c + (cnt[c] ? ' ' + cnt[c] : '') + '</button>';
   }).join('') + '<button class="nt-chip' + (ntSec === '重要' ? ' on' : '') + '" onclick="ntSetSec(\'重要\')">★ 重要のみ</button>';
@@ -122,6 +175,8 @@ function ntChips() {
 }
 function ntSetCat(c) { ntCat = c; ntChips(); ntRender(); }
 function ntSetSec(c) { ntSec = c; ntChips(); ntRender(); }
+function ntSetLeg(c) { ntLeg = c; ntChips(); ntRender(); }
+function ntLegTag(legs) { legs = legs || []; if (legs.length > 1) return '往復'; return legs[0] === 'KZ226' ? '復路のみ' : '往路のみ'; }
 function ntImp(k, v) {
   var val = v ? v : '<span class="nt-none">影響なし</span>';
   val = val.replace(/［要確認[^］]*］/g, function (m) { return '<span class="nt-chk">' + m + '</span>'; });
@@ -132,6 +187,7 @@ function ntRender() {
   var rows = NOTAMS.filter(function (n) {
     if (ntSec === '重要') { if (n.pri !== 'high') return false; }
     else if (ntSec !== '全て' && n.sec !== ntSec) return false;
+    if (ntLeg !== '全て' && (n.legs || []).indexOf(ntLeg) < 0) return false;
     if (ntCat !== '全て' && n.cat.indexOf(ntCat) < 0) return false;
     if (!q) return true;
     var rt = (n.rows || []).map(function (r) { return r.no + ' ' + r.text; }).join(' ');
@@ -149,9 +205,9 @@ function ntRender() {
     var mg = nmapItemsFor(n.no), mi = [].concat.apply([], mg.map(function (g) { return g.items; })), mp = mg.map(function (g) { return '<div class="nt-h">位置（' + ntEsc(g.chart.name) + ' チャート）</div>' + nmapHtml(g.items, g.chart); }).join('');
     var tbl = '';
     if (n.rows) tbl = '<div class="nt-h">一覧</div><div class="nt-tblw"><table class="nt-tbl"><tr><th>No.</th><th>有効</th><th>内容</th></tr>' +
-      n.rows.map(function (r) { return '<tr><td class="nt-no">' + ntEsc(r.no) + ntRowTag(mi, r.no) + '</td><td>' + ntEsc(r.valid) + '</td><td>' + r.text.replace(/\n/g, '<br>') + '</td></tr>'; }).join('') + '</table></div>';
+      n.rows.filter(function (r) { return ntLeg === '全て' || (r.legs || []).indexOf(ntLeg) >= 0; }).map(function (r) { return '<tr><td class="nt-no">' + ntEsc(r.no) + ntRowTag(mi, r.no) + ((r.legs || []).length === 1 ? ' <span class="nt-leg">' + ntLegTag(r.legs) + '</span>' : '') + '</td><td>' + ntEsc(r.valid) + '</td><td>' + r.text.replace(/\n/g, '<br>') + '</td></tr>'; }).join('') + '</table></div>';
     return '<details class="nt-item' + (mp ? ' wide' : '') + (n.pri === 'high' ? ' hi' : '') + '" data-no="' + ntEsc(n.no) + '"' + (rows.length <= 2 ? ' open' : '') + '><summary><span class="nt-no">' + ntEsc(n.no) + '</span><span class="nt-title">' + ntEsc(n.title) + '</span>' +
-      '<span class="nt-tag sec">' + ntEsc(n.sec) + '</span>' + (n.pri === 'high' ? '<span class="nt-tag hi">★重要</span>' : '') +
+      '<span class="nt-tag sec">' + ntEsc(n.sec) + '</span><span class="nt-tag leg' + ((n.legs || []).length > 1 ? ' both' : '') + '">' + ntLegTag(n.legs) + '</span>' + (n.pri === 'high' ? '<span class="nt-tag hi">★重要</span>' : '') +
       n.cat.map(function (c) { return '<span class="nt-tag">' + ntEsc(c) + '</span>'; }).join('') + '</summary>' +
       '<div class="nt-body">' +
       '<div class="nt-cols' + (mp ? ' has-map' : '') + '"><div class="nt-left"><div class="nt-h" style="margin-top:6px">日本語訳・概要</div><div>' + n.ja + '</div>' + tbl +
