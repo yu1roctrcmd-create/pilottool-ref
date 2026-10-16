@@ -545,7 +545,7 @@ function nmapSvg(items, hiN) {
   var svg = '';
   items.forEach(function (it) {
     var c = NMAP_COL[it.type], g = '';
-    var dim = (hiN != null && it.n !== hiN) ? ' opacity=".35"' : '';
+    var dim = ((hiN != null && it.n !== hiN) || nmapInactive(it)) ? ' opacity=".3"' : '';
     var st = 'fill="' + c + '" fill-opacity=".30" stroke="' + c + '" stroke-width="5"' + (it.type === 'light' ? ' stroke-dasharray="14,8"' : '');
     (it.shapes || [it.shape]).forEach(function (sh) {
       if (sh.k === 'line') g += '<line x1="' + sh.pts[0][0] + '" y1="' + sh.pts[0][1] + '" x2="' + sh.pts[1][0] + '" y2="' + sh.pts[1][1] + '" stroke="' + c + '" stroke-opacity=".55" stroke-width="' + sh.w + '" stroke-linecap="round" stroke-dasharray="26,14"/>';
@@ -562,7 +562,8 @@ function nmapSvg(items, hiN) {
 function nmapItemsFor(no) { return NOTAM_CHARTS.map(function (c) { return { chart: c, items: c.items.filter(function (it) { return it.cards.indexOf(no) >= 0; }) }; }).filter(function (g) { return g.items.length; }); }
 function nmapHtml(items, M) {
   var leg = items.map(function (it) {
-    return '<li><span class="nm-n" style="background:' + NMAP_COL[it.type] + '">' + it.n + '</span><span><b>' + ntEsc(it.ids) + '</b>　' + ntEsc(it.label) + '</span></li>';
+    var off = nmapInactive(it);
+    return '<li' + (off ? ' style="opacity:.55"' : '') + '><span class="nm-n" style="background:' + NMAP_COL[it.type] + '">' + it.n + '</span><span><b>' + ntEsc(it.ids) + '</b>　' + ntEsc(it.label) + (off ? ' <span style="color:var(--muted)">【この便の時間帯には無効（終了済み／対象日外）】</span>' : '') + '</span></li>';
   }).join('');
   return '<div class="nm-wrap"><div class="nm-chart"><img src="' + M.img + '" alt="' + M.name + ' Airport Chart" loading="lazy"><svg viewBox="0 0 ' + M.w + ' ' + M.h + '" preserveAspectRatio="none">' + nmapSvg(items) + '</svg></div>' +
     '<div class="nm-side"><ol class="nm-leg">' + leg + '</ol>' +
@@ -1017,3 +1018,25 @@ NOTAMS.forEach(function (n) {
 })();
 
 NOTAM_FLIGHTS.KZ227.label = 'KZ227';
+
+/* ── 便ごとの「この便の時間帯に有効か」（false＝無効：図では薄く表示）──
+   KZ228：ETD 1940Z（ZSPD）／ETA 2232Z（RJAA）／代替 RJTT（2232Z 以降の到着）。16-OCT の夜間閉鎖・工事はいずれも ETA より前に終了 */
+var NMAP_INACTIVE = {
+  KZ228: { 'RJAA': [1, 2, 8], 'RJTT（北側）': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], 'RJTT（南側）': [1, 2, 3, 4, 5, 6, 7, 8, 9] }
+};
+function nmapInactive(it) {
+  if (typeof ntLeg === 'undefined' || !NMAP_INACTIVE[ntLeg] || !it.chart) return false;
+  var list = NMAP_INACTIVE[ntLeg][it.chart.name];
+  return !!list && list.indexOf(it.n) >= 0;
+}
+(function () {
+  var _render = nmapRender;
+  nmapRender = function () {
+    _render();
+    var f = (typeof NOTAM_FLIGHTS !== 'undefined' && NOTAM_FLIGHTS[ntLeg]) ? NOTAM_FLIGHTS[ntLeg] : null;
+    var sm = document.querySelector('#nt-mapbox > summary');
+    if (sm) sm.textContent = f ? ('🗺 NOTAM マップ：' + f.label.replace(/（.*）/, '') + '　' + f.route + '（' + f.time + (f.altn ? '、代替 ' + f.altn : '') + '）') : '🗺 NOTAM マップ（全便）';
+    var host = document.getElementById('nt-map');
+    if (host && NMAP_INACTIVE[ntLeg]) host.insertAdjacentHTML('afterbegin', '<div class="nm-note" style="margin:4px 0 8px">薄く表示した番号は、<b>この便の時間帯（出発・到着・代替の到着）には無効</b>（16-OCT の夜間閉鎖・工事で、到着より前に終了）。濃い表示が、この便で有効なもの。</div>');
+  };
+})();
