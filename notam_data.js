@@ -923,3 +923,25 @@ NOTAMS.forEach(function (n) {
     (n.rows || []).forEach(function (r) { if ((r.legs || []).indexOf('KZ227') < 0) (r.legs = r.legs || []).push('KZ227'); });
   }
 });
+
+/* ═════════ KZ228（ZSPD→RJAA、16-OCT ETD 19:40Z ― ETA 22:32Z、代替 RJTT）：画面 1 枚分（ZSPD 出発側の一部）═════════ */
+NOTAM_FLIGHTS.KZ228 = { label: 'KZ228（一部）', route: 'ZSPD→RJAA', time: 'Oct 16 ETD 19:40Z（PVG）― ETA 22:32Z（NRT）', altn: 'RJTT', partial: true };
+NOTAMS.push(
+{ no: 'ZSPD 16R・17L/35R の計器着陸施設（試験・使用不可）', sec: 'ZSPD', pri: 'mid', cat: ['灯火・NAVAID', '進入'], legs: ['KZ228'],
+  title: 'ZSPD：RWY 17L/35R の ILS 使用不可、RWY 16R の IM・MM・DME「IZZ」は飛行検査のため試験中（16-OCT 夕〜夜）',
+  issued: '16-OCT-2026 13:32〜14:15', valid: '16-OCT-2026 17:00Z 〜 23:30Z（F4365 は 17:30Z 〜 22:30Z）',
+  orig: 'F4365/26 RWY17L/35R ILS U/S.\nF4364/26 IM 16R ON TEST DO NOT USE DUE TO FLTCK.\nF4363/26 MM 16R ON TEST DO NOT USE DUE TO FLTCK.\nF4362/26 DME 16R \'IZZ\' CH24X ON TEST DO NOT USE DUE TO FLTCK.',
+  ja: '<b>RWY 17L/35R の ILS が使用不可</b>（F4365/26）。<b>RWY 16R の IM（インナーマーカー）、MM（ミドルマーカー）、DME「IZZ」（CH24X）は、飛行検査（FLTCK）のため試験中で使用しない</b>（F4364・F4363・F4362）。',
+  perf: '', nav: '<b>16R の ILS：MM・IM が使えず、DME「IZZ」も使えない</b>＝<b>DME を使う進入（DME 距離の確認、DME 必須の方式）に影響</b>［要確認：ZSPD 16R の ILS 方式が DME を必須とするか、LOC/GP 自体は使えるか］。<b>17L/35R は ILS なし</b>＝計器進入は他の方式（RNP 等）に限られる。', ops: '<b>KZ228 は ZSPD 出発（ETD 1940Z）で、有効時間帯の中</b>。出発空港の ILS は、<b>出発後の引き返し（ZSPD に戻る）</b>や出発代替の選定に関わる。<b>RJAA 到着側の NOTAM は、画面の残りを取り込んで確認</b>。',
+  rows: [
+    { no: 'F4365/26', valid: '16-OCT 1730Z 〜 2230Z', text: '<b>RWY 17L/35R の ILS 使用不可</b>' },
+    { no: 'F4364/26', valid: '16-OCT 1700Z 〜 2330Z', text: '<b>RWY 16R の IM</b> 試験中・使用しない（飛行検査）' },
+    { no: 'F4363/26', valid: '16-OCT 1700Z 〜 2330Z', text: '<b>RWY 16R の MM</b> 試験中・使用しない（飛行検査）' },
+    { no: 'F4362/26', valid: '16-OCT 1700Z 〜 2330Z', text: '<b>RWY 16R の DME「IZZ」（CH24X）</b> 試験中・使用しない（飛行検査）' }
+  ], refs: [{ label: 'ZSPD Diversion Info（滑走路・進入）', main: 'DIVERSION' }] }
+);
+/* 位置図：ZSPD 東側チャートに 16R の IM・MM・DME、西側チャートに 17L/35R の ILS */
+(function () {
+  ZSPD_E.items.push({ n: 4, type: 'info', label: 'RWY 16R の IM・MM・DME「IZZ」試験中・使用しない（飛行検査）16-OCT 1700–2330Z', ids: 'F4362〜F4364/26', cards: ['ZSPD 16R・17L/35R の計器着陸施設（試験・使用不可）'], shapes: [{ k: 'pin', c: [478, 250], r: 34 }, { k: 'ellipse', c: [440, 200], rx: 70, ry: 60, rot: -30 }], tag: [560, 330], chart: ZSPD_E });
+  ZSPD_W.items.push({ n: 6, type: 'info', label: 'RWY 17L/35R の ILS 使用不可 16-OCT 1730–2230Z', ids: 'F4365/26', cards: ['ZSPD 16R・17L/35R の計器着陸施設（試験・使用不可）'], shapes: [{ k: 'pin', c: [415, 283], r: 30 }, { k: 'pin', c: [885, 1720], r: 30 }], tag: [510, 330], chart: ZSPD_W });
+})();
