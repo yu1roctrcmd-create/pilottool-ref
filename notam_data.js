@@ -784,3 +784,134 @@ ZSPD_W.items.push({ n: 2, type: 'closed', label: 'TWY Q4（L15〜C 間）と TWY
 
 /* 行の legs が未設定のもの（新規カード）は、カードの legs を引き継ぐ */
 NOTAMS.forEach(function (n) { (n.rows || []).forEach(function (r) { if (!r.legs) r.legs = n.legs || ['KZ225', 'KZ226']; }); });
+
+
+/* ═════════ KZ227（RJAA→ZSPD、16-OCT・今日の担当便）を最新として反映 ═════════
+   KZ227：Oct 16 ETD 13:20Z（NRT）― ETA 16:33Z（PVG）、代替 ZSSS（EFB 画面 2026-10-16 19:09） */
+NOTAM_FLIGHTS.KZ227 = { label: 'KZ227（最新）', route: 'RJAA→ZSPD', time: 'Oct 16 ETD 13:20Z（NRT）― ETA 16:33Z（PVG）', altn: 'ZSSS' };
+var NOTAM_LATEST = 'KZ227';
+var KZ227_IDS = ["00007/19", "00011/20", "00020/26", "00022/25", "00078/25", "00091/25", "00115/24", "00155/26", "00195/26", "00202/26", "00204/26", "00210/23", "00219/22", "A1179/26", "A1193/26", "A1205/26", "A1275/26", "A1306/26", "A1346/26", "A1349/26", "A1388/26", "A1390/26", "A1430/26", "A1442/26", "A1443/26", "A1445/26", "A1472/26", "A1473/26", "A1474/26", "A1475/26", "A1483/26", "A1519/26", "A1552/26", "A2574/26", "A3194/26", "A4021/26", "A4484/26", "A4646/26", "A5182/26", "E4660/26", "E4661/26", "E4851/26", "E4852/26", "E4853/26", "E4854/26", "F2442/26", "F2443/26", "F3192/26", "F3193/26", "F3202/26", "F3220/26", "F3286/26", "F3458/26", "F3772/26", "F3922/26", "F4301/26", "F4328/26", "F4329/26", "F4330/26", "F4336/26", "F4338/26", "P3999/26", "P4897/26", "P4898/26", "P4899/26", "P4900/26", "P4901/26", "P4902/26", "P4903/26", "P4907/26", "P4908/26", "P4910/26", "P4911/26", "P4921/26", "P5063/26", "Q1947/26", "Q2453/26", "Q2456/26", "Q2461/26", "Q2465/26", "Q2469/26", "Q2470/26", "Y1162/26", "Z0718/26", "Z0764/26", "Z0765/26", "Z0785/26", "Z0786/26", "Z1827/26", "00008/20"];
+(function () {
+  var idre = /[A-Z]?\d{3,5}\/\d{2}/g;
+  function present(text) { var ids = String(text).match(idre) || []; return ids.some(function (i) { return KZ227_IDS.indexOf(i) >= 0; }); }
+  NOTAMS.forEach(function (n) {
+    if (!n.legs) n.legs = [];
+    var rowsHit = (n.rows || []).some(function (r) { return present(r.no); });
+    (n.rows || []).forEach(function (r) { r.legs = r.legs || []; if (present(r.no) && r.legs.indexOf('KZ227') < 0) r.legs.push('KZ227'); });
+    if ((present(n.no) || (!/\d{3,5}\/\d{2}/.test(n.no) && rowsHit)) && n.legs.indexOf('KZ227') < 0) n.legs.push('KZ227');
+  });
+})();
+
+/* ── KZ227 で新規／改訂された内容 ── */
+function ntAddRows27(no, rows) {
+  NOTAMS.forEach(function (n) {
+    if (n.no === no) {
+      n.rows = (n.rows || []).concat(rows.map(function (r) { r.legs = ['KZ227']; return r; }));
+      if (n.legs.indexOf('KZ227') < 0) n.legs.push('KZ227');
+    }
+  });
+}
+ntAddRows27('福岡FIR 流量規制（5件）', [
+  { no: 'Z1827/26', valid: '16-OCT 0930Z 〜 17-OCT 1600Z', text: 'ルート B576/Y742。<b>KABAM（N892）経由で VVXX・WMXX・WSXX・VTXX・VDXX 向けの南行き機（SB）</b>：<b>ATOTI・MUGUS で高度に関係なく 12 分間隔</b>。（XX は任意の文字）。本便（PVG 向け）には対象外' },
+  { no: 'Y1162/26', valid: '16-OCT 0924Z 〜 17-OCT 1600Z', text: 'ATS ルート A1/G581/Y26/Y52。<b>N892・KABAM 経由の機に、出発予定許可時刻（EDCT）を発行</b>。本便（PVG 向け）には対象外' }
+]);
+ntAddRows27('Q2448/26・Q2449/26・Q2443/26', [
+  { no: 'Q2470/26', valid: '16-OCT 2100Z 〜 17-OCT 2100Z', text: '<b>16 日 2100Z 以降・17 日分</b>Z16・Z17・Z18・Z21・Z162・Z171・Z182（16 日 2100–2200Z と 17 日 1200–2100Z）、Z101・Z102（16 日 2100Z〜17 日 2100Z）。すべて MEA。<b>本便（ETD 1320Z〜ETA 1633Z）の飛行時間帯より後</b>' },
+  { no: 'Q2465/26', valid: '16-OCT 2100Z 〜 17-OCT 2100Z', text: 'Z29・Z31・Z32・Z34（17 日 1500–2100Z）。すべて MEA。本便の飛行時間帯とは重ならない' }
+]);
+ntAddRows27('Z0765/26', []);
+NOTAMS.forEach(function (n) { if (n.no === 'Z0765/26' && n.legs.indexOf('KZ227') < 0) n.legs.push('KZ227'); });
+
+/* NCA 00202/26 は 16-OCT 01:54 に改訂（文面が「Non-Grooved Rwy として扱う」に変更、OPT 空港 DB の区分を明記）*/
+NOTAMS.forEach(function (n) {
+  if (n.no === 'NCA 00202/26') {
+    n.issued = '01-OCT-2026 09:53（改訂 16-OCT-2026 01:54）';
+    n.orig = '///// COMPANY NOTAM /////\nTAKE FLWG ACTIONS BECAUSE GROOVING OF RWY 16R/34L HAS BEEN PARTIALLY REMOVED, WHICH IS THEREFORE TREATED AS NON-GROOVED RWY.\n///OPT INFO///\n[AIRPORT DATABASE: NCA-AIRPORT-0025 OR EARLIER]\n-TKOF & LDG-\nRWY 16RGRV NOT AVAILABLE\nRWY 34LGRV NOT AVAILABLE\nRWY 16RGRVNTM NOT AVAILABLE\nRWY 34LGRVNTM NOT AVAILABLE\n-TKOF-\nRWY 16RA2GRVNTM NOT AVAILABLE\nRWY 16RA2GRV SEE BELOW\n//RWY 16RA2GRV//\nSINCE RWY 16RA2 IS TREATED AS A NON-GROOVED RWY, USE RWY 16RA2GRV AND SELECT RWY COND "WET NGRV" WHEN CALCULATING WET PERFORMANCE.\n[AIRPORT DATABASE: NCA-AIRPORT-0026 OR LATER]\nTHIS CHG IS REFLECTED IN THE OPT AP DB "NCA-AIRPORT-0026" OR LATER.\nSELECT FLWG RWY.\n-TKOF & LDG-\nRWY 16RGRV NOT AVAILABLE\nRWY 34LGRV NOT AVAILABLE\n-TKOF-\nRWY 16RA2GRV NOT AVAILABLE\nRWY 16RA2 16RA2NTM\n/// i-SKY INFO ///\nSELECT FLWG RWY.\n-TKOF & LDG-\nRWY 16RGRV NOT AVAILABLE\nRWY 34LGRV NOT AVAILABLE\n-TKOF-\nRWY 16RA2GRV NOT AVAILABLE\nRWY 16RA2 16RA2NTM\nEXPLANATION: NOTE:REF A1179/26, A1205/26, A1275/26, A1306/26, A1388/26, A1483/26';
+    n.ja = '<b>RWY 16R/34L のグルービングが部分的に消失しており、Non-Grooved Rwy として扱う</b>（16-OCT 01:54 改訂で、この趣旨が冒頭に明記された）。OPT では<b>空港 DB の版で扱いが分かれる</b>：<br>・<b>NCA-AIRPORT-0025 以前（本便の EFB は 0024/0025）</b>：離着陸とも <b>16RGRV／34LGRV／16RGRVNTM／34LGRVNTM は使用不可</b>。離陸の <b>16RA2GRVNTM は使用不可</b>。<b>16RA2 は Non-Grooved 扱いのため、16RA2GRV を選び、WET は滑走路状態「WET NGRV」で計算</b>する。<br>・<b>NCA-AIRPORT-0026 以降</b>：上記の変更が OPT に反映済み。離着陸 16RGRV／34LGRV、離陸 16RA2GRV は使用不可で、16RA2NTM（離陸）を選ぶ。i-SKY も同様。<br>関連 NOTAM：A1179、A1205、A1275、A1306、A1388、A1483（いずれも /26）。';
+  }
+});
+
+NOTAMS.push(
+{ no: 'A1552/26', sec: 'RJAA', pri: 'low', cat: ['灯火・NAVAID', '滑走路・誘導路'], legs: ['KZ227'],
+  title: 'TWY A（A1〜A2 間）のセンターライン灯 使用不可（工事）',
+  issued: '16-OCT-2026 01:02（改訂 03:59）', valid: '16-OCT-2026 20:00Z 〜 15-JAN-2027 15:00Z',
+  orig: 'TWY-CL-LGT FOR TWY A(BTN A1 AND A2) U/S DUE TO CONST',
+  ja: '<b>TWY A（A1〜A2 間）のセンターライン灯が使用不可</b>（工事）。16-OCT 2000Z から。既存の A1474/26（TWY A・A2 のセンターライン灯 使用不可）に重なる。',
+  perf: '', nav: '', ops: '<b>本便の ETD 1320Z は有効開始（2000Z）の前</b>。夜間・低視程のタキシーで TWY A を使う場合は、センターライン灯がない前提。', refs: [{ label: '同種：A1474/26（TWY A・A2 のセンターライン灯）', jump: 'RJAA 誘導路の閉鎖・灯火不作動' }] },
+
+{ no: 'ZSPD 滑走路・誘導路の閉鎖（16-OCT 夜）', sec: 'ZSPD', pri: 'high', cat: ['滑走路・誘導路'], legs: ['KZ227'],
+  title: 'ZSPD：RWY 17L/35R 閉鎖、TWY P1・P4・A（B8〜P1）、L22・L25・L25A・L26・L26A 閉鎖（16-OCT 1730/1800〜2230Z）',
+  issued: '15-OCT-2026 09:02〜09:20', valid: '16-OCT-2026 17:30Z（F4330 は 18:00Z）〜 22:30Z',
+  orig: 'F4328/26: "RWY17L/35R CLSD.ACFT SHALL CROSS RWY17L/35R VIA TWY P6,P5,P3,P2."\nF4329/26: "FLW TWY CLSD: 1. TWY P1,P4 CLSD BTN TWY D AND TWY B. 2. TWY A BTN TWY B8 AND TWY P1. INTERSECTION CLSD BTN TWY P1 AND TWY A, ACFT SHALL CROSS TWY A VIA TWY P6,P5,P3,P2."\nF4330/26: "FLW TWY CLSD: 1. TWY L22, ACFT SHALL CROSS TWY L22 VIA TWY W1,W6. 2. TWY L25,L25A,L26,L26A."',
+  ja: '<b>RWY 17L/35R が閉鎖</b>。閉鎖滑走路を横断する機は <b>TWY P6・P5・P3・P2 経由</b>で横断。<b>TWY P1・P4（D〜B 間）、TWY A（B8〜P1 間）と P1 との交差点が閉鎖</b>（A を横断する場合は P6・P5・P3・P2 経由）。<b>TWY L22（横断は W1・W6 経由）、L25・L25A・L26・L26A が閉鎖</b>。',
+  perf: '', nav: '', ops: '<b>本便の ETA 1633Z は、閉鎖の開始（1730Z／1800Z）の前</b>。ただし<b>遅延・ホールディングで到着が 1730Z 以降になると</b>、17L/35R の閉鎖とタキシールート（P 系・L 系）の制約を受ける。スポットと、17L/35R・17R/35L のどちらが使えるかを LID（F3193/26）で確認。',
+  rows: [
+    { no: 'F4328/26', valid: '16-OCT 1730Z 〜 2230Z', text: '<b>RWY 17L/35R 閉鎖</b>。横断は <b>TWY P6・P5・P3・P2</b> 経由' },
+    { no: 'F4329/26', valid: '16-OCT 1730Z 〜 2230Z', text: 'TWY <b>P1・P4（D〜B 間）</b>閉鎖。TWY <b>A（B8〜P1 間）</b>と P1 の交差点閉鎖（A の横断は P6・P5・P3・P2 経由）' },
+    { no: 'F4330/26', valid: '16-OCT 1800Z 〜 2230Z', text: 'TWY <b>L22</b>（横断は W1・W6 経由）、<b>L25・L25A・L26・L26A</b> 閉鎖' }
+  ], refs: [{ label: 'LID（F3193/26）', jump: 'F3193/26' }, { label: 'ZSPD Diversion Info', main: 'DIVERSION' }] },
+
+{ no: 'ZSSS 滑走路・誘導路の閉鎖（16〜19-OCT 夜）', sec: 'ZSSS', pri: 'high', cat: ['滑走路・誘導路', '代替空港'], legs: ['KZ227'],
+  title: 'ZSSS（代替）：RWY 18L/36R 閉鎖＋誘導路の広範囲閉鎖（16〜19-OCT、毎日 1700–2200Z）',
+  issued: '15-OCT-2026 15:13', valid: '16-OCT-2026 17:00Z 〜 19-OCT-2026 22:00Z（毎日 1700–2200Z）',
+  orig: 'F4338/26: "FLW TWY CLSD:\n1.TWY A2,A3,A4,B1,B2,B3,B4,B5,B6,B7,B8,T6,K2,K4,K5,K6,K7.\n2.TWY A,B CLSD BTN TWY H4 AND TWY H7.\n3.TWY H2,H3,H5,H6 CLSD BTN RWY18R/36L AND TWY B.\n4.TWY A BTN TWY A2 AND TWY H4.\n5.TWY B BTN TWY H1 AND TWY H4.\n6.TWY H1 BTN RWY18L/36R AND RWY18R/36L." 1700-2200\nF4336/26: "RWY18L/36R CLSD,ACFT SHALL CROSS RWY18L/36R VIA TWY H4,H7." 1700-2200',
+  ja: '<b>RWY 18L/36R が閉鎖</b>（横断は <b>TWY H4・H7</b> 経由）。あわせて誘導路が広範囲に閉鎖（往路の F4290/26 と同じ範囲が、<b>16〜19-OCT の毎日 1700–2200Z</b> に再度設定された）：A2〜A4、B1〜B8、T6、K2・K4〜K7、A・B（H4〜H7）、H2・H3・H5・H6、A（A2〜H4）、B（H1〜H4）、H1。',
+  perf: '', nav: '', ops: '<b>本便の代替（ZSSS）への到着は、ZSPD の ETA 1633Z 以降（約 1700Z 以降）になる見込み＝閉鎖時間帯（1700–2200Z）に入る</b>。<b>使える滑走路は 18R/36L のみ</b>で、着陸後の高速離脱路（B4・A3・B3・A2）などの誘導路も閉鎖。代替の計画では、<b>滑走路・スポットまでのタキシールートの制約</b>を確認。［要確認：18R/36L の ILS・最低気象、スポット］',
+  rows: [
+    { no: 'F4336/26', valid: '16〜19-OCT 毎日 1700–2200Z', text: '<b>RWY 18L/36R 閉鎖</b>。横断は <b>TWY H4・H7</b> 経由' },
+    { no: 'F4338/26', valid: '16〜19-OCT 毎日 1700–2200Z', text: 'TWY A2〜A4、B1〜B8、T6、K2・K4〜K7、A・B（H4〜H7）、H2・H3・H5・H6（18R/36L〜B）、A（A2〜H4）、B（H1〜H4）、H1（18L/36R〜18R/36L）閉鎖' }
+  ], refs: [{ label: '着陸後 50 秒以内の離脱・高速離脱路（F4301/26）', jump: 'F4301/26' }, { label: 'ZSSS Diversion Info', main: 'DIVERSION' }] },
+
+{ no: 'Z0786/26', sec: 'RKRR', pri: 'low', cat: ['流量規制・CDR・トラック'], legs: ['KZ227'],
+  title: '韓国：条件付き経路（CDR2）の開放（16-OCT 2100Z〜17-OCT）',
+  issued: '16-OCT-2026 09:44（改訂 09:56）', valid: '16-OCT-2026 21:00Z 〜 17-OCT-2026 21:00Z',
+  orig: '"CONDITIONAL ROUTE(CDR2) AVBL AS FLW, NEW\nNR ROUTE TIME FM TIME TO LOWER LVL UPPER LVL\n1 MASTA-UPGOS 10162100 10162230 6,000FT AMSL FL600 / 10170000 10171200 / 10171330 10171945\n2 RUGMA-ANROD 10162100 10172100 11,000FT AMSL FL600\n3 BOPTA-PONIK 10162100 10170300 FL150 FL600 / 10170700 10172100\n4 KARBU-LANAT 10162145 10170845 FL150 FL600 / 10171145 10171845"',
+  ja: '<b>韓国 FIR の条件付き経路（CDR2）</b>。16 日 2100Z 以降・17 日の時間帯が設定された（<b>MASTA–UPGOS、RUGMA–ANROD、BOPTA–PONIK、KARBU–LANAT</b>）。',
+  perf: '', nav: '', ops: '本便の飛行時間帯（1320〜1633Z）は、<b>Z0765/26（1300〜2100Z）</b>のほうが該当。この NOTAM（2100Z〜）は後続。', refs: [{ label: '本便の時間帯に該当：Z0765/26', jump: 'Z0765/26' }] },
+
+{ no: 'Z0785/26', sec: 'RKRR', pri: 'mid', cat: ['空域・軍事', '韓国FIR'], legs: ['KZ227'],
+  title: '韓国：原子力発電所上空の臨時飛行禁止区域（AIP SUP 72/26）の内容変更',
+  issued: '16-OCT-2026 09:44', valid: '16-OCT-2026 09:25Z 〜 11-NOV-2026 15:00Z',
+  orig: '"THE CONTENTS CONCERNING THE TEMPORARY PROHIBITED AREAS ESTABLISHED OVER THE NUCLEAR POWER PLANTS IN AIP SUP 72/26 ARE CHANGED AS FLW:\n4. REMARKS\n(1) CONTROL UNIT\n- \'A\' AREA: MCRC\n- \'B\' AREA: MOLIT\n(2) EXCEPTIONS\n-\'A\' AREA: ROKAF OPERATION ACFT\n-\'B\' AREA: SKED AND NON SKED CIVIL AIRLINES, AUTHORIZED BY ATC, OTHER ACFT AUTHORIZED BY MOLIT, LIFE GUARD, POLICE, SAR, MILITARY OPERATION FLIGHT AND FIRE FIGHTING ACFT\n(3) THE TEMPORARY PROHIBITED AREAS ARE SHOWN IN THE BELOW DIAGRAMS.\n(4) ANY CHANGE TO THE CONTENTS OF THESE PAGES WILL BE NOTIFIED BY NOTAM."',
+  ja: '<b>原子力発電所上空の臨時飛行禁止区域</b>（AIP SUP 72/26）の内容が変更された。<b>管制部署：A 区域＝MCRC（空軍管制）、B 区域＝MOLIT（国土交通部）</b>。<b>例外：A 区域は ROKAF の運用機のみ。B 区域は、ATC の許可を受けた定期・不定期の民間航空会社機、MOLIT が許可した航空機、救命・警察・SAR・軍用・消防機</b>。区域は添付の図に示される。',
+  perf: '', nav: '', ops: '<b>B 区域は、ATC の許可を受けた民間定期便は通過できるが、A 区域は ROKAF の運用機のみ</b>。経路が区域に近い場合は、図で位置を確認し、ATC の指示に従う。［要確認：図（AIP SUP 72/26）の区域と、本便の経路との関係］', refs: [{ label: 'AIP Korea SUP 72/26' }] }
+);
+
+/* ── KZ227 の位置図 ── */
+(function () {
+  var rjaa = NOTAM_MAP;  /* RJAA チャート */
+  rjaa.items.push({ n: 14, type: 'light', label: 'TWY A（A1〜A2 間）センターライン灯 使用不可（工事）16-OCT 2000Z〜', ids: 'A1552/26', cards: ['A1552/26'], shapes: [{ k: 'polyline', pts: [[752, 620], [768, 536]], w: 14 }, { k: 'ellipse', c: [760, 578], rx: 36, ry: 60, rot: 0 }], tag: [850, 560], chart: rjaa });
+  /* ZSPD 西側チャート：17L/35R、P1・P4・A、L22・L25・L26 */
+  ZSPD_W.items.push(
+    { n: 3, type: 'closed', label: 'RWY 17L/35R 閉鎖（横断は P6・P5・P3・P2 経由）16-OCT 1730–2230Z', ids: 'F4328/26', cards: ['ZSPD 滑走路・誘導路の閉鎖（16-OCT 夜）'], shapes: [{ k: 'line', pts: [[415, 283], [885, 1720]], w: 24 }], tag: [650, 990], chart: ZSPD_W },
+    { n: 4, type: 'closed', label: 'TWY P1・P4（D〜B 間）、TWY A（B8〜P1 間）閉鎖 16-OCT 1730–2230Z', ids: 'F4329/26', cards: ['ZSPD 滑走路・誘導路の閉鎖（16-OCT 夜）'], shapes: [{ k: 'ellipse', c: [520, 893], rx: 140, ry: 55, rot: 0 }, { k: 'ellipse', c: [780, 1652], rx: 80, ry: 45, rot: 0 }], tag: [660, 800], chart: ZSPD_W },
+    { n: 5, type: 'closed', label: 'TWY L22（横断は W1・W6 経由）、L25・L25A・L26・L26A 閉鎖 16-OCT 1800–2230Z', ids: 'F4330/26', cards: ['ZSPD 滑走路・誘導路の閉鎖（16-OCT 夜）'], shapes: [{ k: 'ellipse', c: [1150, 1215], rx: 160, ry: 95, rot: 0 }, { k: 'ellipse', c: [985, 1115], rx: 120, ry: 42, rot: 0 }], tag: [1150, 1100], chart: ZSPD_W }
+  );
+  /* ZSSS：F4338 は F4290 と同範囲 → カードを追加、F4336（RWY 18L/36R）を追加 */
+  ZSSS_C.items.forEach(function (it) { if (it.cards.indexOf('F4290/26') >= 0) it.cards.push('ZSSS 滑走路・誘導路の閉鎖（16〜19-OCT 夜）'); });
+  ZSSS_C.items.push({ n: 7, type: 'closed', label: 'RWY 18L/36R 閉鎖（横断は TWY H4・H7 経由）16〜19-OCT 毎日 1700–2200Z', ids: 'F4336/26', cards: ['ZSSS 滑走路・誘導路の閉鎖（16〜19-OCT 夜）'], shapes: [{ k: 'line', pts: [[787, 303], [850, 1720]], w: 24 }], tag: [880, 520], chart: ZSSS_C });
+})();
+
+/* 位置図の表示対象：選択中の便に有効な NOTAM の項目だけ */
+function nmapVisible(it) {
+  if (typeof ntLeg === 'undefined' || ntLeg === '全て') return true;
+  return it.cards.some(function (c) { return NOTAMS.some(function (n) { return n.no === c && (n.legs || []).indexOf(ntLeg) >= 0; }); });
+}
+function nmapRender() {
+  var host = document.getElementById('nt-map'); if (!host) return;
+  var out = NOTAM_CHARTS.map(function (c) {
+    var items = c.items.filter(nmapVisible);
+    return items.length ? '<div class="nt-h">' + ntEsc(c.name) + '</div>' + nmapHtml(items, c) : '';
+  }).join('');
+  host.innerHTML = '<div class="nm-key"><span style="color:#ef4444">■ 閉鎖</span><span style="color:#f59e0b">■ 灯火不作動</span><span style="color:#fb923c">■ Non-Grooved Runway</span><span style="color:#38bdf8">■ その他</span></div>' + (out || '<div class="nt-empty">この便に位置図で示せる NOTAM はありません。</div>') +
+    '<div class="nm-note">図に出せないもの：場所を持たない NOTAM（STAR・VOR・LID・ビジュアルアプローチ関連など）。各 NOTAM のカードを開くと、その NOTAM の位置だけを表示します。</div>';
+}
+
+/* カード名を、複数便の ID を含む名称に整理 */
+NOTAMS.forEach(function (n) {
+  if (n.no === 'Q2448/26・Q2449/26・Q2443/26') n.no = 'CDR 開放（Q2443・Q2448・Q2449・Q2453・Q2456・Q2465・Q2469・Q2470）';
+  else if (n.no === 'Q2450/26・Q2452/26') n.no = 'PACOTS 東行きトラック（Q2450・Q2452・Q2461）';
+  else if (n.no === 'P5048/26・P5039/26・P4921/26') n.no = '訓練空域の活動（P4921・P5039・P5048・P5063）';
+});
+
+ZSSS_C.items.forEach(function (it) { it.ids = it.ids.replace('F4290/26', 'F4338/26（＝往路の F4290/26 と同範囲）'); });
