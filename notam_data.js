@@ -513,7 +513,7 @@ var NOTAM_MAP = {
   ]
 };
 var NOTAM_CHARTS = [];  /* 下で NOTAM_MAP（RJAA）と ZSPD を登録 */
-var NMAP_COL = { closed: '#ef4444', light: '#f59e0b', groove: '#fb923c', info: '#38bdf8' };
+var NMAP_COL = { closed: '#a855f7', light: '#a855f7', groove: '#a855f7', info: '#a855f7' };  /* 該当箇所のハイライトは紫の長方形 */
 
 
 /* ZSPD（EFB チャートを西側・東側の2枚に分けて保存。座標は各画像の px） */
@@ -549,10 +549,10 @@ function nmapSvg(items, hiN) {
     var st = 'fill="' + c + '" fill-opacity=".30" stroke="' + c + '" stroke-width="5"' + (it.type === 'light' ? ' stroke-dasharray="14,8"' : '');
     (it.shapes || [it.shape]).forEach(function (sh) {
       if (sh.k === 'line') g += '<line x1="' + sh.pts[0][0] + '" y1="' + sh.pts[0][1] + '" x2="' + sh.pts[1][0] + '" y2="' + sh.pts[1][1] + '" stroke="' + c + '" stroke-opacity=".55" stroke-width="' + sh.w + '" stroke-linecap="round" stroke-dasharray="26,14"/>';
-      else if (sh.k === 'ellipse') g += '<ellipse cx="' + sh.c[0] + '" cy="' + sh.c[1] + '" rx="' + sh.rx + '" ry="' + sh.ry + '" transform="rotate(' + sh.rot + ' ' + sh.c[0] + ' ' + sh.c[1] + ')" ' + st + '/>';
+      else if (sh.k === 'ellipse') g += '<rect x="' + (sh.c[0] - sh.rx) + '" y="' + (sh.c[1] - sh.ry) + '" width="' + (sh.rx * 2) + '" height="' + (sh.ry * 2) + '" rx="6" transform="rotate(' + sh.rot + ' ' + sh.c[0] + ' ' + sh.c[1] + ')" ' + st + '/>';
       else if (sh.k === 'poly') g += '<polygon points="' + sh.pts.map(function (p) { return p.join(','); }).join(' ') + '" ' + st + ' stroke-dasharray="14,8"/>';
       else if (sh.k === 'polyline') g += '<polyline points="' + sh.pts.map(function (p) { return p.join(','); }).join(' ') + '" fill="none" stroke="' + c + '" stroke-width="' + (sh.w || 9) + '" stroke-opacity=".7" stroke-dasharray="14,10" stroke-linecap="round" stroke-linejoin="round"/>';
-      else if (sh.k === 'pin') g += '<circle cx="' + sh.c[0] + '" cy="' + sh.c[1] + '" r="' + (sh.r || 22) + '" ' + st + '/>';
+      else if (sh.k === 'pin') g += '<rect x="' + (sh.c[0] - (sh.r || 22)) + '" y="' + (sh.c[1] - (sh.r || 22)) + '" width="' + ((sh.r || 22) * 2) + '" height="' + ((sh.r || 22) * 2) + '" rx="5" ' + st + '/>';
     });
     var tg = '<circle cx="' + it.tag[0] + '" cy="' + it.tag[1] + '" r="26" fill="' + c + '" stroke="#fff" stroke-width="4"/><text x="' + it.tag[0] + '" y="' + (it.tag[1] + 11) + '" text-anchor="middle" font-size="32" font-weight="700" fill="#111" font-family="sans-serif">' + it.n + '</text>';
     svg += '<g' + dim + '><title>' + it.n + ' ' + ntEsc(it.label) + '（' + ntEsc(it.ids) + '）</title>' + g + tg + '</g>';
@@ -571,7 +571,7 @@ function nmapHtml(items, M) {
 }
 function nmapRender() {
   var host = document.getElementById('nt-map'); if (!host) return;
-  host.innerHTML = '<div class="nm-key"><span style="color:#ef4444">■ 閉鎖</span><span style="color:#f59e0b">■ 灯火不作動</span><span style="color:#fb923c">■ Non-Grooved Runway</span><span style="color:#38bdf8">■ その他</span></div>' +
+  host.innerHTML = '<div class="nm-key"><span style="color:#a855f7">■ 該当箇所（紫の長方形・線）</span><span style="color:var(--muted)">内容（閉鎖・灯火不作動・Non-Grooved など）は番号の説明で区別</span></div>' +
     NOTAM_CHARTS.map(function (c) { return '<div class="nt-h">' + ntEsc(c.name) + '</div>' + nmapHtml(c.items, c); }).join('') +
     '<div class="nm-note">図に出せないもの：RJAA A1193/26（滑走路誤進入警報の停止）、ZSPD・ZSSS の STAR・VOR・LID・ビジュアルアプローチ関連。各 NOTAM のカードを開くと、その NOTAM の位置だけを表示します。</div>';
 }
@@ -904,7 +904,7 @@ function nmapRender() {
     var items = c.items.filter(nmapVisible);
     return items.length ? '<div class="nt-h">' + ntEsc(c.name) + '</div>' + nmapHtml(items, c) : '';
   }).join('');
-  host.innerHTML = '<div class="nm-key"><span style="color:#ef4444">■ 閉鎖</span><span style="color:#f59e0b">■ 灯火不作動</span><span style="color:#fb923c">■ Non-Grooved Runway</span><span style="color:#38bdf8">■ その他</span></div>' + (out || '<div class="nt-empty">この便に位置図で示せる NOTAM はありません。</div>') +
+  host.innerHTML = '<div class="nm-key"><span style="color:#a855f7">■ 該当箇所（紫の長方形・線）</span><span style="color:var(--muted)">内容（閉鎖・灯火不作動・Non-Grooved など）は番号の説明で区別</span></div>' + (out || '<div class="nt-empty">この便に位置図で示せる NOTAM はありません。</div>') +
     '<div class="nm-note">図に出せないもの：場所を持たない NOTAM（STAR・VOR・LID・ビジュアルアプローチ関連など）。各 NOTAM のカードを開くと、その NOTAM の位置だけを表示します。</div>';
 }
 
