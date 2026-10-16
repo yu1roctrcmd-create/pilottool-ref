@@ -1040,3 +1040,7 @@ function nmapInactive(it) {
     if (host && NMAP_INACTIVE[ntLeg]) host.insertAdjacentHTML('afterbegin', '<div class="nm-note" style="margin:4px 0 8px">薄く表示した番号は、<b>この便の時間帯（出発・到着・代替の到着）には無効</b>（16-OCT の夜間閉鎖・工事で、到着より前に終了）。濃い表示が、この便で有効なもの。</div>');
   };
 })();
+
+/* RJTT の灯火 NOTAM（J2007・J2008）の位置図：RWY 16L/34R（終日有効） */
+RJTT_N.items.push({ n: 14, type: 'light', label: 'RWY 16L/34R：センターライン灯（RCLL）使用不可 → CL OUT（J2008）。34R は CAT-2/3 → CAT-1 に格下げ、REDL 一部・SFL（34R）使用不可、16L の THR-ID 灯使用不可（J2007）', ids: 'J2007/26・J2008/26', cards: ['RJTT 灯火・標識の不作動'], shapes: [{ k: 'line', pts: [[1320, 300], [1800, 1120]], w: 20 }, { k: 'pin', c: [1320, 300], r: 26 }, { k: 'pin', c: [1800, 1120], r: 26 }], tag: [1450, 540], chart: RJTT_N });
+RJTT_S.items.push({ n: 10, type: 'light', label: 'RWY 16L/34R：センターライン灯（RCLL）使用不可 → CL OUT（J2008）。34R は CAT-2/3 → CAT-1 に格下げ、REDL 一部・SFL（34R）使用不可、16L の THR-ID 灯使用不可（J2007）', ids: 'J2007/26・J2008/26', cards: ['RJTT 灯火・標識の不作動'], shapes: [{ k: 'line', pts: [[1090, 40], [1310, 430]], w: 20 }, { k: 'pin', c: [1090, 40], r: 26 }, { k: 'pin', c: [1310, 430], r: 26 }], tag: [1160, 250], chart: RJTT_S });
