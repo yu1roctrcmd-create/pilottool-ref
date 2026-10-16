@@ -915,3 +915,11 @@ NOTAMS.forEach(function (n) {
 });
 
 ZSSS_C.items.forEach(function (it) { it.ids = it.ids.replace('F4290/26', 'F4338/26（＝往路の F4290/26 と同範囲）'); });
+
+/* RJTT のカードは、KZ226（復路の代替）で取得した内容のまま、最新便（KZ227）の表示にも残す */
+NOTAMS.forEach(function (n) {
+  if (n.sec === 'RJTT') {
+    if (n.legs.indexOf('KZ227') < 0) n.legs.push('KZ227');
+    (n.rows || []).forEach(function (r) { if ((r.legs || []).indexOf('KZ227') < 0) (r.legs = r.legs || []).push('KZ227'); });
+  }
+});
