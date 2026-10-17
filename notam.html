@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>NCA Tools - NOTAM</title>
   <link rel="stylesheet" href="ref.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="ref-lock.js"></script>
   <style>
     .nt-bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 0 10px}
@@ -41,6 +43,8 @@
       .nt-cols.has-map{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,380px);gap:20px;align-items:start}
       .nt-cols.has-map .nt-right{position:sticky;top:8px}
     }
+    .ng-ap{background:rgba(0,0,0,.65);border:0;color:#fff;font-weight:700;box-shadow:none}
+    .ng-ap:before{display:none}
     .nm-wrap{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start;margin-top:10px}
     .nm-chart{position:relative;flex:0 1 380px;min-width:260px;max-width:100%}
     .nm-chart img{display:block;width:100%;height:auto;border-radius:8px;background:#e8eef4}
@@ -202,6 +206,15 @@
 </div>
 
 <div class="card">
+  <details id="nt-geobox" open>
+  <summary class="card-title" style="cursor:pointer">🌏 空域マップ（緯度経度の記載がある NOTAM）<span id="nt-geocount" style="font-size:.72em;font-weight:400;color:var(--muted)"></span></summary>
+  <div id="nt-geonote" style="font-size:.7em;line-height:1.8;margin:6px 0;color:var(--muted)"></div>
+  <div id="nt-geomap" style="height:520px;border-radius:8px;overflow:hidden;background:#0b1a2a"></div>
+  <ol class="nm-leg" id="nt-geoleg" style="margin-top:10px"></ol>
+  </details>
+</div>
+
+<div class="card">
   <details id="nt-idxbox">
   <summary class="card-title" style="cursor:pointer">📋 全 NOTAM 一覧（この便・すべて個別に分析対象）<span id="nt-idxcount" style="font-size:.72em;font-weight:400;color:var(--muted)"></span></summary>
   <div style="font-size:.7em;color:var(--muted);line-height:1.8;margin:6px 0">表示中の便に載っている NOTAM を、1 件ずつ一覧にしています（順序は問いません）。各行の番号をタップすると、日本語訳・影響・関連マニュアル・原文のあるカードへ移動します。重要度はカードの区分（★重要／要確認／参考）です。</div>
@@ -253,7 +266,7 @@ function ntChips() {
 }
 function ntSetCat(c) { ntCat = c; ntChips(); ntRender(); }
 function ntSetSec(c) { ntSec = c; ntChips(); ntRender(); }
-function ntSetLeg(c) { ntLeg = c; ntChips(); ntRender(); nmapRender(); ntIndexRender(); }
+function ntSetLeg(c) { ntLeg = c; ntChips(); ntRender(); nmapRender(); ntIndexRender(); ngRender(); }
 function ntLegTag(legs) { legs = legs || []; if (legs.length > 1) return legs.map(function (l) { return l.replace('KZ', ''); }).join('・'); return legs[0] ? legs[0] : ''; }
 function ntImp(k, v) {
   var val = v ? v : '<span class="nt-none">影響なし</span>';
@@ -329,8 +342,52 @@ function ntIndexRender() {
     return '<tr><td>' + ntEsc(r.sec) + '</td><td class="nt-no" style="cursor:pointer" onclick="ntJump(\'' + r.card.replace(/'/g, "\\'") + '\')">' + ntEsc(r.id) + '</td><td>' + ntEsc(r.text) + '</td><td>' + r.pr + '</td></tr>';
   }).join('');
 }
+var ngMap = null, ngLayer = null;
+function ngHtmlStrip(h) { return String(h || '').replace(/<[^>]+>/g, ''); }
+function ngValid(id) {
+  var out = '';
+  NOTAMS.forEach(function (n) { (n.rows || []).forEach(function (r) { if (r.no === id) out = r.valid; }); if (!out && n.no === id) out = n.valid; });
+  return out;
+}
+function ngRender() {
+  var box = document.getElementById('nt-geomap'); if (!box || typeof L === 'undefined') return;
+  var leg = ntLeg, note = '';
+  if (leg !== '全て' && typeof AIRSPACE_FALLBACK !== 'undefined' && AIRSPACE_FALLBACK[leg]) { note = '<b style="color:var(--warn)">' + NOTAM_FLIGHTS[leg].label.replace(/（.*）/, '') + ' は Area・Airspace の画面が未取得のため、前便 ' + AIRSPACE_FALLBACK[leg] + ' の内容を参考表示しています（期限・内容が変わっている可能性）。</b><br>'; leg = AIRSPACE_FALLBACK[leg]; }
+  var items = AIRSPACE_GEO.filter(function (d) { return leg === '全て' || d.legs.indexOf(leg) >= 0; });
+  document.getElementById('nt-geocount').textContent = '（' + items.length + ' 件）';
+  document.getElementById('nt-geonote').innerHTML = note + '座標は OCR で読み取った<b>概略</b>です（円弧は直線で近似。数値は原文で確認）。紫の面が NOTAM の空域、番号の付いた印が該当 NOTAM。<b>FL の範囲（F〜G）は凡例参照</b>。';
+  if (!ngMap) {
+    ngMap = L.map(box, { zoomSnap: 0.25 }).setView([32.5, 128], 5);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri, Maxar, Earthstar Geographics', maxZoom: 12 }).addTo(ngMap);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', { maxZoom: 12 }).addTo(ngMap);
+    var ap = [['RJAA', 35.7647, 140.3864], ['RJTT', 35.5533, 139.7811], ['ZSPD', 31.1434, 121.8052], ['ZSSS', 31.1979, 121.3363]];
+    ap.forEach(function (a) { L.circleMarker([a[1], a[2]], { radius: 5, color: '#fff', weight: 2, fillColor: '#111', fillOpacity: 1 }).bindTooltip(a[0], { permanent: true, direction: 'right', offset: [7, 0], className: 'ng-ap' }).addTo(ngMap); });
+    L.polyline([[35.7647, 140.3864], [31.1434, 121.8052]], { color: '#fff', weight: 1.5, dashArray: '4,6', opacity: .7 }).addTo(ngMap);
+  }
+  if (ngLayer) ngMap.removeLayer(ngLayer);
+  ngLayer = L.featureGroup().addTo(ngMap);
+  var P = '#a855f7', n = 0, leghtml = '';
+  var NM = 1852;
+  items.forEach(function (d) {
+    n++;
+    var alt = (d.F || d.G) ? (d.F + ' 〜 ' + d.G) : '';
+    var pop = '<b>' + d.id + '</b>　' + d.name + '<br>' + (alt ? '高度：' + alt + '<br>' : '') + (ngValid(d.id) ? '有効：' + ngValid(d.id) + '<br>' : '') + '<span style="font-size:11px">対象便：' + d.legs.join('・') + '</span>';
+    var st = { color: P, weight: 2, fillColor: P, fillOpacity: .28 }, layer = null, at = null;
+    if (d.kind === 'poly') { layer = L.polygon(d.pts, st); at = layer.getBounds().getCenter(); }
+    else if (d.kind === 'circle') { layer = L.circle(d.c, Object.assign({ radius: d.r_nm * NM }, st)); at = d.c; }
+    else if (d.kind === 'line') { layer = L.polyline(d.pts, { color: P, weight: 5, opacity: .85 }); at = d.pts[0]; }
+    else if (d.kind === 'points') { layer = L.featureGroup(d.pts.map(function (p) { return L.rectangle([[p[0] - .06, p[1] - .06], [p[0] + .06, p[1] + .06]], st); })); at = d.pts[0]; }
+    if (layer) { layer.bindPopup(pop); layer.addTo(ngLayer); }
+    if (at) L.marker(at, { icon: L.divIcon({ className: '', html: '<div style="background:' + P + ';color:#111;border:2px solid #fff;border-radius:50%;width:22px;height:22px;line-height:18px;text-align:center;font:700 11px sans-serif">' + n + '</div>', iconSize: [22, 22], iconAnchor: [11, 11] }) }).bindPopup(pop).addTo(ngLayer);
+    leghtml += '<li><span class="nm-n" style="background:' + P + '">' + n + '</span><span><b>' + ntEsc(d.id) + '</b>　' + ntEsc(d.name) + (alt ? '（' + ntEsc(alt) + '）' : '') + '<br><span style="color:var(--muted)">' + ntEsc(ngHtmlStrip(ngValid(d.id))) + '</span></span></li>';
+  });
+  document.getElementById('nt-geoleg').innerHTML = leghtml || '<li style="list-style:none"><span class="nt-empty">この便に、緯度経度で図示できる空域 NOTAM はありません。</span></li>';
+  if (items.length) { try { ngMap.fitBounds(ngLayer.getBounds().pad(0.15)); } catch (e) {} }
+  setTimeout(function () { ngMap.invalidateSize(); }, 200);
+}
 function ntGo(tab) { try { if (parent && parent.refSwitch) parent.refSwitch(tab); } catch (e) {} }
-ntChips(); ntRender(); nmapRender(); ntIndexRender();
+ntChips(); ntRender(); nmapRender(); ntIndexRender(); ngRender();
+document.getElementById('nt-geobox').addEventListener('toggle', function () { if (ngMap) setTimeout(function () { ngMap.invalidateSize(); }, 100); });
 </script>
 </body>
 </html>
