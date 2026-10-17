@@ -202,6 +202,14 @@
 </div>
 
 <div class="card">
+  <details id="nt-idxbox">
+  <summary class="card-title" style="cursor:pointer">📋 全 NOTAM 一覧（この便・すべて個別に分析対象）<span id="nt-idxcount" style="font-size:.72em;font-weight:400;color:var(--muted)"></span></summary>
+  <div style="font-size:.7em;color:var(--muted);line-height:1.8;margin:6px 0">表示中の便に載っている NOTAM を、1 件ずつ一覧にしています（順序は問いません）。各行の番号をタップすると、日本語訳・影響・関連マニュアル・原文のあるカードへ移動します。重要度はカードの区分（★重要／要確認／参考）です。</div>
+  <div class="nt-tblw"><table class="nt-tbl" id="nt-idxtbl"></table></div>
+  </details>
+</div>
+
+<div class="card">
   <details id="nt-mapbox" open>
   <summary class="card-title" style="cursor:pointer">🗺 NOTAM マップ（RJAA・ZSPD・ZSSS／KZ225・15-OCT）</summary>
   <div id="nt-map"></div>
@@ -245,7 +253,7 @@ function ntChips() {
 }
 function ntSetCat(c) { ntCat = c; ntChips(); ntRender(); }
 function ntSetSec(c) { ntSec = c; ntChips(); ntRender(); }
-function ntSetLeg(c) { ntLeg = c; ntChips(); ntRender(); nmapRender(); }
+function ntSetLeg(c) { ntLeg = c; ntChips(); ntRender(); nmapRender(); ntIndexRender(); }
 function ntLegTag(legs) { legs = legs || []; if (legs.length > 1) return legs.map(function (l) { return l.replace('KZ', ''); }).join('・'); return legs[0] ? legs[0] : ''; }
 function ntImp(k, v) {
   var val = v ? v : '<span class="nt-none">影響なし</span>';
@@ -304,8 +312,25 @@ function ntJump(no) {
     if ((NOTAMS[j].rows || []).some(function (r) { return r.no === no; })) { ntJump(NOTAMS[j].no); return; }
   }
 }
+function ntIndexRender() {
+  var tb = document.getElementById('nt-idxtbl'); if (!tb) return;
+  var rows = [], strip = function (h) { return String(h).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim(); };
+  NOTAMS.forEach(function (n) {
+    if (ntLeg !== '全て' && (n.legs || []).indexOf(ntLeg) < 0) return;
+    var pr = n.pri === 'high' ? '★重要' : (n.pri === 'mid' ? '要確認' : '参考');
+    if (n.rows) n.rows.forEach(function (r) {
+      if (ntLeg !== '全て' && (r.legs || []).indexOf(ntLeg) < 0) return;
+      rows.push({ sec: n.sec, id: r.no, text: strip(r.text).slice(0, 70), pr: pr, card: n.no });
+    });
+    else rows.push({ sec: n.sec, id: n.no, text: strip(n.title).slice(0, 70), pr: pr, card: n.no });
+  });
+  document.getElementById('nt-idxcount').textContent = '（' + rows.length + ' 件）';
+  tb.innerHTML = '<tr><th>区分</th><th>NOTAM</th><th>概要</th><th>重要度</th></tr>' + rows.map(function (r) {
+    return '<tr><td>' + ntEsc(r.sec) + '</td><td class="nt-no" style="cursor:pointer" onclick="ntJump(\'' + r.card.replace(/'/g, "\\'") + '\')">' + ntEsc(r.id) + '</td><td>' + ntEsc(r.text) + '</td><td>' + r.pr + '</td></tr>';
+  }).join('');
+}
 function ntGo(tab) { try { if (parent && parent.refSwitch) parent.refSwitch(tab); } catch (e) {} }
-ntChips(); ntRender(); nmapRender();
+ntChips(); ntRender(); nmapRender(); ntIndexRender();
 </script>
 </body>
 </html>

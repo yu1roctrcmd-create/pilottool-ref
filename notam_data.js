@@ -555,7 +555,7 @@ function nmapSvg(items, hiN) {
       else if (sh.k === 'pin') g += '<rect x="' + (sh.c[0] - (sh.r || 22)) + '" y="' + (sh.c[1] - (sh.r || 22)) + '" width="' + ((sh.r || 22) * 2) + '" height="' + ((sh.r || 22) * 2) + '" rx="5" ' + st + '/>';
     });
     var tg = '<circle cx="' + it.tag[0] + '" cy="' + it.tag[1] + '" r="26" fill="' + c + '" stroke="#fff" stroke-width="4"/><text x="' + it.tag[0] + '" y="' + (it.tag[1] + 11) + '" text-anchor="middle" font-size="32" font-weight="700" fill="#111" font-family="sans-serif">' + it.n + '</text>';
-    svg += '<g' + dim + '><title>' + it.n + ' ' + ntEsc(it.label) + '（' + ntEsc(it.ids) + '）</title>' + g + tg + '</g>';
+    svg += '<g' + dim + '><title>' + it.n + ' ' + ntEsc(it.label) + '（' + ntEsc(it.ids) + '）</title>' + g + tg + nmapLabelSvg(it, c) + '</g>';
   });
   return svg;
 }
@@ -563,7 +563,7 @@ function nmapItemsFor(no) { return NOTAM_CHARTS.map(function (c) { return { char
 function nmapHtml(items, M) {
   var leg = items.map(function (it) {
     var off = nmapInactive(it);
-    return '<li' + (off ? ' style="opacity:.55"' : '') + '><span class="nm-n" style="background:' + NMAP_COL[it.type] + '">' + it.n + '</span><span><b>' + ntEsc(it.ids) + '</b>　' + ntEsc(it.label) + (off ? ' <span style="color:var(--muted)">【この便の時間帯には無効（終了済み／対象日外）】</span>' : '') + '</span></li>';
+    return '<li' + (off ? ' style="opacity:.55"' : '') + '><span class="nm-n" style="background:' + NMAP_COL[it.type] + '">' + it.n + '</span><span><b>' + ntEsc(it.ids) + '</b>　' + ntEsc(it.label) + (off ? '' : '') + nmapBadge(it) + '</span></li>';
   }).join('');
   return '<div class="nm-wrap"><div class="nm-chart"><img src="' + M.img + '" alt="' + M.name + ' Airport Chart" loading="lazy"><svg viewBox="0 0 ' + M.w + ' ' + M.h + '" preserveAspectRatio="none">' + nmapSvg(items) + '</svg></div>' +
     '<div class="nm-side"><ol class="nm-leg">' + leg + '</ol>' +
@@ -1037,10 +1037,77 @@ function nmapInactive(it) {
     var sm = document.querySelector('#nt-mapbox > summary');
     if (sm) sm.textContent = f ? ('🗺 NOTAM マップ：' + f.label.replace(/（.*）/, '') + '　' + f.route + '（' + f.time + (f.altn ? '、代替 ' + f.altn : '') + '）') : '🗺 NOTAM マップ（全便）';
     var host = document.getElementById('nt-map');
-    if (host && NMAP_INACTIVE[ntLeg]) host.insertAdjacentHTML('afterbegin', '<div class="nm-note" style="margin:4px 0 8px">薄く表示した番号は、<b>この便の時間帯（出発・到着・代替の到着）には無効</b>（16-OCT の夜間閉鎖・工事で、到着より前に終了）。濃い表示が、この便で有効なもの。</div>');
+    if (host && NMAP_INACTIVE[ntLeg]) host.insertAdjacentHTML('afterbegin', '<div class="nm-note" style="margin:4px 0 8px"><b>ラベル：</b><span style="color:#16a34a">■ 終日</span>（期間内は常時有効）／<span style="color:#2563eb">■ 時間内</span>（この便の時間帯に有効）／<span style="color:#6b7280">■ 時間外</span>（日付は該当するが、この便の時間帯の外）／<span style="color:#6b7280">■ 日付外</span>（この便の日付が対象外）。<b>時間外・日付外は薄く（グレーアウト）</b>表示。</div>');
   };
 })();
 
 /* RJTT の灯火 NOTAM（J2007・J2008）の位置図：RWY 16L/34R（終日有効） */
 RJTT_N.items.push({ n: 14, type: 'light', label: 'RWY 16L/34R：センターライン灯（RCLL）使用不可 → CL OUT（J2008）。34R は CAT-2/3 → CAT-1 に格下げ、REDL 一部・SFL（34R）使用不可、16L の THR-ID 灯使用不可（J2007）', ids: 'J2007/26・J2008/26', cards: ['RJTT 灯火・標識の不作動'], shapes: [{ k: 'line', pts: [[1320, 300], [1800, 1120]], w: 20 }, { k: 'pin', c: [1320, 300], r: 26 }, { k: 'pin', c: [1800, 1120], r: 26 }], tag: [1450, 540], chart: RJTT_N });
 RJTT_S.items.push({ n: 10, type: 'light', label: 'RWY 16L/34R：センターライン灯（RCLL）使用不可 → CL OUT（J2008）。34R は CAT-2/3 → CAT-1 に格下げ、REDL 一部・SFL（34R）使用不可、16L の THR-ID 灯使用不可（J2007）', ids: 'J2007/26・J2008/26', cards: ['RJTT 灯火・標識の不作動'], shapes: [{ k: 'line', pts: [[1090, 40], [1310, 430]], w: 20 }, { k: 'pin', c: [1090, 40], r: 26 }, { k: 'pin', c: [1310, 430], r: 26 }], tag: [1160, 250], chart: RJTT_S });
+
+/* ── 各項目の「この便に対する有効性」ラベル（終日／時間内／時間外／日付外）──
+   kind: allday＝終日（H24・期間内は常時）／in＝この便の時間内に有効／out_time＝日付は該当するが時間外／out_date＝日付が対象外
+   KZ228：ETD 1940Z（ZSPD）・ETA 2232Z（RJAA）・代替 RJTT（2232Z 以降）、日付は 16-OCT（Z）*/
+var NMAP_STATUS = {
+  KZ228: {
+    'RJAA': {
+      1: ['out_time', '1510–2030Z'], 2: ['out_time', '1410–2030Z'], 3: ['allday', ''], 4: ['allday', ''], 5: ['allday', ''], 6: ['allday', ''],
+      8: ['out_time', '1410–2030Z'], 9: ['allday', ''], 10: ['allday', ''], 11: ['allday', ''], 12: ['allday', ''], 13: ['allday', ''], 14: ['in', '2000Z〜']
+    },
+    'ZSPD（西側）': { 3: ['in', '1730–2230Z'], 4: ['in', '1730–2230Z'], 5: ['in', '1800–2230Z'], 6: ['in', '1730–2230Z'] },
+    'ZSPD（東側）': { 2: ['allday', ''], 3: ['allday', ''], 4: ['in', '1700–2330Z'] },
+    'RJTT（北側）': {
+      1: ['out_time', '1430–2100Z'], 2: ['out_date', '16日は対象外'], 3: ['out_time', '1530–2130Z'], 4: ['out_time', '16日 1430–2130Z'],
+      5: ['out_time', '1430–2100Z'], 6: ['out_time', '1530–2130Z'], 7: ['out_time', '1500–2100Z'], 8: ['out_time', '1500–2100Z'], 9: ['out_time', '1500–2100Z'],
+      10: ['out_time', '1430–2100Z'], 11: ['out_date', '16日は対象外'], 12: ['out_time', '1600–2100Z'], 13: ['out_time', '1600–2100Z'], 14: ['allday', ''], 15: ['allday', ''], 16: ['allday', '']
+    },
+    'RJTT（南側）': {
+      1: ['out_date', '16日は対象外'], 2: ['out_time', '1530–2130Z'], 3: ['out_date', '16日は対象外'], 4: ['out_time', '16日 1530–2130Z'],
+      5: ['out_time', '1530–2130Z'], 6: ['out_time', '1500–2100Z'], 7: ['out_date', '16日は対象外'], 8: ['out_date', '16日は対象外'], 9: ['out_time', '1600–2100Z'], 10: ['allday', ''], 11: ['allday', ''], 12: ['allday', '']
+    }
+  }
+};
+var NMAP_KIND = { allday: '終日', 'in': '時間内', out_time: '時間外', out_date: '日付外' };
+var NMAP_KCOL = { allday: '#16a34a', 'in': '#2563eb', out_time: '#6b7280', out_date: '#6b7280' };
+function nmapStatus(it) {
+  if (typeof ntLeg === 'undefined' || !NMAP_STATUS[ntLeg] || !it.chart) return null;
+  var t = NMAP_STATUS[ntLeg][it.chart.name];
+  return t && t[it.n] ? { k: t[it.n][0], t: t[it.n][1] } : null;
+}
+function nmapInactive(it) { var st = nmapStatus(it); return !!st && (st.k === 'out_time' || st.k === 'out_date'); }
+function nmapBadge(it) {
+  var st = nmapStatus(it); if (!st) return '';
+  return ' <span style="display:inline-block;border-radius:9px;padding:0 8px;font-size:.88em;font-weight:700;color:#fff;background:' + NMAP_KCOL[st.k] + ';white-space:nowrap">' + NMAP_KIND[st.k] + '</span>' + (st.t ? ' <span style="color:var(--muted);white-space:nowrap">' + ntEsc(st.t) + '</span>' : '');
+}
+function nmapLabelSvg(it, c) {
+  var st = nmapStatus(it); if (!st) return '';
+  var txt = NMAP_KIND[st.k], w = txt.length * 34 + 22, x = it.tag[0] + 34, y = it.tag[1];
+  return '<rect x="' + x + '" y="' + (y - 24) + '" width="' + w + '" height="48" rx="10" fill="' + NMAP_KCOL[st.k] + '" stroke="#fff" stroke-width="3"/><text x="' + (x + w / 2) + '" y="' + (y + 12) + '" text-anchor="middle" font-size="34" font-weight="700" fill="#fff" font-family="sans-serif">' + txt + '</text>';
+}
+/* 旧い一括設定（NMAP_INACTIVE）は使わない */
+NMAP_INACTIVE = {};
+
+/* ── 誘導路センターライン灯 使用不可（J2009・J2012）を RJTT の図に追加 ── */
+RJTT_N.items.push(
+  { n: 15, type: 'light', label: '誘導路センターライン灯 使用不可（J2009）：R1・W11（W〜R1）、K（C〜R）・E（K 交差）、A16、T12・T14・Q・Q1・Q2、C（C3・C5 交差）、C7・C8・C9、J（R〜W）・J1・J2、M1', ids: 'J2009/26', cards: ['RJTT 灯火・標識の不作動'], shapes: [
+    { k: 'ellipse', c: [982, 675], rx: 55, ry: 60, rot: 0 }, { k: 'ellipse', c: [1130, 285], rx: 95, ry: 55, rot: -30 }, { k: 'ellipse', c: [665, 414], rx: 55, ry: 32, rot: 0 },
+    { k: 'ellipse', c: [790, 205], rx: 125, ry: 125, rot: -20 }, { k: 'ellipse', c: [1700, 975], rx: 50, ry: 40, rot: 0 }, { k: 'ellipse', c: [1565, 765], rx: 60, ry: 140, rot: -28 },
+    { k: 'polyline', pts: [[1050, 378], [940, 440], [830, 552]], w: 14 }, { k: 'ellipse', c: [1090, 760], rx: 50, ry: 30, rot: 0 }], tag: [1220, 480], chart: RJTT_N },
+  { n: 16, type: 'light', label: '誘導路センターライン灯 使用不可（J2012）：C（C14 交差）、J1（J〜K）、B（B9〜B10）、W11・W9（W 交差）、E3（E〜R）。ほか A・W（スポット 201 後方）、E（スポット 808〜809）、R（A〜スポット 709）は位置が図から特定できず未表示', ids: 'J2012/26', cards: ['RJTT 灯火・標識の不作動'], shapes: [
+    { k: 'ellipse', c: [1270, 160], rx: 50, ry: 35, rot: 0 }, { k: 'ellipse', c: [750, 470], rx: 50, ry: 30, rot: 0 }, { k: 'ellipse', c: [983, 706], rx: 45, ry: 30, rot: 0 }, { k: 'ellipse', c: [842, 437], rx: 45, ry: 30, rot: 0 }], tag: [1000, 570], chart: RJTT_N }
+);
+RJTT_S.items.push(
+  { n: 11, type: 'light', label: '誘導路センターライン灯 使用不可（J2009）：C（C3・C5 交差）、C7 ほか', ids: 'J2009/26', cards: ['RJTT 灯火・標識の不作動'], shapes: [
+    { k: 'ellipse', c: [1268, 400], rx: 48, ry: 40, rot: 0 }, { k: 'ellipse', c: [1210, 215], rx: 45, ry: 35, rot: 0 }, { k: 'ellipse', c: [1110, 135], rx: 40, ry: 50, rot: 0 }], tag: [1340, 330], chart: RJTT_S },
+  { n: 12, type: 'light', label: '誘導路センターライン灯 使用不可（J2012）：E3（E〜R 間）', ids: 'J2012/26', cards: ['RJTT 灯火・標識の不作動'], shapes: [{ k: 'ellipse', c: [1150, 425], rx: 60, ry: 55, rot: 0 }], tag: [1050, 520], chart: RJTT_S }
+);
+
+/* RJTT のグルービング 2 件を個別の行に（全 NOTAM を個別に一覧・分析対象にするため）*/
+NOTAMS.forEach(function (n) {
+  if (n.no === 'RJTT RWY 16L/34R グルービング → Non-Grooved を適用' && !n.rows) {
+    n.rows = [
+      { no: 'J1623/26', legs: ['KZ226', 'KZ227', 'KZ228'], valid: '30-JUL-2026 2130Z 〜 28-OCT-2026 2130Z', text: '<b>RWY 16L/34R のグルービング一部消失（保守）</b>：34R しきい値から 1,004.8〜1,102.8m（長さ 98.0m）、中心線の東側・西側とも幅 11.0m（1.0〜12.0m）。<b>NON-GROOVED を適用</b>' },
+      { no: 'J1987/26', legs: ['KZ226', 'KZ227', 'KZ228'], valid: '30-SEP-2026 1500Z 〜 28-OCT-2026 1500Z', text: '<b>RWY 16L/34R のグルービングが一部消失／段階的に施工中</b>（AIP SUP 212/26 項目 RWY:53,58。次の期間は別 NOTAM で通知。A/M RJTT 10-8B）。<b>NON-GROOVED を適用</b>' }
+    ];
+  }
+});
