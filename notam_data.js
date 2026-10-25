@@ -579,6 +579,14 @@ function nmapRender() {
 /* ═════════ 往復（NRT-PVG-NRT）対応：KZ226（ZSPD→RJAA、15/16-OCT 往復の復路）の追加 ═════════
    legs: ['KZ225'] 往路のみ／['KZ226'] 復路のみ／両方
    KZ226：Oct 16 ETD 07:20Z（ZSPD）― ETA 10:12Z（RJAA）、代替 RJTT・ZSSS（EFB 画面 2026-10-16 18:37 取得） */
+
+/* 便ごとの ETD/ETA（UTC・ISO）。notam.html が有効期間の自動判定（有効／時間外／日付外／期限切れ）に使う */
+var NOTAM_LEG_TIMES = {
+  KZ225: { etd: '2026-10-15T01:30Z', eta: '2026-10-15T04:46Z' },
+  KZ226: { etd: '2026-10-16T07:20Z', eta: '2026-10-16T10:12Z' },
+  KZ227: { etd: '2026-10-16T13:20Z', eta: '2026-10-16T16:33Z' },
+  KZ228: { etd: '2026-10-16T19:40Z', eta: '2026-10-16T22:32Z' }
+};
 var NOTAM_FLIGHTS = {
   KZ225: { label: 'KZ225 往路', route: 'RJAA→ZSPD', time: 'Oct 15 ETD 01:30Z（NRT）― ETA 04:46Z（PVG）', altn: 'ZSSS' },
   KZ226: { label: 'KZ226 復路', route: 'ZSPD→RJAA', time: 'Oct 16 ETD 07:20Z（PVG）― ETA 10:12Z（NRT）', altn: 'RJTT・ZSSS' }

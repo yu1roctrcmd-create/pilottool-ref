@@ -30,6 +30,22 @@
     .nt-chk{color:var(--warn);font-weight:700}
     .nt-ref a,.nt-ref button{display:inline-block;margin:4px 8px 4px 0;border:1px solid var(--accent);color:var(--accent);background:transparent;border-radius:6px;padding:2px 9px;font-size:.92em;font-weight:700;cursor:pointer;text-decoration:none;font-family:inherit}
     .nt-src{font-size:.82em;color:var(--muted);margin-top:8px}
+    .nt-st{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:2px 9px;font-size:.66em;font-weight:700;white-space:nowrap;border:1px solid}
+    .nt-st.active{color:var(--green,#00e698);border-color:rgba(0,230,152,.5);background:rgba(0,230,152,.1)}
+    .nt-st.outtime{color:var(--warn);border-color:rgba(255,140,66,.5);background:rgba(255,140,66,.1)}
+    .nt-st.future,.nt-st.expired{color:var(--muted);border-color:var(--border);background:transparent}
+    .nt-st.expired{text-decoration:line-through}
+    .nt-st.unknown{color:var(--accent);border-color:rgba(0,200,255,.4);background:rgba(0,200,255,.08)}
+    .nt-item.expired>summary{opacity:.55}
+    .nt-imt{display:inline-block;font-size:.6em;font-weight:800;letter-spacing:.04em;border-radius:4px;padding:1px 5px;margin-left:2px;color:#fff;background:#4a6880}
+    .nt-imt.perf{background:#c2410c}.nt-imt.nav{background:#1d4ed8}.nt-imt.ops{background:#0f766e}
+    .nt-origd>summary{cursor:pointer;color:var(--accent);font-size:.9em;padding:4px 0;list-style:none}
+    .nt-origd>summary::before{content:'▸ '}.nt-origd[open]>summary::before{content:'▾ '}
+    #nt-flight{font-size:.8em;line-height:1.8;margin:6px 2px 10px;padding:8px 12px;border:1px solid var(--border);border-radius:10px;background:var(--card)}
+    #nt-auto{font-size:.78em;line-height:1.9}
+    #nt-auto .cnt{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 8px}
+    #nt-auto ul{margin:4px 0 0;padding-left:1.2em}
+    #nt-auto a{color:var(--accent);text-decoration:none}
     #nt-list{display:grid;grid-template-columns:1fr;gap:0 14px;align-items:start}
     @media (min-width:640px){#nt-list{grid-template-columns:1fr 1fr}}
     #nt-list .nt-empty{grid-column:1/-1}
@@ -90,7 +106,14 @@
 </div>
 
 <div style="font-size:0.62em;color:var(--warn);margin:6px 2px 10px;line-height:1.7">
-  ⚠ 出典は<b>会社貸与EFBのスクリーンショット</b>（KZ225 RJAA→ZSPD、Oct 15、代替 ZSSS）です。同種の NOTAM は表にまとめています。NOTAM は日々変わるため、<b>当日のフライトでは必ず最新のNOTAMを確認</b>してください。「影響」「関連マニュアル」の欄のうち、原文から直接言えない部分は <span style="font-weight:700">［要確認］</span> と表示しています。
+  ⚠ 出典は<b>会社貸与EFBのスクリーンショット</b>（便は下の「便」ボタンで切替）です。同種の NOTAM は表にまとめています。NOTAM は日々変わるため、<b>当日のフライトでは必ず最新のNOTAMを確認</b>してください。「影響」「関連マニュアル」の欄のうち、原文から直接言えない部分は <span style="font-weight:700">［要確認］</span> と表示しています。
+</div>
+
+<div id="nt-flight"></div>
+
+<div class="card nt-sum">
+  <div class="card-title">⏱ 有効期間の自動判定 <span style="font-size:.72em;font-weight:400;color:var(--muted)">出発空港は ETD、到着・代替空港は ETA、その他は便全体の時間帯（UTC）に対して判定</span></div>
+  <div id="nt-auto"></div>
 </div>
 
 <div class="card nt-sum">
@@ -246,6 +269,127 @@
 <script>
 var ntCat = '全て', ntSec = '全て', ntLeg = (typeof NOTAM_LATEST !== 'undefined' ? NOTAM_LATEST : '全て'), SECS = ['全て','General','RJAA','ZSPD','ZSSS','RJTT','CHN','ASP','RJJJ','ZSHA','RKRR'];
 var PRI = {high:'重要', mid:'', low:''};
+var ntOnlyActive = false, ntHideExpired = true;
+/* ═══ 有効期間の解析（valid 文字列 → 構造）と便に対する判定 ═══ */
+var NT_MON = {JAN:0,FEB:1,MAR:2,APR:3,MAY:4,JUN:5,JUL:6,AUG:7,SEP:8,OCT:9,NOV:10,DEC:11};
+function ntParseValid(str, yearHint) {
+  var r = { ok: false, raw: str || '', from: null, to: null, ufn: false, daily: [], days: null, dayWin: null, note: '' };
+  if (!str) return r;
+  var t = String(str).replace(/\s+/g, ' ').trim();
+  if (/各 NOTAM 参照|同上|→/.test(t) && !/\d{2}-[A-Z]{3}/.test(t)) { r.note = '個別参照'; return r; }
+  var y = yearHint || 2026;
+  var dtRe = /(\d{2})-([A-Z]{3})(?:-(\d{4}))?(?:\s*(\d{2}):?(\d{2})\s*Z?)?/g, m, toks = [];
+  while ((m = dtRe.exec(t))) toks.push({ i: m.index, d: +m[1], mo: NT_MON[m[2]], y: m[3] ? +m[3] : null, h: m[4] != null ? +m[4] : null, mi: m[5] != null ? +m[5] : null });
+  var dayRange = /(\d{2})〜(\d{2})-([A-Z]{3})(?:-(\d{4}))?/.exec(t);
+  var dayList = /((?:\d{2}・)+\d{2})-([A-Z]{3})/.exec(t);
+  if (!toks.length && !dayRange && !dayList) { r.note = '日付なし'; return r; }
+  function mk(tk, endOfDay) { var yy = tk.y || y; return new Date(Date.UTC(yy, tk.mo, tk.d, tk.h != null ? tk.h : (endOfDay ? 23 : 0), tk.mi != null ? tk.mi : (endOfDay ? 59 : 0))); }
+  if (dayRange) { var mo = NT_MON[dayRange[3]], yy = dayRange[4] ? +dayRange[4] : y; r.from = new Date(Date.UTC(yy, mo, +dayRange[1])); r.to = new Date(Date.UTC(yy, mo, +dayRange[2], 23, 59)); }
+  else if (dayList) { var mo2 = NT_MON[dayList[2]], ds = dayList[1].split('・').map(Number); r.from = new Date(Date.UTC(y, mo2, Math.min.apply(null, ds))); r.to = new Date(Date.UTC(y, mo2, Math.max.apply(null, ds), 23, 59)); r.days = ds; }
+  else {
+    var tk0 = toks[0]; r.from = mk(tk0, false);
+    var rest = t.slice(tk0.i + 6), sep = rest.indexOf('〜');
+    if (sep >= 0) {
+      var after = rest.slice(sep + 1);
+      if (/UFN/.test(after)) r.ufn = true;
+      else {
+        var tk1 = toks.filter(function (k) { return k.i > tk0.i + 6 + sep; })[0];
+        if (tk1) { if (tk1.y && !tk0.y) r.from = new Date(Date.UTC(tk1.y - (tk1.mo < tk0.mo ? 1 : 0), tk0.mo, tk0.d, tk0.h || 0, tk0.mi || 0)); r.to = mk(tk1, true); }
+        else { var tm = /(\d{2}):?(\d{2})\s*Z/.exec(after); if (tm) { r.to = new Date(r.from.getTime()); r.to.setUTCHours(+tm[1], +tm[2], 0, 0); if (r.to < r.from) r.to.setUTCDate(r.to.getUTCDate() + 1); } }
+      }
+    } else if (tk0.h == null) r.to = new Date(Date.UTC(tk0.y || y, tk0.mo, tk0.d, 23, 59));
+  }
+  var w, wRe = /(\d{2})(\d{2})[–](\d{2})(\d{2})/g, wins = [];
+  while ((w = wRe.exec(t))) wins.push([+w[1], +w[2], +w[3], +w[4]]);
+  var dw, dwRe = /(\d{1,2})\s*日\s*(\d{2})(\d{2})[–](\d{2})(\d{2})/g, dayWin = {}, anyDw = false;
+  while ((dw = dwRe.exec(t))) { anyDw = true; (dayWin[+dw[1]] = dayWin[+dw[1]] || []).push([+dw[2], +dw[3], +dw[4], +dw[5]]); }
+  if (anyDw) r.dayWin = dayWin; else if (wins.length) r.daily = wins;
+  // 「01-OCT 1410Z 〜 31-OCT 2030Z」形式（年なし・コロンなし時刻・複数日・開始と終了の時刻が異なる）は夜間閉鎖などの「毎日 その時間帯」と解釈
+  if (!r.daily.length && !r.dayWin && r.from && r.to && !/\d{4}/.test(t.replace(/\d{4}Z/g, '')) && /\d{4}Z/.test(t) && (r.to - r.from) > 36e5 * 24) {
+    var fh = r.from.getUTCHours(), fm = r.from.getUTCMinutes(), th = r.to.getUTCHours(), tm2 = r.to.getUTCMinutes();
+    if (fh * 60 + fm !== th * 60 + tm2) { r.daily = [[fh, fm, th, tm2]]; r.note = (r.note ? r.note + ' ' : '') + '毎日の時間帯と解釈'; }
+  }
+  var dl = /日：([\d\s-]+)/.exec(t) || /[（(]((?:\d{2}(?:-\d{2})?\s+){2,}\d{2}(?:-\d{2})?)[）)]/.exec(t);
+  if (dl && !r.days) { var ds2 = []; dl[1].trim().split(/\s+/).forEach(function (p) { var q = p.split('-'); if (q.length === 2) { for (var k = +q[0]; k <= +q[1]; k++) ds2.push(k); } else ds2.push(+q[0]); }); if (ds2.length) r.days = ds2; }
+  if (/予定/.test(t)) r.note = '（予定）';
+  r.ok = !!r.from;
+  return r;
+}
+function ntLegWindow(leg, sec) {
+  var lt = (typeof NOTAM_LEG_TIMES !== 'undefined') ? NOTAM_LEG_TIMES[leg] : null; if (!lt) return null;
+  var etd = new Date(lt.etd), eta = new Date(lt.eta), f = NOTAM_FLIGHTS[leg] || {}, rt = (f.route || '').split('→');
+  var dep = (rt[0] || '').trim(), arr = (rt[1] || '').trim(), altn = (f.altn || '');
+  var ws = new Date(etd.getTime() - 90 * 60000), we = new Date(eta.getTime() + 60 * 60000), scope = '便全体';
+  if (sec && sec === dep) { we = new Date(etd.getTime() + 30 * 60000); scope = '出発（ETD−1:30〜+0:30）'; }
+  else if (sec && (sec === arr || altn.indexOf(sec) >= 0)) { ws = new Date(eta.getTime() - 30 * 60000); we = new Date(eta.getTime() + 90 * 60000); scope = (sec === arr ? '到着' : '代替') + '（ETA−0:30〜+1:30）'; }
+  return { ws: ws, we: we, etd: etd, eta: eta, scope: scope };
+}
+function ntStatus(p, leg, sec) {
+  var win = ntLegWindow(leg, sec); if (!win) return 'noleg'; if (!p || !p.ok) return 'unknown';
+  if (p.to && p.to < win.ws) return 'expired';
+  if (p.from && p.from > win.we) return 'future';
+  if (!p.daily.length && !p.dayWin && !p.days) return 'active';
+  var d0 = new Date(Date.UTC(win.ws.getUTCFullYear(), win.ws.getUTCMonth(), win.ws.getUTCDate())), dayHit = false;
+  for (var d = new Date(d0); d <= win.we; d.setUTCDate(d.getUTCDate() + 1)) {
+    var dn = d.getUTCDate();
+    if (p.days && p.days.indexOf(dn) < 0) continue;
+    if (p.dayWin && !p.dayWin[dn]) continue;
+    var wins = p.dayWin ? p.dayWin[dn] : (p.daily.length ? p.daily : [[0, 0, 23, 59]]);
+    dayHit = true;
+    for (var i = 0; i < wins.length; i++) {
+      var a = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), dn, wins[i][0], wins[i][1])), b = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), dn, wins[i][2], wins[i][3]));
+      if (b <= a) b.setUTCDate(b.getUTCDate() + 1);
+      if (p.from && b < p.from) continue; if (p.to && a > p.to) continue;
+      if (a <= win.we && b >= win.ws) return 'active';
+    }
+  }
+  return dayHit ? 'outtime' : 'future';
+}
+var NT_ST = { active: ['有効', '便の時間帯に有効'], outtime: ['時間外', '期間内だが便の時間帯の外'], future: ['日付外', '便の日より後に開始／対象日ではない'], expired: ['期限切れ', '便より前に終了'], unknown: ['期間要確認', '期間を解析できない（個別参照・原文確認）'], noleg: ['', ''] };
+function ntBadge(st) { return st && NT_ST[st] && NT_ST[st][0] ? '<span class="nt-st ' + st + '" title="' + NT_ST[st][1] + '">' + NT_ST[st][0] + '</span>' : ''; }
+function ntRowsFor(n) { return (n.rows || []).filter(function (r) { return ntLeg === '全て' || (r.legs || []).indexOf(ntLeg) >= 0; }); }
+var NT_RANK = { active: 4, outtime: 3, unknown: 2, future: 1, expired: 0 };
+function ntItemStatus(n) {
+  if (ntLeg === '全て') return 'noleg';
+  var st = ntStatus(ntParseValid(n.valid), ntLeg, n.sec);
+  // 一覧（rows）がある場合は、個別 NOTAM の期間を優先（見出しの期間は「最長」など概括のことが多い）。最も「効く」側（有効＞時間外＞要確認＞日付外＞期限切れ）を採用
+  var rows = ntRowsFor(n).filter(function (r) { return r.valid && !/同上|→/.test(r.valid); }), best = null, parsed = 0;
+  rows.forEach(function (r) { var p = ntParseValid(r.valid); if (p.ok) parsed++; var rs = ntStatus(p, ntLeg, n.sec); if (best === null || NT_RANK[rs] > NT_RANK[best]) best = rs; });
+  if (parsed > 0) st = best; else if (best !== null && st === 'unknown') st = best;
+  return st;
+}
+function ntFmtDate(d) { if (!d) return ''; var mo = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC']; return ('0' + d.getUTCDate()).slice(-2) + '-' + mo[d.getUTCMonth()] + ' ' + ('0' + d.getUTCHours()).slice(-2) + ('0' + d.getUTCMinutes()).slice(-2) + 'Z'; }
+function ntValidExplain(n) {
+  var p = ntParseValid(n.valid); if (!p.ok) return '';
+  var s = ntFmtDate(p.from) + ' 〜 ' + (p.ufn ? 'UFN' : p.to ? ntFmtDate(p.to) : '—');
+  if (p.daily.length) s += '　毎日 ' + p.daily.map(function (w) { return ('0' + w[0]).slice(-2) + ('0' + w[1]).slice(-2) + '–' + ('0' + w[2]).slice(-2) + ('0' + w[3]).slice(-2) + 'Z'; }).join('、');
+  if (p.days) s += '　対象日：' + p.days.join(' ');
+  if (p.dayWin) s += '　日別の時間帯あり';
+  return s + (p.note ? ' ' + p.note : '');
+}
+function ntFlightBox() {
+  var el = document.getElementById('nt-flight'); if (!el) return;
+  if (ntLeg === '全て') { el.innerHTML = '<b>全便表示</b>（過去分を含む）。便を選ぶと ETD/ETA に対する有効判定が付きます。'; return; }
+  var f = NOTAM_FLIGHTS[ntLeg] || {}, w = ntLegWindow(ntLeg);
+  el.innerHTML = '<b>' + ntEsc(f.label || ntLeg) + '</b>　' + ntEsc(f.route || '') + '　' + ntEsc(f.time || '') + (f.altn ? '　代替 ' + ntEsc(f.altn) : '') +
+    (w ? '<br><span style="color:var(--muted)">判定：出発空港＝ETD−1:30〜+0:30、到着・代替＝ETA−0:30〜+1:30、その他＝便全体（ETD ' + ntFmtDate(w.etd) + '／ETA ' + ntFmtDate(w.eta) + '）</span>' : '');
+}
+function ntAutoSummary() {
+  var el = document.getElementById('nt-auto'); if (!el) return;
+  if (ntLeg === '全て') { el.innerHTML = '<span style="color:var(--muted)">便を選択すると自動判定を表示します。</span>'; return; }
+  var cnt = { active: 0, outtime: 0, future: 0, expired: 0, unknown: 0 }, act = {};
+  NOTAMS.forEach(function (n) {
+    if ((n.legs || []).indexOf(ntLeg) < 0) return;
+    var st = ntItemStatus(n); if (cnt[st] != null) cnt[st]++;
+    if (st === 'active' && n.pri !== 'low') (act[n.sec] = act[n.sec] || []).push(n);
+  });
+  var secs = Object.keys(act);
+  el.innerHTML = '<div class="cnt">' + ['active', 'outtime', 'future', 'expired', 'unknown'].map(function (k) { return ntBadge(k) + ' ' + cnt[k]; }).join('　') + '</div>' +
+    (secs.length ? '<div style="font-weight:700;margin-top:4px">有効（重要・中）：</div>' + secs.map(function (sec) {
+      return '<div><b style="color:var(--accent)">' + ntEsc(sec) + '</b><ul>' + act[sec].map(function (n) { return '<li><a href="#" onclick="ntJump(\'' + n.no.replace(/'/g, "\\'") + '\');return false;">' + ntEsc(n.no) + '</a>　' + ntEsc(n.title) + (n.pri === 'high' ? ' <span class="nt-tag hi">★</span>' : '') + '</li>'; }).join('') + '</ul></div>';
+    }).join('') : '<div style="color:var(--muted)">有効な重要・中の NOTAM はありません。</div>') +
+    '<div style="font-size:.9em;color:var(--muted);margin-top:8px">判定は valid 欄の機械解析によるもの。「期間要確認」は原文を確認。時間帯は UTC。</div>';
+}
 function ntEsc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 function ntCats() {
   var s = {}; NOTAMS.forEach(function (n) { n.cat.forEach(function (c) { s[c] = 1; }); });
@@ -257,6 +401,9 @@ function ntChips() {
     var lab = c === '全て' ? '全便（過去分を含む）' : (NOTAM_FLIGHTS[c].label + '（' + NOTAM_FLIGHTS[c].route + '）');
     return '<button class="nt-chip' + (c === ntLeg ? ' on' : '') + '" onclick="ntSetLeg(\'' + c + '\')">' + lab + '</button>';
   }).join('');
+  if (lg && ntLeg !== '全て') lg.innerHTML += '<span style="flex-basis:100%"></span>' +
+    '<button class="nt-chip' + (ntOnlyActive ? ' on' : '') + '" onclick="ntOnlyActive=!ntOnlyActive;ntChips();ntRender()">✓ この便に有効のみ</button>' +
+    '<button class="nt-chip' + (ntHideExpired ? ' on' : '') + '" onclick="ntHideExpired=!ntHideExpired;ntChips();ntRender()">期限切れを隠す</button>';
   var cnt = {}; NOTAMS.forEach(function (n) { if (ntLeg === '全て' || (n.legs || []).indexOf(ntLeg) >= 0) cnt[n.sec] = (cnt[n.sec] || 0) + 1; });
   document.getElementById('nt-secs').innerHTML = SECS.map(function (c) {
     return '<button class="nt-chip' + (c === ntSec ? ' on' : '') + '" onclick="ntSetSec(\'' + c + '\')">' + c + (cnt[c] ? ' ' + cnt[c] : '') + '</button>';
@@ -267,7 +414,7 @@ function ntChips() {
 }
 function ntSetCat(c) { ntCat = c; ntChips(); ntRender(); }
 function ntSetSec(c) { ntSec = c; ntChips(); ntRender(); }
-function ntSetLeg(c) { ntLeg = c; ntChips(); ntRender(); nmapRender(); ntIndexRender(); ngRender(); }
+function ntSetLeg(c) { ntLeg = c; ntChips(); ntRender(); nmapRender(); ntIndexRender(); ngRender(); ntFlightBox(); ntAutoSummary(); }
 function ntLegTag(legs) { legs = legs || []; if (legs.length > 1) return legs.map(function (l) { return l.replace('KZ', ''); }).join('・'); return legs[0] ? legs[0] : ''; }
 function ntImp(k, v) {
   var val = v ? v : '<span class="nt-none">影響なし</span>';
@@ -281,6 +428,7 @@ function ntRender() {
     else if (ntSec !== '全て' && n.sec !== ntSec) return false;
     if (ntLeg !== '全て' && (n.legs || []).indexOf(ntLeg) < 0) return false;
     if (ntCat !== '全て' && n.cat.indexOf(ntCat) < 0) return false;
+    if (ntLeg !== '全て') { var st0 = ntItemStatus(n); if (ntHideExpired && st0 === 'expired') return false; if (ntOnlyActive && st0 !== 'active' && st0 !== 'unknown') return false; }
     if (!q) return true;
     var rt = (n.rows || []).map(function (r) { return r.no + ' ' + r.text; }).join(' ');
     return (n.no + ' ' + n.title + ' ' + n.orig + ' ' + n.ja + ' ' + (n.perf || '') + ' ' + (n.nav || '') + ' ' + (n.ops || '') + ' ' + n.cat.join(' ') + ' ' + rt).toLowerCase().indexOf(q) >= 0;
@@ -297,16 +445,18 @@ function ntRender() {
     var mg = nmapItemsFor(n.no), mi = [].concat.apply([], mg.map(function (g) { return g.items; })), mp = mg.map(function (g) { return '<div class="nt-h">位置（' + ntEsc(g.chart.name) + ' チャート）</div>' + nmapHtml(g.items, g.chart); }).join('');
     var tbl = '';
     if (n.rows) tbl = '<div class="nt-h">一覧</div><div class="nt-tblw"><table class="nt-tbl"><tr><th>No.</th><th>有効</th><th>内容</th></tr>' +
-      n.rows.filter(function (r) { return ntLeg === '全て' || (r.legs || []).indexOf(ntLeg) >= 0; }).map(function (r) { return '<tr><td class="nt-no">' + ntEsc(r.no) + ntRowTag(mi, r.no) + ((r.legs || []).length === 1 ? ' <span class="nt-leg">' + ntLegTag(r.legs) + '</span>' : '') + '</td><td>' + ntEsc(r.valid) + '</td><td>' + r.text.replace(/\n/g, '<br>') + '</td></tr>'; }).join('') + '</table></div>';
-    return '<details class="nt-item' + (mp ? ' wide' : '') + (n.pri === 'high' ? ' hi' : '') + '" data-no="' + ntEsc(n.no) + '"' + (rows.length <= 2 ? ' open' : '') + '><summary><span class="nt-no">' + ntEsc(n.no) + '</span><span class="nt-title">' + ntEsc(n.title) + '</span>' +
+      n.rows.filter(function (r) { return ntLeg === '全て' || (r.legs || []).indexOf(ntLeg) >= 0; }).map(function (r) { var rst = (ntLeg !== '全て' && r.valid && !/同上|→/.test(r.valid)) ? ntStatus(ntParseValid(r.valid), ntLeg, n.sec) : ''; return '<tr><td class="nt-no">' + ntEsc(r.no) + ntRowTag(mi, r.no) + ((r.legs || []).length === 1 ? ' <span class="nt-leg">' + ntLegTag(r.legs) + '</span>' : '') + '</td><td>' + ntEsc(r.valid) + (rst ? '<br>' + ntBadge(rst) : '') + '</td><td>' + r.text.replace(/\n/g, '<br>') + '</td></tr>'; }).join('') + '</table></div>';
+    var st = ntItemStatus(n), imt = (n.perf ? '<span class="nt-imt perf">PERF</span>' : '') + (n.nav ? '<span class="nt-imt nav">NAV</span>' : '') + (n.ops ? '<span class="nt-imt ops">OPS</span>' : '');
+    return '<details class="nt-item' + (mp ? ' wide' : '') + (n.pri === 'high' ? ' hi' : '') + (st === 'expired' ? ' expired' : '') + '" data-no="' + ntEsc(n.no) + '"' + (rows.length <= 2 ? ' open' : '') + '><summary><span class="nt-no">' + ntEsc(n.no) + '</span><span class="nt-title">' + ntEsc(n.title) + '</span>' + ntBadge(st) + imt + '' +
       '<span class="nt-tag sec">' + ntEsc(n.sec) + '</span><span class="nt-tag leg' + ((n.legs || []).length > 2 ? ' both' : '') + '">' + ntLegTag(n.legs) + '</span>' + (n.pri === 'high' ? '<span class="nt-tag hi">★重要</span>' : '') +
       n.cat.map(function (c) { return '<span class="nt-tag">' + ntEsc(c) + '</span>'; }).join('') + '</summary>' +
       '<div class="nt-body">' +
-      '<div class="nt-cols' + (mp ? ' has-map' : '') + '"><div class="nt-left"><div class="nt-h" style="margin-top:6px">日本語訳・概要</div><div>' + n.ja + '</div>' + tbl +
-      '<div class="nt-h">影響</div><div class="nt-imp">' + ntImp('性能', n.perf) + ntImp('航法要件', n.nav) + ntImp('運航', n.ops) + '</div>' +
+      '<div class="nt-cols' + (mp ? ' has-map' : '') + '"><div class="nt-left">' +
+      '<div class="nt-h" style="margin-top:6px">影響</div><div class="nt-imp">' + ntImp('性能', n.perf) + ntImp('航法要件', n.nav) + ntImp('運航', n.ops) + '</div>' +
+      '<div class="nt-h">有効期間</div><div>' + ntBadge(st) + (ntLeg !== '全て' && ntLegWindow(ntLeg, n.sec) ? ' <span style="color:var(--muted);font-size:.85em">判定：' + ntLegWindow(ntLeg, n.sec).scope + '</span>' : '') + ' ' + ntEsc(n.valid) + (ntValidExplain(n) ? '<br><span style="color:var(--muted);font-size:.9em">解析：' + ntEsc(ntValidExplain(n)) + '</span>' : '') + '<br><span style="color:var(--muted);font-size:.9em">発行／改訂：' + ntEsc(n.issued) + '</span></div>' +
+      '<div class="nt-h">日本語訳・概要</div><div>' + n.ja + '</div>' + tbl +
       '<div class="nt-h">関連マニュアル・ツール</div><div class="nt-ref">' + (refs || '<span class="nt-none">未登録</span>') + '</div>' +
-      '<div class="nt-h">原文（英語）</div><div class="nt-orig">' + ntEsc(n.orig) + '</div>' +
-      '<div class="nt-src">発行／改訂：' + ntEsc(n.issued) + '　有効：' + ntEsc(n.valid) + '</div>' +
+      '<details class="nt-origd" style="margin-top:14px"><summary>原文（英語）</summary><div class="nt-orig">' + ntEsc(n.orig) + '</div></details>' +
       '</div>' + (mp ? '<div class="nt-right">' + mp + '</div>' : '') + '</div></div></details>';
   }).join('');
 }
@@ -387,7 +537,8 @@ function ngRender() {
   setTimeout(function () { ngMap.invalidateSize(); }, 200);
 }
 function ntGo(tab) { try { if (parent && parent.refSwitch) parent.refSwitch(tab); } catch (e) {} }
-ntChips(); ntRender(); nmapRender(); ntIndexRender(); ngRender();
+ntChips(); ntRender(); nmapRender(); ntIndexRender(); ngRender(); ntFlightBox(); ntAutoSummary();
+if (window.innerWidth < 700) { var sb = document.getElementById('nt-sumbox'); if (sb) sb.open = false; }
 document.getElementById('nt-geobox').addEventListener('toggle', function () { if (ngMap) setTimeout(function () { ngMap.invalidateSize(); }, 100); });
 </script>
 </body>
