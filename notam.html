@@ -51,7 +51,7 @@
     #nt-auto a{color:var(--accent);text-decoration:none}
     @media print {
       body{background:#fff;color:#000}
-      .tab-bar,#nt-export,#nt-export-ta,.nt-bar,#nt-q,#nt-mapbox,#nt-geobox,#nt-idxbox,#nt-sumbox-old,#nt-sumbox-227,.nm-wrap,.nt-right,.nt-ref button{display:none !important}
+      .tab-bar,#nt-export,#nt-export-ta,.nt-bar,#nt-q,#nt-mapbox,#nt-geobox,#nt-idxbox,#nt-sumbox-old,#nt-sumbox-227,#nt-sumbox-228,.nm-wrap,.nt-right,.nt-ref button{display:none !important}
       .card,.nt-item{break-inside:avoid;border:1px solid #999 !important;background:#fff !important;color:#000 !important}
       .nt-item>summary::before{content:''}
       .nt-body{font-size:11px;line-height:1.6}
@@ -138,7 +138,44 @@
 
 <div class="card nt-sum">
   <details id="nt-sumbox" open>
-  <summary class="card-title" style="cursor:pointer">🧭 KZ228（ZSPD→RJAA）NOTAM 分析　<span style="font-size:.7em;font-weight:400;color:var(--muted)">最新</span></summary>
+  <summary class="card-title" style="cursor:pointer">🧭 KZ225（RJAA→ZSPD、26-OCT）NOTAM 分析　<span style="font-size:.7em;font-weight:400;color:var(--muted)">最新</span></summary>
+  <div style="font-size:.74em;line-height:1.9;margin:6px 0 4px;color:var(--muted)">
+    <b>KZ225 / NCA225</b>　RJAA/NRT → ZSPD/PVG　Oct 26　<b>ETD 01:35Z ― ETA 04:34Z</b>（日本時間 10:35 ― 13:34、上海 09:35 ― 12:34）　代替 ZSSS<br>
+    取り込み済みの画面：General／RJAA／ZSPD／ZSSS／CHN／ASP／RJJJ／ZSHA／RKRR（全 56 枚）。日中の便なので、灯火関係の NOTAM の影響は小さい。
+  </div>
+  <h4>① 出発（RJAA、ETD 0135Z）</h4>
+  <ul>
+    <li><b>NCA 00225/26（新・NCA 00202/26 の後継）：RWY 16R/34L はグルービング一部消失 → Non-Grooved 扱い</b>。OPT／i-SKY で <b>16RGRV・34LGRV は選ばない</b>、離陸は <b>16RA2／16RA2NTM</b>。Wet なら <b>WET NGRV</b> の性能。</li>
+    <li><b>TSAT 運用（NCA 00210/23）</b>：EOBT 2100〜1130Z の便が対象＝<b>本便は対象</b>。NRT Station が EOBT の 5 分前に TOBT を設定。守れなければ FOC へ。</li>
+    <li>夜間の滑走路閉鎖（A1442・A1443・A1445、1410〜2030Z）は<b>時間外</b>。16L の PALS 一部不作動（A1472・A1473）は 16L を使う場合の最低気象に注意。</li>
+    <li><b>A1564/26（新）：滑走路誤進入警報の運用停止</b>（〜2027 年 1 月）。滑走路横断・進入は目視と復唱で確実に。</li>
+    <li>誘導路センターライン灯の不作動（A1552：TWY A の A1〜A2、<b>A1562：D1、A1563：N2・D1/M・M の D2〜H1</b>。新規）— 日中のため影響は小さい。</li>
+  </ul>
+  <h4>② 到着（ZSPD、ETA 0434Z）</h4>
+  <ul>
+    <li><b>F4468/26（新）：TWY Q5（L15〜C 間）と TWY L15（スポット 313〜315 間）が閉鎖、0200〜0900Z＝ETA は閉鎖中</b>。工事車両・作業員のジェットブラスト注意。余裕がなければ Ground にプルフォワードを要求。</li>
+    <li>LID（着陸情報のデータリンク配信）試行（F3193）、TWY・翼幅制限などの前便からの継続（F3772・F3286・F3458・F3220・F2442・F4301）は各カードを参照。</li>
+    <li>RAIM 予測（NCA 00078/25、25-OCT 0443Z 改訂）：<b>ZSPD／ZSSS とも 0.3・1.0 に欠落なし</b>。</li>
+  </ul>
+  <h4>③ 代替（ZSSS）</h4>
+  <ul>
+    <li>TWY A の K1 交差部が工事中（F3922、Jepp 10-8・AIRAC SUP 21/26）、Visual Approach の運用（F3202）、LID 試行（F3192）、LIUZAO VOR「PDL」の一部ラジアル不可（F2443）。<b>ZGGG は代替に不可（NCA 00011/20）</b>。</li>
+  </ul>
+  <h4>④ 経路・空域</h4>
+  <ul>
+    <li><b>Z1879/26（新）：A593／Y592 を西行きする台風迂回機は ONIKU で 60 分間隔</b>（〜26-OCT 0400Z、本便の時間帯に重なる）。<b>OFP ルートが A593／Y592 で台風迂回扱いなら対象</b>＝遅延・待機の可能性。［要確認］</li>
+    <li>岩国 ITRA（P5257、〜1330Z）は本便の時間帯に活動。経路と交差する場合は ATC の迂回指示。［要確認：会社ルートとの交差］</li>
+    <li>米軍・自衛隊（三沢周辺 P5289・P5290・P5267・P5268、沖縄周辺 P5147〜P5160）は<b>会社ルート（NRT→PVG）に影響なし</b>。</li>
+    <li>仁川 FIR の臨時制限空域：<b>E5011・E5016（黄海、26 日 0145〜0445Z）は本便の時間帯だが、東シナ海経由の経路には影響なし</b>。SOT VORTAC 使用不可（Z0764、DME/DME に注意）、仁川 FIR で GPS 不安定の報告（Z0718）。</li>
+    <li>ZSHA：北京周辺 ZB(SR)801（A4484・A4646）、大連 CTA（A5182）、上海発の新経路（A3194）は<b>本便（PVG 到着）には直接関係なし</b>（欧州線・PVG 発で確認）。</li>
+  </ul>
+  <div style="font-size:.72em;color:var(--warn);margin-top:6px">⚠ EFB の画面を OCR で読み取り、画像で確認した内容です。<b>当日は必ず最新の NOTAM・OFP を確認</b>してください。</div>
+  </details>
+</div>
+
+<div class="card nt-sum">
+  <details id="nt-sumbox-228">
+  <summary class="card-title" style="cursor:pointer">🗂 過去の分析：KZ228（ZSPD→RJAA、16-OCT）</summary>
   <div style="font-size:.74em;line-height:1.9;margin:6px 0 4px;color:var(--muted)">
     <b>KZ228 / NCA228</b>　ZSPD/PVG → RJAA/NRT　Oct 16　<b>ETD 19:40Z ― ETA 22:32Z</b>（日本時間 17 日 04:40 ― 07:32）　代替 RJTT<br>
     <b>取り込み済みの画面：</b>General／ZSPD（出発）／RJAA（到着）／RJTT（代替）／CHN／ZSHA／RJJJ／RKRR。<b>Area（ASP）の画面（RAIM 予測 NCA 00078/25）は未取得</b>です。</div>
@@ -391,7 +428,7 @@ function ntStatus(p, leg, sec) {
   }
   return dayHit ? 'outtime' : 'future';
 }
-var NT_ST = { active: ['有効', '便の時間帯に有効'], outtime: ['時間外', '期間内だが便の時間帯の外'], future: ['日付外', '便の日より後に開始／対象日ではない'], expired: ['期限切れ', '便より前に終了'], unknown: ['期間要確認', '期間を解析できない（個別参照・原文確認）'], noleg: ['', ''] };
+var NT_ST = { active: ['有効', '便の時間帯に有効'], outtime: ['時間外', '期間内だが便の時間帯の外'], future: ['便より後', '便の時間帯より後に開始／対象日ではない'], expired: ['期限切れ', '便より前に終了'], unknown: ['期間要確認', '期間を解析できない（個別参照・原文確認）'], noleg: ['', ''] };
 function ntBadge(st) { return st && NT_ST[st] && NT_ST[st][0] ? '<span class="nt-st ' + st + '" title="' + NT_ST[st][1] + '">' + NT_ST[st][0] + '</span>' : ''; }
 function ntRowsFor(n) { return (n.rows || []).filter(function (r) { return ntLeg === '全て' || (r.legs || []).indexOf(ntLeg) >= 0; }); }
 var NT_RANK = { active: 4, outtime: 3, unknown: 2, future: 1, expired: 0 };
@@ -451,7 +488,7 @@ function ntCats() {
 }
 function ntChips() {
   var lg = document.getElementById('nt-legs');
-  if (lg) lg.innerHTML = ['KZ228', 'KZ227', 'KZ226', 'KZ225', '全て'].map(function (c) {
+  if (lg) lg.innerHTML = ((typeof NOTAM_LEG_ORDER !== 'undefined') ? NOTAM_LEG_ORDER : ['KZ228', 'KZ227', 'KZ226', 'KZ225']).concat(['全て']).map(function (c) {
     var lab = c === '全て' ? '全便（過去分を含む）' : (NOTAM_FLIGHTS[c].label + '（' + NOTAM_FLIGHTS[c].route + '）');
     return '<button class="nt-chip' + (c === ntLeg ? ' on' : '') + '" onclick="ntSetLeg(\'' + c + '\')">' + lab + '</button>';
   }).join('');

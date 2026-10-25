@@ -1167,3 +1167,115 @@ NOTAMS.forEach(function (n) {
   }
 });
 AIRSPACE_GEO.forEach(function (d) { if (d.id === 'E4855/26') { d.name = '臨時制限空域（17-OCT 0300–0700Z）'; } });
+
+
+/* ═════════ KZ225（RJAA→ZSPD、26-OCT ETD 01:35Z ― ETA 04:34Z、代替 ZSSS）を最新として反映（便キー KZ225B） ═════════
+   出典：EFB 画面 56 枚（2026-10-26 07:04〜07:08 JST、IMG_1060〜1115）。General／RJAA／ZSPD／ZSSS／CHN／ASP／RJJJ／ZSHA／RKRR をすべて取得 */
+NOTAM_FLIGHTS.KZ225B = { label: 'KZ225（最新・10/26）', route: 'RJAA→ZSPD', time: 'Oct 26 ETD 01:35Z（NRT）― ETA 04:34Z（PVG）', altn: 'ZSSS' };
+NOTAM_LEG_TIMES.KZ225B = { etd: '2026-10-26T01:35Z', eta: '2026-10-26T04:34Z' };
+NOTAM_LATEST = 'KZ225B';
+var NOTAM_LEG_ORDER = ['KZ225B', 'KZ228', 'KZ227', 'KZ226', 'KZ225'];
+NOTAM_FLIGHTS.KZ228.label = 'KZ228'; NOTAM_FLIGHTS.KZ225.label = 'KZ225（10/15）';
+var KZ225B_IDS = ["00007/19", "00204/26", "00195/26", "00155/26", "00020/26", "00091/25", "00022/25", "00219/22", "00031/22", "A1483/26", "A1388/26", "A1306/26", "A1275/26", "A1205/26", "A1179/26", "00225/26", "A1564/26", "A1563/26", "A1562/26", "A1552/26", "A1475/26", "A1474/26", "A1473/26", "A1472/26", "A1443/26", "A1442/26", "A1445/26", "A1349/26", "A1346/26", "00210/23", "00008/20", "F4468/26", "F3193/26", "F3772/26", "F3458/26", "F3286/26", "F3220/26", "F2442/26", "F4301/26", "F3192/26", "F3922/26", "F3202/26", "F2443/26", "00011/20", "00078/25", "Q2556/26", "Q2554/26", "Q2553/26", "Q2552/26", "Q2551/26", "Z1879/26", "P5290/26", "P5289/26", "P5268/26", "P5267/26", "P5257/26", "P5151/26", "P5147/26", "P5150/26", "P5152/26", "P5157/26", "P5158/26", "P5160/26", "P5156/26", "P4921/26", "Q1947/26", "P3999/26", "00115/24", "A5182/26", "A4646/26", "A4484/26", "A4021/26", "A3194/26", "A2574/26", "A1519/26", "E5045/26", "E5044/26", "E5043/26", "E5042/26", "E5041/26", "E5016/26", "E5011/26", "E5018/26", "E5017/26", "E4986/26", "Z0764/26", "Z0718/26"];
+(function () {
+  var idre = /[A-Z]?\d{3,5}\/\d{2}/g;
+  function present(text) { var ids = String(text).match(idre) || []; return ids.some(function (i) { return KZ225B_IDS.indexOf(i) >= 0; }); }
+  NOTAMS.forEach(function (n) {
+    n.legs = n.legs || [];
+    var rowsHit = (n.rows || []).some(function (r) { return present(r.no); });
+    (n.rows || []).forEach(function (r) { r.legs = r.legs || []; if (present(r.no) && r.legs.indexOf('KZ225B') < 0) r.legs.push('KZ225B'); });
+    var noHasId = /\d{3,5}\/\d{2}/.test(n.no);
+    if ((present(n.no) || (!noHasId && rowsHit)) && n.legs.indexOf('KZ225B') < 0) n.legs.push('KZ225B');
+  });
+  AIRSPACE_GEO.forEach(function (d) { if (KZ225B_IDS.indexOf(d.id) >= 0 && d.legs.indexOf('KZ225B') < 0) d.legs.push('KZ225B'); });
+})();
+
+/* ── 新規カード ── */
+NOTAMS.push(
+{ no: 'NCA 00225/26', sec: 'RJAA', pri: 'high', cat: ['Company', '性能', '滑走路・誘導路', '出発'], legs: ['KZ225B'],
+  title: 'RJAA RWY 16R/34L：グルービング一部消失 → Non-Grooved として扱う（OPT／i-SKY の滑走路選択）— NCA 00202/26 の後継',
+  issued: '22-OCT-2026 08:49（改訂 09:14）', valid: '23-OCT-2026 00:00Z 〜 10-DEC-2026 20:20Z',
+  orig: '///// COMPANY NOTAM /////\nTAKE FLWG ACTIONS BECAUSE GROOVING OF RWY 16R/34L HAS BEEN PARTIALLY REMOVED, WHICH IS THEREFORE TREATED AS NON-GROOVED RWY.\n///OPT, i-SKY INFO///\nSELECT FLWG RWY.\n-TKOF & LDG-\nRWY 16RGRV NOT AVAILABLE\nRWY 34LGRV NOT AVAILABLE\n-TKOF-\nRWY 16RA2GRV NOT AVAILABLE\nRWY 16RA2 16RA2NTM\nEXPLANATION: NOTE:REF A1179/26, A1205/26, A1275/26, A1306/26, A1388/26, A1483/26',
+  ja: 'RWY 16R/34L のグルービングが一部削られているため、<b>Non-Grooved 滑走路として扱う</b>。OPT・i-SKY では <b>「16RGRV」「34LGRV」は使わず</b>、離陸は <b>16RA2／16RA2NTM</b>（Intersection A2）を選ぶ（16RA2GRV も不可）。対象 NOTAM は A1179・A1205・A1275・A1306・A1388・A1483（下の「グルービング一部消失（6 件）」）。',
+  perf: '<b>Wet のとき WET NGRV の性能（離陸・着陸）を適用</b>。OPT で GRV 付きの滑走路名を選ばない。Dry では差はない。', nav: '',
+  ops: '出発前の OPT 入力で滑走路名を確認（16R なら 16RA2／16RA2NTM）。i-SKY の滑走路名も同じ。<b>NCA 00202/26（前回の便で表示）はこの NOTAM に置き換わった</b>。',
+  refs: [{ label: 'Runway Condition（Wet NGRV）', main: 'TO' }, { label: 'グルービング一部消失（6 件）', jump: 'RJAA グルービング一部消失（6件）' }] },
+{ no: 'NCA 00031/22', sec: 'General', pri: 'low', cat: ['Company', '性能'], legs: ['KZ225B'],
+  title: 'CDL 27-51-02 適用時：会社ルート・PACOTS では Enroute Climb Limit Weight の減少を便ごとに確認しなくてよい',
+  issued: '16-FEB-2022 07:11（改訂 08-OCT-2026 12:19）', valid: '19-FEB-2026 21:00Z 〜 UFN',
+  orig: '//ONLY FOR PORTIONS OF THE ROUTE WHERE THE 90 MINUTES RULE (DESCRIBED IN OPERATIONS UPDATE 25017) IS APPLICABLE//\n//WHEN CDL 27-51-02 IS APPLED//\n//FOR ALL COMPANY ROUTE AND PACOTS FOLLOW ROUTE//\nNO NEED TO CHECK ENROUTE CLIMB LIMIT WEIGHT REDUCTION OF CDL 27-51-02 ON EACH FLIGHT BECAUSE OTHER LIMIT WEIGHTS SUCH AS STRUCTURAL LIMIT WEIGHT ARE MORE RESTRICTIVE.\nNOTE THAT REDUCTION OF TAKEOFF, APPROACH AND LANDING LIMIT WEIGHT AND FUEL PENALTY MUST BE ACCOUNTED.',
+  ja: 'OPS UPDATE 25017 の<b>90 分ルール</b>が適用される区間で、<b>CDL 27-51-02</b> を適用して飛ぶ場合：会社ルート・PACOTS 追従ルートでは<b>巡航上昇制限重量の減少を便ごとに確認する必要はない</b>（構造制限重量などの方が厳しいため）。ただし<b>離陸・進入・着陸の制限重量の減少と燃料ペナルティは考慮が必要</b>。',
+  perf: 'CDL 27-51-02 を適用する便のみ。離陸・進入・着陸の制限重量の減少と燃料ペナルティは OPT／MEL-CDL で反映する。', nav: '', ops: '本便で CDL 27-51-02 の適用がなければ関係なし。',
+  refs: [{ label: 'MEL/CDL 27-51-02', go: 'mel' }] },
+{ no: 'RJAA A1564/26', sec: 'RJAA', pri: 'mid', cat: ['滑走路・誘導路', 'ATC・手順', '出発'], legs: ['KZ225B'],
+  title: 'RJAA：滑走路誤進入警報（RWY Incursion Warning）の運用停止（整備）',
+  issued: '21-OCT-2026 01:53', valid: '21-OCT-2026 01:38Z 〜 20-JAN-2027 14:59Z',
+  orig: 'RWY INCURSION WARNING OPERATION SUSPENDED DUE TO MAINT',
+  ja: '成田の<b>滑走路誤進入警報の運用が停止</b>（整備）。2027 年 1 月 20 日まで。',
+  perf: '', nav: '', ops: '滑走路への進入・横断時は<b>停止線・ストップバー・ATC 許可の目視／復唱確認を徹底</b>（警報による補助がない）。［要確認：対象システムの範囲（RWSL 相当か、管制側の警報か）］',
+  refs: [] },
+{ no: 'ZSPD F4468/26', sec: 'ZSPD', pri: 'high', cat: ['滑走路・誘導路', '着陸'], legs: ['KZ225B'],
+  title: 'ZSPD：TWY Q5（L15〜C 間）と TWY L15（スポット 313〜315 間）閉鎖（26-OCT 0200〜0900Z）— 工事車両のジェットブラスト注意',
+  issued: '23-OCT-2026 10:02', valid: '26-OCT-2026 02:00Z 〜 09:00Z',
+  orig: '"FLW TWY CLSD:\n1. TWY Q5 BTN TWY L15 AND TWY C. INTERSECTION CLSD BTN TWY L15 AND TWY Q5.\n2. TWY L15 BTN PARKING STAND NR.313 AND PARKING STAND NR.315. INTERSECTION CLSD BTN PARKING STAND NR.313 AND TWY L15, BTN PARKING STAND NR.315 AND TWY L15."\nEXPLANATION: NOTE:PLEASE BE AWARE OF JET BLAST WHILE CONSTRUCTION EQUIPMENT AND WORKERS ARE ACTIVE IN THE AREA.\nIF YOU FEEL INSUFFICIENT MARGIN FROM THIS AREA, REQ GND TO PULL FORWARD.',
+  ja: '<b>TWY Q5 の L15〜C 間</b>と、<b>TWY L15 のスポット 313〜315 の間</b>が閉鎖（各交差部も閉鎖）。<b>ETA 0434Z は閉鎖時間帯（0200〜0900Z）の中</b>。作業員・車両が近くにいるため<b>ジェットブラストに注意</b>。余裕が足りないと感じたら <b>Ground に前方へのプルフォワードを要求</b>。',
+  perf: '', nav: '', ops: '到着後のタキシールートで Q5・L15 付近を通る場合は代替経路の指示に従う。スポット 313〜315 周辺に止める場合はブラストに特に注意。［要確認：当日の割当スポットと Q5／L15 の位置（Jepp 10-9）］',
+  refs: [{ label: 'ZSPD Diversion Info（スポット・誘導路）', main: 'DIVERSION' }] },
+{ no: 'RJAA Z1879/26', sec: 'RJJJ', pri: 'mid', cat: ['流量規制・CDR・トラック', 'ATC・手順'], legs: ['KZ225B'],
+  title: '福岡 FIR 境界の流量制御：A593／Y592 を西行きする台風迂回機は ONIKU で 60 分間隔（〜26-OCT 0400Z）',
+  issued: '24-OCT-2026 14:53', valid: '24-OCT-2026 14:39Z 〜 26-OCT-2026 04:00Z',
+  orig: '"FLOW CTL AT FIR BDRY AS FLWS,\nRTE: A593/Y592\nACFT: WB FOR TYPH DETOUR ACFT FM JAPAN\nPROC: 60MIN INTERVAL REGARDLESS OF ALT WILL BE APPLIED AT ONIKU\nRMK: REF AIP ENR1.9-1"',
+  ja: 'FIR 境界での流量制御。<b>A593／Y592 を西行き</b>する、<b>日本発の台風迂回機</b>に対し、<b>ONIKU で高度に関係なく 60 分間隔</b>。26 日 0400Z まで（本便の飛行時間帯 0135〜0434Z に重なる）。',
+  perf: '', nav: '', ops: '対象は「台風迂回のためこの経路に乗る機」。<b>本便の OFP ルートが A593／Y592 経由か、台風迂回扱いかを確認</b>。該当すれば ONIKU 前で待機・速度調整や EDCT の可能性。［要確認：当日の OFP ルートと台風の有無］',
+  refs: [] }
+);
+
+/* ── 既存グループへの行追加 ── */
+NOTAMS.forEach(function (n) {
+  function addRows(rows) { n.rows = n.rows || []; rows.forEach(function (r) { r.legs = ['KZ225B']; n.rows.push(r); }); if (n.legs.indexOf('KZ225B') < 0) n.legs.push('KZ225B'); }
+  if (n.no === 'RJAA 誘導路の閉鎖・灯火不作動') addRows([
+    { no: 'A1563/26', valid: '21-OCT-2026 01:14Z 〜 17-DEC-2026 20:00Z（予定）', text: '<b>TWY N2、D1（M との交差部）、M（D2〜H1 間）のセンターライン灯 使用不可</b>（工事）' },
+    { no: 'A1562/26', valid: '21-OCT-2026 01:10Z 〜 17-DEC-2026 20:00Z（予定）', text: '<b>TWY D1 のセンターライン灯 使用不可</b>（不具合）' }
+  ]);
+  if (n.no === 'PACOTS 東行きトラック（Q2450・Q2452・Q2461）') { n.no = 'PACOTS 東行きトラック（Q2450・Q2452・Q2461・Q2554・Q2556）'; addRows([
+    { no: 'Q2554/26', valid: '26-OCT 0700Z 〜 2100Z', text: '<b>26 日分（日本⇔北米）</b>Track 1：POWAL A590 PLADO PINSO POOFF PINTT PTZGR CHUUK R341 ODK J123 CJAYY B757 KATCH（KSEA/KPDX は KATCH TOU、CYVR は KATCH POWOL、他は KATCH から UPR）。Track 2：KALNA 42N160E 45N170E 47N180E 48N170W 48N160W 48N150W 47N140W 44N130W LATNE。Track 3：EMRON 41N160E 44N170E 46N180E 47N170W 47N160W 47N150W 46N140W 42N130W VESPA。<b>本便（PVG 向け・ETA 0434Z）には関係なし</b>' },
+    { no: 'Q2556/26', valid: '26-OCT 0700Z 〜 2100Z', text: '<b>26 日分（東南アジア⇔北米）Track 14</b>：EMRON 40N160E 43N170E 45N180E 46N170W 46N160W 46N150W 45N140W 41N130W FATMO。RCTP/VHHH ルート：MOLKA M750 MUKEP Y891 OVSUN Y893 IGMIS Y57 POROT Y809 IDLAN Y812 ADNAP OTR7 EMRON。Track 15 なし。本便には関係なし' }
+  ]); }
+  if (n.no.indexOf('CDR 開放') === 0) { n.no = 'CDR 開放（Q2443・Q2448・Q2449・Q2453・Q2456・Q2465・Q2469・Q2470・Q2475・Q2551〜Q2553）'; addRows([
+    { no: 'Q2553/26', valid: '25-OCT 2200Z 〜 26-OCT 2200Z（26 日 1200–2200Z、Z40・Z41 は 25 日 2200–2300Z と 26 日 1400–2200Z）', text: '<b>26 日分</b>L512・Z13・Z14（1200–2200Z）、Z25・Z26・Z27・Z262（1330–2200Z）、Z40・Z41（25 日 2200–2300Z、26 日 1400–2200Z）。すべて MEA。<b>本便の時間帯（0135〜0434Z）には開いていない</b>' },
+    { no: 'Q2552/26', valid: '26-OCT 1200Z 〜 2100Z（Z16〜Z18・Z101・Z102・Z162 は 1300–2100Z、Z21・Z171・Z182 は 1200–2100Z）', text: '<b>26 日分</b>Z16・Z17・Z18・Z101・Z102・Z162（1300–2100Z）、Z21・Z171・Z182（1200–2100Z）。すべて MEA。本便の時間帯には開いていない' },
+    { no: 'Q2551/26', valid: '26-OCT 1500Z 〜 2100Z', text: '<b>26 日分</b>Z29・Z31・Z32・Z34（1500–2100Z）。すべて MEA。本便の時間帯には開いていない' }
+  ]); }
+  if (n.no.indexOf('訓練空域の活動') === 0) { n.no = '訓練空域の活動（P4921・P5039・P5048・P5063・P5257）'; addRows([
+    { no: 'P5257/26', valid: '25-OCT 2200Z 〜 26-OCT 1330Z', text: '<b>岩国 ITRA（臨時の留保空域）</b>ITRA-E（SFC〜FL250）、N1（〜FL180）、N2（〜FL600）、N3（〜FL240）、S10〜S16（〜FL600）、S20〜S25（〜FL450）、S30〜S33（〜FL250）。<b>本便の飛行時間帯（0135〜0434Z）に重なる</b>。AIP SUP 023/26。経路が交差する場合は ATC の迂回指示。［要確認：会社ルートとの交差の有無］' }
+  ]); }
+  if (n.no.indexOf('福岡FIR 米軍・自衛隊活動') === 0) { n.no = '福岡FIR 米軍・自衛隊活動（29件）'; addRows([
+    { no: 'P5290/26', valid: '26-OCT 0100Z 〜 0430Z', text: '<b>米軍</b>（三沢・八戸の南東、40〜40.8°N）5,000ft AMSL〜FL300。V22・Y10・Y302 の FL310 以下が影響（RJCC 出発機を除き代替経路を申請）。<b>東北地方なので NRT→PVG の経路には関係しない</b>' },
+    { no: 'P5289/26', valid: '26-OCT 0100Z 〜 0430Z', text: '<b>米軍</b>（三沢の北東・下北半島、40.7〜41.4°N）5,000ft AMSL〜FL300。V22・Y10・Y302 の FL310 以下が影響。NRT→PVG の経路には関係しない' },
+    { no: 'P5268/26', valid: '25-OCT 2300Z 〜 26-OCT 0100Z', text: '<b>自衛隊</b>（三沢・八戸の南東）5,000ft AMSL〜FL300。V22・Y10・Y302 の FL310 以下が影響。出発前に終了' },
+    { no: 'P5267/26', valid: '25-OCT 2300Z 〜 26-OCT 0100Z', text: '<b>自衛隊</b>（三沢の北東・下北）5,000ft AMSL〜FL300。出発前に終了' },
+    { no: 'P5151/26', valid: '25-OCT 2300Z 〜 31-OCT 1500Z（毎日 2300–1500Z）', text: '<b>米軍 TIGER-CENTER</b>（沖縄本島の北東〜奄美の東、26〜27.6°N／128.6〜132°E）SFC〜FL600。<b>会社ルートに影響なし</b>' },
+    { no: 'P5147/26', valid: '25-OCT 2300Z 〜 31-OCT 1500Z（毎日 2300–1500Z）', text: '<b>米軍 EAGLE-EAST</b>（沖縄本島の南東）SFC〜FL600。会社ルートに影響なし' },
+    { no: 'P5150/26', valid: '25-OCT 2300Z 〜 31-OCT 1500Z（毎日 2300–1500Z）', text: '<b>米軍 TIGER-WEST</b>（沖縄本島の北）SFC〜FL600。会社ルートに影響なし' },
+    { no: 'P5152/26', valid: '25-OCT 2300Z 〜 31-OCT 1500Z（毎日 2300–1500Z）', text: '<b>米軍 TIGER-EAST</b>（奄美の東）SFC〜FL600。会社ルートに影響なし' },
+    { no: 'P5157/26', valid: '25-OCT 2100Z 〜 31-OCT 1500Z（毎日 2100–1500Z）', text: '<b>米軍 MOOSE-SOUTH-HI</b>（沖縄本島の西）FL250〜FL600。会社ルートに影響なし' },
+    { no: 'P5158/26', valid: '25-OCT 2100Z 〜 31-OCT 1500Z（毎日 2100–1500Z）', text: '<b>米軍 TYBEE-EAST</b>（沖縄本島の南東）FL280〜FL290。会社ルートに影響なし' },
+    { no: 'P5160/26', valid: '25-OCT 2100Z 〜 31-OCT 1500Z（毎日 2100–1500Z）', text: '<b>米軍 TYBEE-WEST</b>（久米島の西）FL280〜FL290。会社ルートに影響なし' },
+    { no: 'P5156/26', valid: '25-OCT 2100Z 〜 31-OCT 1500Z（毎日 2100–1500Z）', text: '<b>米軍 MOOSE-NORTH</b>（沖縄本島の北西〜北、26.7〜28.5°N）SFC〜FL600。会社ルートに影響なし' }
+  ]); }
+  if (n.no.indexOf('仁川FIR 臨時制限空域') === 0) { n.no = '仁川FIR 臨時制限空域（18件）'; addRows([
+    { no: 'E5045/26', valid: '26-OCT 0600Z 〜 30-OCT 0600Z（26 日 0600–0900、30 日 0445–0600Z）', text: '韓国西岸（36.5〜36.6°N、126°E）SFC〜FL330。<b>ETA 後（0600Z〜）</b>。会社ルートに影響なし' },
+    { no: 'E5044/26', valid: '25-OCT 2130Z 〜 29-OCT 2200Z（25 日 2130–2200、27 日 0130–0200、29 日 2130–2200Z）', text: '韓国南部（34.1〜35°N、127.3〜128.4°E）FL200〜FL430。26 日は対象外。会社ルートに影響なし' },
+    { no: 'E5043/26', valid: '25-OCT 2050Z 〜 31-OCT 0030Z（25 日 2050–2130、26 日 1000–1130、27 日 0050–0130、28 日 0300–0430、29 日 2050–2130、30 日 2300–31 日 0030Z）', text: '韓国南部（35.2〜35.7°N、127.4〜128.4°E）7,000ft AMSL〜FL430。26 日は 1000–1130Z のみ。会社ルートに影響なし' },
+    { no: 'E5042/26', valid: '25-OCT 2050Z 〜 31-OCT 0030Z（25 日 2050–2130、26 日 1000–1130、27 日 0050–0130、28 日 0300–0430、29 日 2050–2130、30 日 2300–31 日 0030Z）', text: '韓国南部（34.1〜35°N、127.3〜128.4°E）7,000ft AMSL〜FL430。26 日は 1000–1130Z のみ。会社ルートに影響なし' },
+    { no: 'E5041/26', valid: '25-OCT 2130Z 〜 29-OCT 2200Z（25 日 2130–2200、27 日 0130–0200、29 日 2130–2200Z）', text: '韓国南部（35.2〜35.7°N）FL200〜FL430。26 日は対象外。会社ルートに影響なし' },
+    { no: 'E5016/26', valid: '26-OCT 0145Z 〜 02-NOV 0445Z（毎回 0145–0445Z、日：26 30）', text: '済州島の西（33.3〜34°N、125〜125.8°E）FL220〜FL420。<b>26 日 0145–0445Z は本便の飛行時間帯</b>だが、黄海側で会社ルート（東シナ海経由）には影響なし［要確認：OFP ルート］' },
+    { no: 'E5011/26', valid: '26-OCT 0145Z 〜 02-NOV 0445Z（毎回 0145–0445Z、日：26 30）', text: '<b>黄海・韓国西方の広域</b>（34〜37°N、124.5〜126.6°E）500ft AGL〜FL600。<b>26 日 0145–0445Z は本便の飛行時間帯</b>。黄海側で会社ルート（東シナ海経由）には影響なし［要確認：OFP ルート］' },
+    { no: 'E5018/26', valid: '25-OCT 1906Z 〜 31-OCT 1113Z（25 日 1906–2147、26 日 0829–1113・1906–2147、27 日 1906–2147、28 日 0829–1000・1906–2147、29〜30 日 0829–1113・1906–2147、31 日 0829–1113Z）', text: '韓国東岸（36.8°N 129.1°E）半径 10NM、FL300〜FL600。26 日は 0829Z 以降。会社ルートに影響なし' },
+    { no: 'E5017/26', valid: '25-OCT 1906Z 〜 31-OCT 1113Z（25 日 1906–2147、26 日 0829–1113・1906–2147、27 日 1906–2147、28 日 0829–1000・1906–2147、29〜30 日 0829–1113・1906–2147、31 日 0829–1113Z）', text: '韓国東岸（同地点）半径 5.5NM、SFC〜FL300。会社ルートに影響なし' },
+    { no: 'E4986/26', valid: '26-OCT 0000Z 〜 29-OCT 0400Z（26 日 0000–0145、27〜29 日 0000–0400Z）', text: '韓国中西部（35.6〜36.4°N、125.9〜126.6°E）SFC〜UNL。<b>26 日は 0000–0145Z（出発直後まで）</b>。会社ルートに影響なし' }
+  ]); }
+});
+AIRSPACE_GEO = AIRSPACE_GEO.concat([{"id": "P5290/26", "kind": "poly", "pts": [[40.7528, 141.4172], [40.7425, 142.1781], [40.2028, 142.2297], [40.0211, 141.8983]], "F": "5000FT AMSL", "G": "FL300", "legs": ["KZ225B"], "name": "米軍（三沢・八戸の南東）", "cat": "RJJJ", "notaffect": false}, {"id": "P5289/26", "kind": "poly", "pts": [[41.4167, 141.4958], [41.4167, 142.1167], [40.7425, 142.1781], [40.7528, 141.4172], [40.8356, 141.4006], [41.0778, 141.4]], "F": "5000FT AMSL", "G": "FL300", "legs": ["KZ225B"], "name": "米軍（三沢の北東・下北）", "cat": "RJJJ", "notaffect": false}, {"id": "P5268/26", "kind": "poly", "pts": [[40.7528, 141.4172], [40.7425, 142.1781], [40.2028, 142.2297], [40.0211, 141.8983]], "F": "5000FT AMSL", "G": "FL300", "legs": ["KZ225B"], "name": "自衛隊（三沢・八戸の南東）", "cat": "RJJJ", "notaffect": false}, {"id": "P5267/26", "kind": "poly", "pts": [[41.4167, 141.4958], [41.4167, 142.1167], [40.7425, 142.1781], [40.7528, 141.4172], [40.8356, 141.4006], [41.0778, 141.4]], "F": "5000FT AMSL", "G": "FL300", "legs": ["KZ225B"], "name": "自衛隊（三沢の北東・下北）", "cat": "RJJJ", "notaffect": false}, {"id": "P5151/26", "kind": "poly", "pts": [[26.3692, 128.5783], [26.79, 129.0672], [27.6461, 130.5642], [27.6431, 130.9317], [27.6281, 132.0375], [27.4436, 131.9947], [26.1822, 130.8433]], "F": "SFC", "G": "FL600", "legs": ["KZ225B"], "name": "米軍 TIGER-CENTER", "cat": "RJJJ", "notaffect": true}, {"id": "P5147/26", "kind": "poly", "pts": [[25.7397, 130.5003], [25.7108, 130.9244], [25.1539, 130.4914], [24.9411, 130.2981], [24.6639, 129.6653]], "F": "SFC", "G": "FL600", "legs": ["KZ225B"], "name": "米軍 EAGLE-EAST", "cat": "RJJJ", "notaffect": true}, {"id": "P5150/26", "kind": "poly", "pts": [[26.79, 129.0672], [27.4686, 129.5064], [27.6461, 130.5642]], "F": "SFC", "G": "FL600", "legs": ["KZ225B"], "name": "米軍 TIGER-WEST", "cat": "RJJJ", "notaffect": true}, {"id": "P5152/26", "kind": "poly", "pts": [[27.4436, 131.9947], [26.7961, 131.8456], [26.4572, 131.5717], [26.1417, 131.2814], [26.1822, 130.8433]], "F": "SFC", "G": "FL600", "legs": ["KZ225B"], "name": "米軍 TIGER-EAST", "cat": "RJJJ", "notaffect": true}, {"id": "P5157/26", "kind": "poly", "pts": [[26.6953, 125.2111], [27.0842, 126.9942], [26.2675, 126.1431], [26.2389, 125.6219]], "F": "FL250", "G": "FL600", "legs": ["KZ225B"], "name": "米軍 MOOSE-SOUTH-HI", "cat": "RJJJ", "notaffect": true}, {"id": "P5158/26", "kind": "poly", "pts": [[26.3003, 129.4297], [25.7375, 129.4311], [25.7458, 130.4036], [25.7397, 130.5003], [26.2094, 130.5186]], "F": "FL280", "G": "FL290", "legs": ["KZ225B"], "name": "米軍 TYBEE-EAST", "cat": "RJJJ", "notaffect": true}, {"id": "P5160/26", "kind": "poly", "pts": [[26.6181, 124.47], [26.9758, 124.9558], [26.2389, 125.6219], [26.1956, 124.855]], "F": "FL280", "G": "FL290", "legs": ["KZ225B"], "name": "米軍 TYBEE-WEST", "cat": "RJJJ", "notaffect": true}, {"id": "P5156/26", "kind": "poly", "pts": [[26.9758, 124.9558], [28.4786, 127.0542], [27.8033, 127.3211], [27.2986, 127.2208], [27.0842, 126.9942], [26.6953, 125.2111]], "F": "SFC", "G": "FL600", "legs": ["KZ225B"], "name": "米軍 MOOSE-NORTH", "cat": "RJJJ", "notaffect": true}, {"id": "E5045/26", "kind": "poly", "pts": [[36.6139, 125.9944], [36.5167, 125.9944], [36.5167, 126.2], [36.6139, 126.2]], "F": "SFC", "G": "FL330", "legs": ["KZ225B"], "name": "臨時制限空域（韓国西岸）", "cat": "RKRR", "notaffect": true}, {"id": "E5044/26", "kind": "poly", "pts": [[35.0, 127.3039], [35.0, 128.375], [34.825, 128.3583], [34.1464, 127.3036]], "F": "FL200", "G": "FL430", "legs": ["KZ225B"], "name": "臨時制限空域（韓国南部）", "cat": "RKRR", "notaffect": true}, {"id": "E5043/26", "kind": "poly", "pts": [[35.6361, 127.4806], [35.6611, 128.4028], [35.6292, 128.4306], [35.2542, 128.3972], [35.2333, 127.4]], "F": "7000FT AMSL", "G": "FL430", "legs": ["KZ225B"], "name": "臨時制限空域（韓国南部）", "cat": "RKRR", "notaffect": true}, {"id": "E5042/26", "kind": "poly", "pts": [[35.0, 127.3039], [35.0, 128.375], [34.825, 128.3583], [34.1464, 127.3036]], "F": "7000FT AMSL", "G": "FL430", "legs": ["KZ225B"], "name": "臨時制限空域（韓国南部）", "cat": "RKRR", "notaffect": true}, {"id": "E5041/26", "kind": "poly", "pts": [[35.6361, 127.4806], [35.6611, 128.4028], [35.6292, 128.4306], [35.2542, 128.3972], [35.2333, 127.4]], "F": "FL200", "G": "FL430", "legs": ["KZ225B"], "name": "臨時制限空域（韓国南部）", "cat": "RKRR", "notaffect": true}, {"id": "E5016/26", "kind": "poly", "pts": [[34.0031, 124.9981], [34.0031, 125.8314], [33.2533, 125.8314], [33.2533, 124.9981]], "F": "FL220", "G": "FL420", "legs": ["KZ225B"], "name": "臨時制限空域（済州島の西）", "cat": "RKRR", "notaffect": true}, {"id": "E5011/26", "kind": "poly", "pts": [[37.0442, 126.3983], [37.0028, 126.425], [36.8, 126.4833], [36.6833, 126.475], [36.2833, 126.4167], [35.6667, 126.4167], [35.6667, 126.6569], [35.2503, 126.6131], [34.8336, 126.5692], [34.4167, 126.5261], [34.0, 126.4831], [34.0, 125.6039], [34.0003, 124.8839], [34.0, 124.7236], [34.045, 124.5331], [34.4158, 124.5319], [34.8325, 124.5306], [35.2492, 124.5289], [35.6658, 124.5272], [36.0819, 124.5256], [36.3989, 124.5239], [36.5333, 124.8333], [37.0225, 124.8333], [37.0356, 125.6]], "F": "500FT AGL", "G": "FL600", "legs": ["KZ225B"], "name": "臨時制限空域（黄海・韓国西方の広域）", "cat": "RKRR", "notaffect": true}, {"id": "E5018/26", "kind": "circle", "c": [36.8, 129.0833], "r_nm": 10, "F": "FL300", "G": "FL600", "legs": ["KZ225B"], "name": "韓国東岸の臨時制限空域（半径 10NM）", "cat": "RKRR", "notaffect": true}, {"id": "E5017/26", "kind": "circle", "c": [36.8, 129.0833], "r_nm": 5.5, "F": "SFC", "G": "FL300", "legs": ["KZ225B"], "name": "韓国東岸の臨時制限空域（半径 5.5NM）", "cat": "RKRR", "notaffect": true}, {"id": "E4986/26", "kind": "poly", "pts": [[36.3583, 126.3817], [36.3564, 126.5022], [36.2333, 126.6333], [35.5833, 126.1], [35.7, 125.8667]], "F": "SFC", "G": "UNL", "legs": ["KZ225B"], "name": "臨時制限空域（韓国中西部）", "cat": "RKRR", "notaffect": true}]);
+/* Z0764/26（SOT VORTAC 使用不可）：有効期間を後継 NOTAM の期間に更新（自動判定が前任 Z0624 の終了日で期限切れ扱いにならないように） */
+NOTAMS.forEach(function (n) { if (n.no === 'Z0624/26・Z0764/26') n.valid = '15-OCT-2026 07:25Z 〜 30-DEC-2026 16:00Z（Z0764/26。前任 Z0624/26 は 31-AUG 〜 20-OCT-2026）'; });
