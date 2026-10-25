@@ -37,6 +37,9 @@
     .nt-st.expired{text-decoration:line-through}
     .nt-st.unknown{color:var(--accent);border-color:rgba(0,200,255,.4);background:rgba(0,200,255,.08)}
     .nt-item.expired>summary{opacity:.55}
+    .nt-chkbtn{flex:none;border:1px solid var(--border);background:transparent;color:var(--muted);border-radius:6px;padding:3px 8px;font-size:.7em;font-weight:700;cursor:pointer;min-height:28px}
+    .nt-chkbtn.on{color:var(--green,#00e698);border-color:rgba(0,230,152,.6);background:rgba(0,230,152,.1)}
+    .nt-item.chkd>summary{opacity:.6}
     .nt-imt{display:inline-block;font-size:.6em;font-weight:800;letter-spacing:.04em;border-radius:4px;padding:1px 5px;margin-left:2px;color:#fff;background:#4a6880}
     .nt-imt.perf{background:#c2410c}.nt-imt.nav{background:#1d4ed8}.nt-imt.ops{background:#0f766e}
     .nt-origd>summary{cursor:pointer;color:var(--accent);font-size:.9em;padding:4px 0;list-style:none}
@@ -46,6 +49,16 @@
     #nt-auto .cnt{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 8px}
     #nt-auto ul{margin:4px 0 0;padding-left:1.2em}
     #nt-auto a{color:var(--accent);text-decoration:none}
+    @media print {
+      body{background:#fff;color:#000}
+      .tab-bar,#nt-export,#nt-export-ta,.nt-bar,#nt-q,#nt-mapbox,#nt-geobox,#nt-idxbox,#nt-sumbox-old,#nt-sumbox-227,.nm-wrap,.nt-right,.nt-ref button{display:none !important}
+      .card,.nt-item{break-inside:avoid;border:1px solid #999 !important;background:#fff !important;color:#000 !important}
+      .nt-item>summary::before{content:''}
+      .nt-body{font-size:11px;line-height:1.6}
+      .nt-st,.nt-tag,.nt-imt{border:1px solid #666 !important;color:#000 !important;background:#fff !important}
+      #nt-list{grid-template-columns:1fr !important}
+      a{color:#000;text-decoration:none}
+    }
     #nt-list{display:grid;grid-template-columns:1fr;gap:0 14px;align-items:start}
     @media (min-width:640px){#nt-list{grid-template-columns:1fr 1fr}}
     #nt-list .nt-empty{grid-column:1/-1}
@@ -110,6 +123,13 @@
 </div>
 
 <div id="nt-flight"></div>
+<div class="nt-bar" id="nt-export" style="margin:-4px 0 10px">
+  <button class="nt-chip" onclick="ntExportText('copy')">📋 要約をコピー</button>
+  <button class="nt-chip" onclick="ntExportText('share')">📤 共有（AirDrop／LINE 等）</button>
+  <button class="nt-chip" onclick="ntExportText('show')">📄 テキスト表示</button>
+  <button class="nt-chip" onclick="ntPrint()">🖨 印刷／PDF</button>
+</div>
+<textarea id="nt-export-ta" style="display:none;width:100%;min-height:220px;font-size:12px;line-height:1.6;font-family:ui-monospace,Menlo,monospace;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px;margin:0 0 10px"></textarea>
 
 <div class="card nt-sum">
   <div class="card-title">⏱ 有効期間の自動判定 <span style="font-size:.72em;font-weight:400;color:var(--muted)">出発空港は ETD、到着・代替空港は ETA、その他は便全体の時間帯（UTC）に対して判定</span></div>
@@ -269,7 +289,33 @@
 <script>
 var ntCat = '全て', ntSec = '全て', ntLeg = (typeof NOTAM_LATEST !== 'undefined' ? NOTAM_LATEST : '全て'), SECS = ['全て','General','RJAA','ZSPD','ZSSS','RJTT','CHN','ASP','RJJJ','ZSHA','RKRR'];
 var PRI = {high:'重要', mid:'', low:''};
-var ntOnlyActive = false, ntHideExpired = true;
+var ntOnlyActive = false, ntHideExpired = true, ntOnlyUnchecked = false, ntCatGroup = '全て';
+var CAT_GROUPS = { '会社・運航': ['Company', 'EFB・システム', '運航', '非常時', '注意喚起', '通信'], '航法・進入': ['GPS・航法', '航法', '進入', '着陸最低気象'], '空港・性能': ['滑走路・誘導路', '灯火・NAVAID', '性能', '出発', '着陸'], 'ATC・経路': ['ATC・手順', '流量規制・CDR・トラック'], '空域': ['空域・軍事', 'Conflict Zone', '中国空域', '韓国FIR'], '代替': ['代替空港'] };
+function ntCatGroupOf(c) { for (var g in CAT_GROUPS) if (CAT_GROUPS[g].indexOf(c) >= 0) return g; return 'その他'; }
+/* 確認済みチェック（端末保存・便ごと） */
+var NT_CHK_KEY = 'nca_notam_chk_v1';
+function ntChkLoad() { try { return JSON.parse(localStorage.getItem(NT_CHK_KEY) || '{}'); } catch (e) { return {}; } }
+function ntIsChecked(no) { return !!ntChkLoad()[ntLeg + '|' + no]; }
+function ntToggleChk(no, ev) { if (ev) { ev.stopPropagation(); ev.preventDefault(); } var d = ntChkLoad(), k = ntLeg + '|' + no; if (d[k]) delete d[k]; else d[k] = Date.now(); try { localStorage.setItem(NT_CHK_KEY, JSON.stringify(d)); } catch (e) {} ntChips(); ntRender(); ntAutoSummary(); }
+function ntChkReset() { if (!confirm(ntLeg + ' の確認済みチェックをすべて外しますか？')) return; var d = ntChkLoad(); Object.keys(d).forEach(function (k) { if (k.indexOf(ntLeg + '|') === 0) delete d[k]; }); try { localStorage.setItem(NT_CHK_KEY, JSON.stringify(d)); } catch (e) {} ntChips(); ntRender(); ntAutoSummary(); }
+function ntNeedsConfirm(n) { return /要確認/.test(JSON.stringify([n.ja, n.perf, n.nav, n.ops, n.refs || [], n.rows || []])); }
+/* ── 11. データ検査 ── */
+function ntValidateData() {
+  var issues = [], seen = {};
+  NOTAMS.forEach(function (n, i) {
+    if (!n.no) issues.push('#' + i + '：番号なし'); else if (seen[n.no]) issues.push(n.no + '：番号が重複'); seen[n.no] = 1;
+    (n.legs || []).forEach(function (l) { if (!NOTAM_FLIGHTS[l]) issues.push(n.no + '：不明な便 ' + l); });
+    if (!(n.legs || []).length) issues.push(n.no + '：便タグなし');
+    var p = ntParseValid(n.valid), rowsOk = (n.rows || []).some(function (r) { return ntParseValid(r.valid).ok; });
+    if (!p.ok && !rowsOk) issues.push(n.no + '：有効期間を解析できない「' + (n.valid || '') + '」');
+    (n.rows || []).forEach(function (r) { if (r.valid && !/同上|→/.test(r.valid) && !ntParseValid(r.valid).ok) issues.push(n.no + ' 行 ' + r.no + '：期間を解析できない「' + r.valid + '」'); });
+    if (!n.title) issues.push(n.no + '：タイトルなし'); if (!n.ja) issues.push(n.no + '：日本語訳なし');
+    if (n.pri && ['high', 'mid', 'low'].indexOf(n.pri) < 0) issues.push(n.no + '：pri 不正 ' + n.pri);
+  });
+  Object.keys(NOTAM_FLIGHTS).forEach(function (l) { if (typeof NOTAM_LEG_TIMES === 'undefined' || !NOTAM_LEG_TIMES[l]) issues.push('便 ' + l + '：ETD/ETA（NOTAM_LEG_TIMES）未登録'); });
+  return issues;
+}
+function ntValidateShow() { var is = ntValidateData(); alert(is.length ? 'データ検査：' + is.length + ' 件\n\n' + is.join('\n') : 'データ検査：問題なし'); }
 /* ═══ 有効期間の解析（valid 文字列 → 構造）と便に対する判定 ═══ */
 var NT_MON = {JAN:0,FEB:1,MAR:2,APR:3,MAY:4,JUN:5,JUL:6,AUG:7,SEP:8,OCT:9,NOV:10,DEC:11};
 function ntParseValid(str, yearHint) {
@@ -350,7 +396,13 @@ function ntBadge(st) { return st && NT_ST[st] && NT_ST[st][0] ? '<span class="nt
 function ntRowsFor(n) { return (n.rows || []).filter(function (r) { return ntLeg === '全て' || (r.legs || []).indexOf(ntLeg) >= 0; }); }
 var NT_RANK = { active: 4, outtime: 3, unknown: 2, future: 1, expired: 0 };
 function ntItemStatus(n) {
-  if (ntLeg === '全て') return 'noleg';
+  if (ntLeg === '全て') {   // 全便表示：現在時刻より前に終了したものを「期限切れ」（自動アーカイブ）
+    var now = new Date(), pp = ntParseValid(n.valid), ends = [];
+    if (pp.ok && pp.to) ends.push(pp.to);
+    (n.rows || []).forEach(function (r) { var rp = ntParseValid(r.valid); if (rp.ok && rp.to) ends.push(rp.to); });
+    if (ends.length && ends.every(function (e) { return e < now; })) return 'expired';
+    return 'noleg';
+  }
   var st = ntStatus(ntParseValid(n.valid), ntLeg, n.sec);
   // 一覧（rows）がある場合は、個別 NOTAM の期間を優先（見出しの期間は「最長」など概括のことが多い）。最も「効く」側（有効＞時間外＞要確認＞日付外＞期限切れ）を採用
   var rows = ntRowsFor(n).filter(function (r) { return r.valid && !/同上|→/.test(r.valid); }), best = null, parsed = 0;
@@ -383,8 +435,10 @@ function ntAutoSummary() {
     var st = ntItemStatus(n); if (cnt[st] != null) cnt[st]++;
     if (st === 'active' && n.pri !== 'low') (act[n.sec] = act[n.sec] || []).push(n);
   });
-  var secs = Object.keys(act);
-  el.innerHTML = '<div class="cnt">' + ['active', 'outtime', 'future', 'expired', 'unknown'].map(function (k) { return ntBadge(k) + ' ' + cnt[k]; }).join('　') + '</div>' +
+  var secs = Object.keys(act), chk = ntChkLoad(), legN = NOTAMS.filter(function (n) { return (n.legs || []).indexOf(ntLeg) >= 0; });
+  var nChk = legN.filter(function (n) { return chk[ntLeg + '|' + n.no]; }).length, nQ = legN.filter(ntNeedsConfirm).length;
+  el.innerHTML = '<div class="cnt">' + ['active', 'outtime', 'future', 'expired', 'unknown'].map(function (k) { return ntBadge(k) + ' ' + cnt[k]; }).join('　') +
+    '　<span style="color:var(--muted)">確認済 ' + nChk + '／' + legN.length + '　要確認マーク ' + nQ + ' 件</span></div>' +
     (secs.length ? '<div style="font-weight:700;margin-top:4px">有効（重要・中）：</div>' + secs.map(function (sec) {
       return '<div><b style="color:var(--accent)">' + ntEsc(sec) + '</b><ul>' + act[sec].map(function (n) { return '<li><a href="#" onclick="ntJump(\'' + n.no.replace(/'/g, "\\'") + '\');return false;">' + ntEsc(n.no) + '</a>　' + ntEsc(n.title) + (n.pri === 'high' ? ' <span class="nt-tag hi">★</span>' : '') + '</li>'; }).join('') + '</ul></div>';
     }).join('') : '<div style="color:var(--muted)">有効な重要・中の NOTAM はありません。</div>') +
@@ -401,18 +455,27 @@ function ntChips() {
     var lab = c === '全て' ? '全便（過去分を含む）' : (NOTAM_FLIGHTS[c].label + '（' + NOTAM_FLIGHTS[c].route + '）');
     return '<button class="nt-chip' + (c === ntLeg ? ' on' : '') + '" onclick="ntSetLeg(\'' + c + '\')">' + lab + '</button>';
   }).join('');
-  if (lg && ntLeg !== '全て') lg.innerHTML += '<span style="flex-basis:100%"></span>' +
-    '<button class="nt-chip' + (ntOnlyActive ? ' on' : '') + '" onclick="ntOnlyActive=!ntOnlyActive;ntChips();ntRender()">✓ この便に有効のみ</button>' +
-    '<button class="nt-chip' + (ntHideExpired ? ' on' : '') + '" onclick="ntHideExpired=!ntHideExpired;ntChips();ntRender()">期限切れを隠す</button>';
+  if (lg) lg.innerHTML += '<span style="flex-basis:100%"></span>' +
+    (ntLeg !== '全て' ? '<button class="nt-chip' + (ntOnlyActive ? ' on' : '') + '" onclick="ntOnlyActive=!ntOnlyActive;ntChips();ntRender()">✓ この便に有効のみ</button>' : '') +
+    '<button class="nt-chip' + (ntHideExpired ? ' on' : '') + '" onclick="ntHideExpired=!ntHideExpired;ntChips();ntRender()">期限切れを隠す' + (ntLeg === '全て' ? '（現在時刻基準）' : '') + '</button>';
   var cnt = {}; NOTAMS.forEach(function (n) { if (ntLeg === '全て' || (n.legs || []).indexOf(ntLeg) >= 0) cnt[n.sec] = (cnt[n.sec] || 0) + 1; });
   document.getElementById('nt-secs').innerHTML = SECS.map(function (c) {
     return '<button class="nt-chip' + (c === ntSec ? ' on' : '') + '" onclick="ntSetSec(\'' + c + '\')">' + c + (cnt[c] ? ' ' + cnt[c] : '') + '</button>';
   }).join('') + '<button class="nt-chip' + (ntSec === '重要' ? ' on' : '') + '" onclick="ntSetSec(\'重要\')">★ 重要のみ</button>';
-  document.getElementById('nt-chips').innerHTML = ntCats().map(function (c) {
-    return '<button class="nt-chip' + (c === ntCat ? ' on' : '') + '" onclick="ntSetCat(\'' + c.replace(/'/g, "\\'") + '\')">' + c + '</button>';
-  }).join('');
+  var groups = ['全て'].concat(Object.keys(CAT_GROUPS)).concat(ntCats().some(function (c) { return c !== '全て' && ntCatGroupOf(c) === 'その他'; }) ? ['その他'] : []);
+  var html = groups.map(function (g) { return '<button class="nt-chip' + (g === ntCatGroup ? ' on' : '') + '" onclick="ntSetCatGroup(\'' + g + '\')">' + g + '</button>'; }).join('');
+  if (ntCatGroup !== '全て') html += '<span style="flex-basis:100%"></span>' + ntCats().filter(function (c) { return c !== '全て' && ntCatGroupOf(c) === ntCatGroup; }).map(function (c) {
+    return '<button class="nt-chip' + (c === ntCat ? ' on' : '') + '" style="font-size:.9em" onclick="ntSetCat(\'' + c.replace(/'/g, "\\'") + '\')">' + c + '</button>'; }).join('');
+  var chk = ntChkLoad(), nChecked = NOTAMS.filter(function (n) { return (ntLeg === '全て' || (n.legs || []).indexOf(ntLeg) >= 0) && chk[ntLeg + '|' + n.no]; }).length;
+  var vis = NOTAMS.filter(function (n) { return ntLeg === '全て' || (n.legs || []).indexOf(ntLeg) >= 0; }).length, issues = ntValidateData().length;
+  html += '<span style="flex-basis:100%"></span>' +
+    '<button class="nt-chip' + (ntOnlyUnchecked ? ' on' : '') + '" onclick="ntOnlyUnchecked=!ntOnlyUnchecked;ntChips();ntRender()">☐ 未確認のみ（' + (vis - nChecked) + '／' + vis + '）</button>' +
+    '<button class="nt-chip" onclick="ntChkReset()">確認済みをリセット</button>' +
+    '<button class="nt-chip" style="' + (issues ? 'color:var(--warn);border-color:var(--warn)' : '') + '" onclick="ntValidateShow()">データ検査：' + (issues ? '問題 ' + issues + ' 件' : 'OK') + '</button>';
+  document.getElementById('nt-chips').innerHTML = html;
 }
 function ntSetCat(c) { ntCat = c; ntChips(); ntRender(); }
+function ntSetCatGroup(g) { ntCatGroup = g; ntCat = '全て'; ntChips(); ntRender(); }
 function ntSetSec(c) { ntSec = c; ntChips(); ntRender(); }
 function ntSetLeg(c) { ntLeg = c; ntChips(); ntRender(); nmapRender(); ntIndexRender(); ngRender(); ntFlightBox(); ntAutoSummary(); }
 function ntLegTag(legs) { legs = legs || []; if (legs.length > 1) return legs.map(function (l) { return l.replace('KZ', ''); }).join('・'); return legs[0] ? legs[0] : ''; }
@@ -428,7 +491,9 @@ function ntRender() {
     else if (ntSec !== '全て' && n.sec !== ntSec) return false;
     if (ntLeg !== '全て' && (n.legs || []).indexOf(ntLeg) < 0) return false;
     if (ntCat !== '全て' && n.cat.indexOf(ntCat) < 0) return false;
-    if (ntLeg !== '全て') { var st0 = ntItemStatus(n); if (ntHideExpired && st0 === 'expired') return false; if (ntOnlyActive && st0 !== 'active' && st0 !== 'unknown') return false; }
+    if (ntCatGroup !== '全て' && !n.cat.some(function (c) { return ntCatGroupOf(c) === ntCatGroup; })) return false;
+    if (ntOnlyUnchecked && ntIsChecked(n.no)) return false;
+    var st0 = ntItemStatus(n); if (ntHideExpired && st0 === 'expired') return false; if (ntLeg !== '全て' && ntOnlyActive && st0 !== 'active' && st0 !== 'unknown') return false;
     if (!q) return true;
     var rt = (n.rows || []).map(function (r) { return r.no + ' ' + r.text; }).join(' ');
     return (n.no + ' ' + n.title + ' ' + n.orig + ' ' + n.ja + ' ' + (n.perf || '') + ' ' + (n.nav || '') + ' ' + (n.ops || '') + ' ' + n.cat.join(' ') + ' ' + rt).toLowerCase().indexOf(q) >= 0;
@@ -446,8 +511,9 @@ function ntRender() {
     var tbl = '';
     if (n.rows) tbl = '<div class="nt-h">一覧</div><div class="nt-tblw"><table class="nt-tbl"><tr><th>No.</th><th>有効</th><th>内容</th></tr>' +
       n.rows.filter(function (r) { return ntLeg === '全て' || (r.legs || []).indexOf(ntLeg) >= 0; }).map(function (r) { var rst = (ntLeg !== '全て' && r.valid && !/同上|→/.test(r.valid)) ? ntStatus(ntParseValid(r.valid), ntLeg, n.sec) : ''; return '<tr><td class="nt-no">' + ntEsc(r.no) + ntRowTag(mi, r.no) + ((r.legs || []).length === 1 ? ' <span class="nt-leg">' + ntLegTag(r.legs) + '</span>' : '') + '</td><td>' + ntEsc(r.valid) + (rst ? '<br>' + ntBadge(rst) : '') + '</td><td>' + r.text.replace(/\n/g, '<br>') + '</td></tr>'; }).join('') + '</table></div>';
-    var st = ntItemStatus(n), imt = (n.perf ? '<span class="nt-imt perf">PERF</span>' : '') + (n.nav ? '<span class="nt-imt nav">NAV</span>' : '') + (n.ops ? '<span class="nt-imt ops">OPS</span>' : '');
-    return '<details class="nt-item' + (mp ? ' wide' : '') + (n.pri === 'high' ? ' hi' : '') + (st === 'expired' ? ' expired' : '') + '" data-no="' + ntEsc(n.no) + '"' + (rows.length <= 2 ? ' open' : '') + '><summary><span class="nt-no">' + ntEsc(n.no) + '</span><span class="nt-title">' + ntEsc(n.title) + '</span>' + ntBadge(st) + imt + '' +
+    var st = ntItemStatus(n), imt = (n.perf ? '<span class="nt-imt perf">PERF</span>' : '') + (n.nav ? '<span class="nt-imt nav">NAV</span>' : '') + (n.ops ? '<span class="nt-imt ops">OPS</span>' : '') + (ntNeedsConfirm(n) ? '<span class="nt-imt" style="background:#b45309">要確認</span>' : '');
+    var chkd = ntIsChecked(n.no), chkBtn = '<button type="button" class="nt-chkbtn' + (chkd ? ' on' : '') + '" title="確認済みにする" onclick="ntToggleChk(\'' + n.no.replace(/'/g, "\\'") + '\', event)">' + (chkd ? '✓ 確認済' : '☐ 確認') + '</button>';
+    return '<details class="nt-item' + (mp ? ' wide' : '') + (n.pri === 'high' ? ' hi' : '') + (st === 'expired' ? ' expired' : '') + (chkd ? ' chkd' : '') + '" data-no="' + ntEsc(n.no) + '"' + (rows.length <= 2 ? ' open' : '') + '><summary>' + chkBtn + '<span class="nt-no">' + ntEsc(n.no) + '</span><span class="nt-title">' + ntEsc(n.title) + '</span>' + ntBadge(st) + imt + '' +
       '<span class="nt-tag sec">' + ntEsc(n.sec) + '</span><span class="nt-tag leg' + ((n.legs || []).length > 2 ? ' both' : '') + '">' + ntLegTag(n.legs) + '</span>' + (n.pri === 'high' ? '<span class="nt-tag hi">★重要</span>' : '') +
       n.cat.map(function (c) { return '<span class="nt-tag">' + ntEsc(c) + '</span>'; }).join('') + '</summary>' +
       '<div class="nt-body">' +
@@ -537,6 +603,52 @@ function ngRender() {
   setTimeout(function () { ngMap.invalidateSize(); }, 200);
 }
 function ntGo(tab) { try { if (parent && parent.refSwitch) parent.refSwitch(tab); } catch (e) {} }
+
+/* ═══ 出力：要約テキスト（コピー／共有／表示）と印刷 ═══ */
+function ntStrip(h) { return String(h || '').replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/\s+/g, ' ').trim(); }
+function ntExportBuild() {
+  var f = NOTAM_FLIGHTS[ntLeg] || {}, w = ntLegWindow(ntLeg);
+  var L = [];
+  L.push('【NOTAM 要約】' + (ntLeg === '全て' ? '全便' : (f.label || ntLeg) + '　' + (f.route || '') + '　' + (f.time || '') + (f.altn ? '　代替 ' + f.altn : '')));
+  L.push('作成：' + new Date().toISOString().slice(0, 16).replace('T', ' ') + 'Z　出典：EFB 画面の文字起こし（非公式・参考用）。必ず当日の正規 NOTAM／FLT PLAN で確認のこと。');
+  if (w) L.push('判定：出発空港＝ETD−1:30〜+0:30／到着・代替＝ETA−0:30〜+1:30／その他＝便全体（UTC）');
+  L.push('');
+  var order = ['active', 'outtime', 'unknown', 'future', 'expired'], lab = { active: '■ 有効', outtime: '■ 時間外（期間内だが便の時間帯の外）', unknown: '■ 期間要確認', future: '■ 日付外', expired: '■ 期限切れ' };
+  var by = {}; NOTAMS.forEach(function (n) { if (ntLeg !== '全て' && (n.legs || []).indexOf(ntLeg) < 0) return; var st = ntLeg === '全て' ? 'active' : ntItemStatus(n); (by[st] = by[st] || []).push(n); });
+  order.forEach(function (st) {
+    var arr = by[st]; if (!arr || !arr.length) return;
+    if (st === 'expired' && ntHideExpired) return;
+    L.push(lab[st] + '（' + arr.length + '）');
+    var secs = {}; arr.forEach(function (n) { (secs[n.sec] = secs[n.sec] || []).push(n); });
+    Object.keys(secs).forEach(function (sec) {
+      L.push('  ［' + sec + '］');
+      secs[sec].forEach(function (n) {
+        L.push('  ' + (n.pri === 'high' ? '★ ' : '・ ') + n.no + '　' + n.title);
+        L.push('     期間：' + ntStrip(n.valid));
+        var imp = []; if (n.perf) imp.push('性能：' + ntStrip(n.perf)); if (n.nav) imp.push('航法：' + ntStrip(n.nav)); if (n.ops) imp.push('運航：' + ntStrip(n.ops));
+        if (st === 'active' || st === 'unknown') imp.forEach(function (x) { L.push('     ' + x); });
+        if ((st === 'active' || st === 'unknown') && n.rows) { var rs = ntRowsFor(n); rs.forEach(function (r) { var rst = (ntLeg !== '全て' && r.valid && !/同上|→/.test(r.valid)) ? ntStatus(ntParseValid(r.valid), ntLeg, n.sec) : ''; if (!rst || rst === 'active' || rst === 'unknown') L.push('       - ' + r.no + '：' + ntStrip(r.text).slice(0, 90) + (r.valid ? '（' + ntStrip(r.valid) + '）' : '')); }); }
+      });
+    });
+    L.push('');
+  });
+  L.push('※「［要確認］」の箇所は原文から直接言えない推測。機械判定のため、時間帯は各自確認。');
+  return L.join('\n');
+}
+function ntExportText(mode) {
+  var txt = ntExportBuild(), ta = document.getElementById('nt-export-ta');
+  if (mode === 'show') { ta.style.display = ta.style.display === 'none' ? 'block' : 'none'; ta.value = txt; return; }
+  if (mode === 'share' && navigator.share) { navigator.share({ title: 'NOTAM 要約 ' + ntLeg, text: txt }).catch(function () {}); return; }
+  var done = function () { var b = document.querySelector('#nt-export button'); if (b) { var o = b.textContent; b.textContent = '✓ コピーしました'; setTimeout(function () { b.textContent = o; }, 1500); } };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, function () { ta.style.display = 'block'; ta.value = txt; ta.select(); });
+  else { ta.style.display = 'block'; ta.value = txt; ta.select(); try { document.execCommand('copy'); done(); } catch (e) {} }
+}
+function ntPrint() {
+  var items = document.querySelectorAll('#nt-list .nt-item'), was = [];
+  items.forEach(function (d) { was.push(d.open); d.open = true; });
+  var sb = document.getElementById('nt-sumbox'), sbWas = sb ? sb.open : null; if (sb) sb.open = false;
+  setTimeout(function () { window.print(); setTimeout(function () { items.forEach(function (d, i) { d.open = was[i]; }); if (sb && sbWas !== null) sb.open = sbWas; }, 500); }, 100);
+}
 ntChips(); ntRender(); nmapRender(); ntIndexRender(); ngRender(); ntFlightBox(); ntAutoSummary();
 if (window.innerWidth < 700) { var sb = document.getElementById('nt-sumbox'); if (sb) sb.open = false; }
 document.getElementById('nt-geobox').addEventListener('toggle', function () { if (ngMap) setTimeout(function () { ngMap.invalidateSize(); }, 100); });
