@@ -458,7 +458,7 @@ function ntValidExplain(n) {
 }
 function ntFlightBox() {
   var el = document.getElementById('nt-flight'); if (!el) return;
-  if (ntLeg === '全て') { el.innerHTML = '<b>全便表示</b>（過去分を含む）。便を選ぶと ETD/ETA に対する有効判定が付きます。'; return; }
+  if (ntLeg === '全て') { el.innerHTML = '<b>全便表示</b>。便を選ぶと ETD/ETA に対する有効判定が付きます。' + (window._ntPruned && window._ntPruned.length ? '<br><span style="color:var(--muted)">ETA から ' + NT_PRUNE_DAYS + ' 日を過ぎた便（' + window._ntPruned.join('・') + '）は自動的に表示から外しています。</span>' : ''); return; }
   var f = NOTAM_FLIGHTS[ntLeg] || {}, w = ntLegWindow(ntLeg);
   el.innerHTML = '<b>' + ntEsc(f.label || ntLeg) + '</b>　' + ntEsc(f.route || '') + '　' + ntEsc(f.time || '') + (f.altn ? '　代替 ' + ntEsc(f.altn) : '') +
     (w ? '<br><span style="color:var(--muted)">判定：出発空港＝ETD−1:30〜+0:30、到着・代替＝ETA−0:30〜+1:30、その他＝便全体（ETD ' + ntFmtDate(w.etd) + '／ETA ' + ntFmtDate(w.eta) + '）</span>' : '');
@@ -489,7 +489,7 @@ function ntCats() {
 function ntChips() {
   var lg = document.getElementById('nt-legs');
   if (lg) lg.innerHTML = ((typeof NOTAM_LEG_ORDER !== 'undefined') ? NOTAM_LEG_ORDER : ['KZ228', 'KZ227', 'KZ226', 'KZ225']).concat(['全て']).map(function (c) {
-    var lab = c === '全て' ? '全便（過去分を含む）' : (NOTAM_FLIGHTS[c].label + '（' + NOTAM_FLIGHTS[c].route + '）');
+    var lab = c === '全て' ? '全便' : (NOTAM_FLIGHTS[c].label + '（' + NOTAM_FLIGHTS[c].route + '）');
     return '<button class="nt-chip' + (c === ntLeg ? ' on' : '') + '" onclick="ntSetLeg(\'' + c + '\')">' + lab + '</button>';
   }).join('');
   if (lg) lg.innerHTML += '<span style="flex-basis:100%"></span>' +
@@ -686,6 +686,34 @@ function ntPrint() {
   var sb = document.getElementById('nt-sumbox'), sbWas = sb ? sb.open : null; if (sb) sb.open = false;
   setTimeout(function () { window.print(); setTimeout(function () { items.forEach(function (d, i) { d.open = was[i]; }); if (sb && sbWas !== null) sb.open = sbWas; }, 500); }, 100);
 }
+
+/* ═══ 過去便の自動削除：ETA から NT_PRUNE_DAYS 日を過ぎた便は、便ボタン・カード・行・空域・手書きサマリーから自動的に外す（データファイルは残すが表示しない） ═══ */
+var NT_PRUNE_DAYS = 3;
+function ntPrune() {
+  if (typeof NOTAM_LEG_TIMES === 'undefined') return;
+  var now = Date.now(), keep = {}, dropped = [];
+  Object.keys(NOTAM_FLIGHTS).forEach(function (k) {
+    var t = NOTAM_LEG_TIMES[k]; var eta = t ? new Date(t.eta).getTime() : 0;
+    if (eta && now - eta > NT_PRUNE_DAYS * 864e5) { dropped.push(k); } else keep[k] = 1;
+  });
+  if (!Object.keys(keep).length && Object.keys(NOTAM_FLIGHTS).length) { keep[NOTAM_LATEST] = 1; dropped = dropped.filter(function (k) { return k !== NOTAM_LATEST; }); }   // 最新便は必ず残す
+  if (!dropped.length) return;
+  dropped.forEach(function (k) { delete NOTAM_FLIGHTS[k]; });
+  if (typeof NOTAM_LEG_ORDER !== 'undefined') NOTAM_LEG_ORDER = NOTAM_LEG_ORDER.filter(function (k) { return keep[k]; });
+  var f = function (legs) { return (legs || []).filter(function (l) { return keep[l]; }); };
+  for (var i = NOTAMS.length - 1; i >= 0; i--) {
+    var n = NOTAMS[i]; n.legs = f(n.legs);
+    if (n.rows) n.rows = n.rows.filter(function (r) { r.legs = f(r.legs); return r.legs.length; });
+    if (!n.legs.length) NOTAMS.splice(i, 1);
+  }
+  if (typeof AIRSPACE_GEO !== 'undefined') AIRSPACE_GEO = AIRSPACE_GEO.filter(function (g) { g.legs = f(g.legs); return g.legs.length; });
+  if (typeof NOTAM_CHARTS !== 'undefined') NOTAM_CHARTS.forEach(function (c) { if (c.items) c.items = c.items.filter(function (it) { return !it.legs || f(it.legs).length; }); });
+  var boxes = { 'nt-sumbox-old': ['KZ225', 'KZ226'], 'nt-sumbox-227': ['KZ227'], 'nt-sumbox-228': ['KZ228'] };
+  Object.keys(boxes).forEach(function (id) { var el = document.getElementById(id); if (el && !boxes[id].some(function (l) { return keep[l]; })) { var card = el.closest('.card') || el; card.parentNode.removeChild(card); } });
+  if (!keep[ntLeg]) ntLeg = NOTAM_LATEST;
+  window._ntPruned = dropped;
+}
+ntPrune();
 ntChips(); ntRender(); nmapRender(); ntIndexRender(); ngRender(); ntFlightBox(); ntAutoSummary();
 if (window.innerWidth < 700) { var sb = document.getElementById('nt-sumbox'); if (sb) sb.open = false; }
 document.getElementById('nt-geobox').addEventListener('toggle', function () { if (ngMap) setTimeout(function () { ngMap.invalidateSize(); }, 100); });
