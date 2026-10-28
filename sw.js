@@ -1,4 +1,4 @@
-const CACHE = 'nca-ref-v2';   // 本体の 'nca-tools-*' とは別プレフィックス（本体SWの掃除対象外）
+const CACHE = 'nca-ref-v3';   // 本体の 'nca-tools-*' とは別プレフィックス（本体SWの掃除対象外）
 const ASSETS = [
   './emer.html',
   './mel.html',
@@ -47,7 +47,7 @@ self.addEventListener('fetch', e => {
   // NOTAM（日々更新）は network-first：オンラインなら常に最新、オフラインはキャッシュ
   if (/\/notam(_data\.js|\.html)$/.test(new URL(e.request.url).pathname)) {
     e.respondWith(
-      fetch(e.request).then(res => {
+      fetch(e.request, { cache: 'no-cache' }).then(res => {
         if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); }
         return res;
       }).catch(() => caches.match(e.request))
