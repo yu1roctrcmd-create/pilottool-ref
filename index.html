@@ -20,6 +20,7 @@
   <button class="tab-btn" data-tab="mel">MEL</button>
   <button class="tab-btn" data-tab="notam">NOTAM</button>
   <button class="reset-btn" id="reset-btn">RESET</button>
+  <button class="theme-btn" id="refresh-btn" title="キャッシュをリセットして最新版を取得（画像は残す）">🔄</button>
   <button class="theme-btn" id="cache-btn" title="オフライン用キャッシュを更新（QRH画像を含む。数百MB）">📥</button>
   <button class="theme-btn" id="theme-btn" title="Day / Night">☀️</button>
 </div>
@@ -99,6 +100,30 @@ document.getElementById('cache-btn').addEventListener('click', async function ()
   } catch (e) { ok = false; }
   btn.textContent = ok ? '✅' : '⚠️';
   setTimeout(function () { btn.textContent = '📥'; btn.disabled = false; }, 2500);
+});
+
+/* 🔄 キャッシュリセット: HTML/JS/CSS 等のキャッシュを破棄して最新版を取り直し、再読み込み（QRH 画像などオフライン用の画像は残す） */
+document.getElementById('refresh-btn').addEventListener('click', async function () {
+  var btn = this; if (btn.disabled) return;
+  btn.disabled = true; btn.textContent = '⏳'; var ok = true;
+  try {
+    if (navigator.serviceWorker) {
+      var regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(function (r) { return r.update().catch(function () {}); }));
+    }
+    var keys = await caches.keys();
+    for (var i = 0; i < keys.length; i++) {
+      if (keys[i].indexOf('nca-ref-') !== 0) continue;
+      var c = await caches.open(keys[i]), reqs = await c.keys();
+      for (var j = 0; j < reqs.length; j++) {
+        if (/\.(png|jpe?g|webp|gif|svg|ico)$/i.test(new URL(reqs[j].url).pathname)) continue;
+        await c.delete(reqs[j]);
+        try { var res = await fetch(reqs[j].url, { cache: 'reload' }); if (res.ok) await c.put(reqs[j].url, res); } catch (e) { ok = false; }
+      }
+    }
+  } catch (e) { ok = false; }
+  btn.textContent = ok ? '✅' : '⚠️';
+  setTimeout(function () { location.reload(); }, 600);
 });
 
 /* RESET: 入力データのリセット（本体のRESETと同様）。参照ページで保存される入力＝QRHの記入内容（localStorage qrh-*） */
