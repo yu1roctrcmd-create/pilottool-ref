@@ -7761,7 +7761,7 @@
                 ${trainingNotesBlock(item.id)}
 
                 <div class="image-upload-section">
-                  <label>📸 FCTR / AOM Images (複数枚対応)</label>
+                  <label>📸 FCTR / AOM Images</label>
                   <div class="image-preview-grid" id="imageGrid-${item.id}"></div>
                 </div>
 
@@ -7815,7 +7815,6 @@
       grid.innerHTML = images.map((base64, idx) => `
         <div class="image-preview-item">
           <img src="${base64}" alt="Image ${idx + 1}" loading="lazy" decoding="async" onclick="openLightbox('${itemId}', ${idx})">
-          <button class="image-delete-btn" onclick="deleteImage('${itemId}', ${idx})">🗑️</button>
         </div>
       `).join("");
     }
