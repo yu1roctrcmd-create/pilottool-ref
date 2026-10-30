@@ -21,6 +21,7 @@
   <button class="tab-btn" data-tab="notam">NOTAM</button>
   <button class="reset-btn" id="reset-btn">RESET</button>
   <button class="theme-btn" id="refresh-btn" title="キャッシュをリセットして最新版を取得（画像は残す）">🔄</button>
+  <span id="cache-prog" style="font-size:0.68rem;opacity:.75;white-space:nowrap;align-self:center;padding:0 2px"></span>
   <button class="theme-btn" id="cache-btn" title="オフライン用キャッシュを更新（QRH画像を含む。数百MB）">📥</button>
   <button class="theme-btn" id="theme-btn" title="Day / Night">☀️</button>
 </div>
@@ -82,10 +83,19 @@ document.getElementById('theme-btn').addEventListener('click', function () {
 document.getElementById('cache-btn').addEventListener('click', async function () {
   var btn = this; if (btn.disabled) return;
   btn.disabled = true; btn.textContent = '⏳'; var ok = true;
+  // 進捗（％・残り時間の目安）：SW の保存分＋QRH 画像の 完了数／総数 を合算して 📥 の横に表示
+  var prog = document.getElementById('cache-prog'), t0 = Date.now(), P = { sw: [0, 0], img: [0, 0] };
+  function render() {
+    var d = P.sw[0] + P.img[0], t = P.sw[1] + P.img[1]; if (!t) return;
+    var pct = Math.min(100, Math.round(d / t * 100)), el = (Date.now() - t0) / 1000, eta = '';
+    if (d >= 8 && d < t) { var r = el / d * (t - d); eta = ' ・残り約' + (r >= 60 ? Math.floor(r / 60) + '分' + ('0' + Math.round(r % 60)).slice(-2) + '秒' : Math.max(1, Math.round(r)) + '秒'); }
+    prog.textContent = pct + '%' + eta;
+  }
   try {
     if (navigator.serviceWorker && navigator.serviceWorker.controller) {
       ok = await new Promise(function (res) {
-        var ch = new MessageChannel(); ch.port1.onmessage = function (e) { res(e.data === 'done'); };
+        var ch = new MessageChannel();
+        ch.port1.onmessage = function (e) { if (e.data && e.data.t) { P.sw = [e.data.p, e.data.t]; render(); } else res(e.data === 'done'); };
         navigator.serviceWorker.controller.postMessage('FORCE_CACHE', [ch.port2]);
       });
     } else { ok = false; }
@@ -96,10 +106,11 @@ document.getElementById('cache-btn').addEventListener('click', async function ()
       await new Promise(function (res) { f.addEventListener('load', res, { once: true }); f.setAttribute('src', f.dataset.page); });
     }
     var w = f.contentWindow;
-    if (w && typeof w.prefetchAllImages === 'function') { var r = await w.prefetchAllImages(); if (r && r.fail) ok = false; }
+    if (w && typeof w.prefetchAllImages === 'function') { var r = await w.prefetchAllImages(function (d, t) { P.img = [d, t]; render(); }); if (r && r.fail) ok = false; }
   } catch (e) { ok = false; }
   btn.textContent = ok ? '✅' : '⚠️';
-  setTimeout(function () { btn.textContent = '📥'; btn.disabled = false; }, 2500);
+  prog.textContent = ok ? '100% 完了' : '一部失敗';
+  setTimeout(function () { btn.textContent = '📥'; btn.disabled = false; prog.textContent = ''; }, 2500);
 });
 
 /* 🔄 キャッシュリセット: HTML/JS/CSS 等のキャッシュを破棄して最新版を取り直し、再読み込み（QRH 画像などオフライン用の画像は残す） */

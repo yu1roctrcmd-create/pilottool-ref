@@ -70,9 +70,10 @@ self.addEventListener('fetch', e => {
 self.addEventListener('message', e => {
   if (e.data !== 'FORCE_CACHE') return;
   const port = e.ports[0];
+  let n = 0;
   caches.open(CACHE).then(cache =>
     Promise.allSettled(ASSETS.map(url =>
-      fetch(url, { cache: 'reload' }).then(res => { if (res.ok) cache.put(url, res); })
+      fetch(url, { cache: 'reload' }).then(res => { if (res.ok) cache.put(url, res); }).finally(() => { n++; port && port.postMessage({ p: n, t: ASSETS.length }); })
     ))
   ).then(() => port && port.postMessage('done'))
     .catch(() => port && port.postMessage('error'));

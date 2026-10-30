@@ -8496,7 +8496,7 @@
     // NCA_Tools.html側の📥（強制キャッシュ）ボタンから
     // document.getElementById('qrh-iframe').contentWindow.prefetchAllImages() として呼ばれる想定。
     // { cache: 'reload' } でSWのcache-first経路をバイパスし、必ずネットワークから取得してキャッシュへ上書きする。
-    async function prefetchAllImages() {
+    async function prefetchAllImages(onProgress) {
       const urls = new Set();
       Object.values(prepopulatedData).forEach(item => {
         (item?.images || []).forEach(url => {
@@ -8517,8 +8517,10 @@
             fail++;
           }
           done++;
+          if (onProgress) onProgress(done, list.length);
         }
       }
+      if (onProgress) onProgress(0, list.length);
       await Promise.all(Array.from({ length: Math.min(CONCURRENCY, list.length) }, worker));
       showStatus(`📥 画像キャッシュ完了：${list.length - fail}/${list.length}件（失敗${fail}件）`);
       return { total: list.length, fail };
