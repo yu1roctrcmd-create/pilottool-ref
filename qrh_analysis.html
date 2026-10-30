@@ -7762,7 +7762,6 @@
 
                 <div class="image-upload-section">
                   <label>📸 FCTR / AOM Images (複数枚対応)</label>
-                  <input type="file" id="imageInput-${item.id}" accept="image/*" multiple onchange="handleImageUpload('${item.id}')">
                   <div class="image-preview-grid" id="imageGrid-${item.id}"></div>
                 </div>
 
@@ -7806,30 +7805,6 @@
       const items = header.nextElementSibling;
       header.classList.toggle("collapsed");
       items.classList.toggle("hidden");
-    }
-
-    function handleImageUpload(itemId) {
-      const input = document.getElementById(`imageInput-${itemId}`);
-      const files = input.files;
-      const images = prepopulatedData[itemId]?.images || [];
-
-      Array.from(files).forEach(file => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const base64 = e.target.result;
-          images.push(base64);
-          displayImages(itemId);
-          updateProgress(itemId);
-        };
-        reader.readAsDataURL(file);
-      });
-
-      // Store in prepopulatedData
-      if (prepopulatedData[itemId]) {
-        prepopulatedData[itemId].images = images;
-      }
-
-      input.value = '';
     }
 
     function displayImages(itemId) {
