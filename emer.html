@@ -64,6 +64,33 @@
 <li><b>FMC title</b>：<b>"ACT LRC D/D"</b> と表示されることを確認<br><span style="color:var(--muted)">FMC title "ACT LRC D/D"</span></li>
 </ol></div>
 <div class="hint" style="margin:0 0 10px">図は FCTR p.4-15 のスライド「Delay in DES is necessary」右側の Cockpit Panel（CDU・EXEC・MCP ALT）を模式化したもの。</div>
+<div style="font-weight:700;font-size:0.82em;color:var(--accent);margin:12px 0 4px">② Terrain が Factor の場合の Cockpit Panel（FCTR p.4-15〜4-16）</div>
+<div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start;margin-bottom:6px">
+<div style="flex:0 1 300px;min-width:200px"><svg viewBox="0 0 300 400" style="width:100%;max-width:300px;height:auto;display:block" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cockpit Panel: ENG OUT, EO SPD, ALT 17000, EXEC">
+<rect width="300" height="400" rx="6" fill="#b88a64"/>
+<path d="M0 10 H255 Q290 10 290 56 L290 78 Q285 86 270 90 H0 Z" fill="#000"/>
+<text x="14" y="48" font-family="Menlo,monospace" font-size="22" font-weight="700" fill="#fff" letter-spacing="1">ENG OUT&gt;</text><circle cx="26" cy="26" r="9" fill="#2a6b2a"/><text x="26" y="30" text-anchor="middle" font-size="11" font-weight="700" fill="#fff" font-family="sans-serif">1</text>
+<path d="M60 108 H300 V170 H110 Q60 170 60 130 Z" fill="#000"/>
+<text x="285" y="145" text-anchor="end" font-family="Menlo,monospace" font-size="22" font-weight="700" fill="#fff" letter-spacing="1">&lt;EO SPD</text><circle cx="80" cy="124" r="9" fill="#2a6b2a"/><text x="80" y="128" text-anchor="middle" font-size="11" font-weight="700" fill="#fff" font-family="sans-serif">2</text>
+<rect y="182" width="300" height="108" fill="#c49a74"/>
+<text x="150" y="200" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="#e8d6c8" letter-spacing="1">ALT</text>
+<rect x="18" y="206" width="264" height="44" rx="3" fill="#555"/>
+<rect x="64" y="212" width="30" height="32" fill="#111"/><rect x="96" y="212" width="30" height="32" fill="#111"/><rect x="128" y="212" width="30" height="32" fill="#111"/><rect x="160" y="212" width="30" height="32" fill="#111"/><rect x="192" y="212" width="30" height="32" fill="#111"/>
+<g font-family="Menlo,monospace" font-size="24" font-weight="700" fill="#fff" text-anchor="middle"><text x="79" y="237">1</text><text x="111" y="237">7</text><text x="143" y="237">0</text><text x="175" y="237">0</text><text x="207" y="237">0</text></g><circle cx="40" cy="228" r="9" fill="#2a6b2a"/><text x="40" y="232" text-anchor="middle" font-size="11" font-weight="700" fill="#fff" font-family="sans-serif">3</text>
+<line x1="150" y1="254" x2="150" y2="266" stroke="#eee" stroke-width="3"/><circle cx="150" cy="290" r="22" fill="#e8d9c3" stroke="#cdb99b" stroke-width="2"/>
+<rect y="302" width="300" height="98" fill="#b88a64"/>
+<rect x="150" y="318" width="92" height="56" rx="3" fill="#6b1d12" stroke="#3a0d08"/>
+<text x="196" y="338" text-anchor="middle" font-family="Menlo,monospace" font-size="13" font-weight="700" fill="#e8d6c8">EXEC</text>
+<rect x="164" y="347" width="64" height="12" rx="3" fill="#f5c400" stroke="#fff"/><circle cx="258" cy="330" r="9" fill="#2a6b2a"/><text x="258" y="334" text-anchor="middle" font-size="11" font-weight="700" fill="#fff" font-family="sans-serif">4</text>
+</svg></div>
+<ol style="flex:1 1 220px;margin:0;padding-left:1.2em;font-size:0.8em;line-height:1.8">
+<li><b>CDU</b>：VNAV CRZ ページで <b>ENG OUT&gt;</b> prompt を Select<br><span style="color:var(--muted)">Select ENG OUT prompt on VNAV CRZ page</span></li>
+<li><b>CDU</b>：<b>&lt;EO SPD</b> prompt を Select → 4R に新しい（より高い）EO MAX ALT が表示されることがある。新しい EO MAX ALT を 1L に入力<br><span style="color:var(--muted)">Select EO SPD prompt and may display the new higher EO MAX ALT in 4R. Enter New EO MAX ALT in 1L.</span></li>
+<li><b>MCP ALT</b>：EO MAX ALT 以下の高度をセット（図は 17000）<br><span style="color:var(--muted)">Set at or below EO MAX ALT to MCP ALT</span></li>
+<li><b>EXEC</b>：Execute → DES。FMC title が <b>"ACT EO D/D"</b> に変わる<br><span style="color:var(--muted)">Execute for DES. FMC title change to "ACT EO D/D"</span></li>
+<li>Level Off 後、FMC title が <b>"ACT EO CRZ"</b> になる<br><span style="color:var(--muted)">Then level off "ACT EO CRZ"</span></li>
+</ol></div>
+<div class="hint" style="margin:0 0 10px">図は FCTR のスライド「Terrain is a factor」右側の Cockpit Panel（CDU・MCP ALT・EXEC）を模式化したもの。最も浅い降下になる。</div>
 <div style="font-weight:700;font-size:0.82em;color:var(--accent);margin:12px 0 4px">Speed／Thrust（状況別）</div><div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:0.78em;line-height:1.6;width:100%;min-width:420px"><tr><th style="padding:4px 6px;border:1px solid var(--border);vertical-align:top;text-align:left;color:var(--muted)">状況</th><th style="padding:4px 6px;border:1px solid var(--border);vertical-align:top;text-align:left;color:var(--muted)">Speed／Thrust</th></tr><tr><td style="padding:4px 6px;border:1px solid var(--border);vertical-align:top;font-weight:700;">① Descent の Delay が必要（Traffic・Track Offset・Clearance）</td><td style="padding:4px 6px;border:1px solid var(--border);vertical-align:top;"><b>E/O LRC</b>、Max CON Thrust</td></tr><tr><td style="padding:4px 6px;border:1px solid var(--border);vertical-align:top;font-weight:700;">② Terrain が Factor</td><td style="padding:4px 6px;border:1px solid var(--border);vertical-align:top;"><b>E/O SPD</b>、Thrust Reference は CON</td></tr><tr><td style="padding:4px 6px;border:1px solid var(--border);vertical-align:top;font-weight:700;">③ Delay も Terrain も問題なし</td><td style="padding:4px 6px;border:1px solid var(--border);vertical-align:top;"><b>All Engine LRC／All Engine ECON／Company Speed</b>（VNAV Cruise Descent）</td></tr><tr><td style="padding:4px 6px;border:1px solid var(--border);vertical-align:top;font-weight:700;">④ すでに Engine Out Maximum Altitude 以下で巡航中</td><td style="padding:4px 6px;border:1px solid var(--border);vertical-align:top;"><b>E/O LRC</b>、Reference Thrust は CON</td></tr></table></div>
       <div class="hint" style="margin:6px 0 14px">出典：FCTR p.4-15〜4-16「Engine Inoperative Cruise/Driftdown」。AOM PP.3.10：Terrain が厳しい時は FMS の E/O CRZ CLB Mode／E/O D/D Mode を使用。メリット・デメリットのうち「解釈」は記述からの推定。</div>
       <div class="formula-box" style="margin-bottom:12px">
