@@ -12,6 +12,12 @@
   <script src="ref-lock.js"></script>
 </head>
 <body id="ref-shell">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+</svg>
 
 <!-- 本体（Pilot Dashboard）と同じタブバー。EMER / QRH / MEL を単体で開く用 -->
 <div class="tab-bar" id="main-tab-bar">
@@ -20,10 +26,10 @@
   <button class="tab-btn" data-tab="mel">MEL</button>
   <button class="tab-btn" data-tab="notam">NOTAM</button>
   <button class="reset-btn" id="reset-btn">RESET</button>
-  <button class="theme-btn" id="refresh-btn" title="キャッシュをリセットして最新版を取得（画像は残す）">🔄</button>
+  <button class="theme-btn" id="refresh-btn" title="キャッシュをリセットして最新版を取得（画像は残す）"><svg class="ico"><use href="#i-refresh"/></svg></button>
   <span id="cache-prog" style="font-size:0.68rem;opacity:.75;white-space:nowrap;align-self:center;padding:0 2px"></span>
-  <button class="theme-btn" id="cache-btn" title="オフライン用キャッシュを更新（QRH画像を含む。数百MB）">📥</button>
-  <button class="theme-btn" id="theme-btn" title="Day / Night">☀️</button>
+  <button class="theme-btn" id="cache-btn" title="オフライン用キャッシュを更新（QRH画像を含む。数百MB）"><svg class="ico"><use href="#i-download"/></svg></button>
+  <button class="theme-btn" id="theme-btn" title="Day / Night"><svg class="ico"><use href="#i-sun"/></svg></button>
 </div>
 
 <div class="tab-panel" id="tab-emer">
@@ -59,7 +65,7 @@ function refSwitch(name) {
 }
 function refTheme(day) {
   document.body.classList.toggle('day', day);
-  document.getElementById('theme-btn').textContent = day ? '🌙' : '☀️';
+  document.getElementById('theme-btn').innerHTML = '<svg class="ico"><use href="#i-' + (day ? 'moon' : 'sun') + '"/></svg>';
   ['emer-iframe', 'qrh-iframe', 'mel-iframe', 'notam-iframe'].forEach(function (id) {
     var f = document.getElementById(id);
     if (f && f.contentWindow) f.contentWindow.postMessage({ type: 'nca-theme', theme: day ? 'light' : 'dark' }, '*');
@@ -82,7 +88,7 @@ document.getElementById('theme-btn').addEventListener('click', function () {
 /* 📥 一括キャッシュ: 参照ページ本体 + QRH画像（QRHページの先読み関数を利用） */
 document.getElementById('cache-btn').addEventListener('click', async function () {
   var btn = this; if (btn.disabled) return;
-  btn.disabled = true; btn.textContent = '⏳'; var ok = true;
+  btn.disabled = true; btn.dataset.h = btn.innerHTML; btn.textContent = '⏳'; var ok = true;
   // 進捗（％・残り時間の目安）：SW の保存分＋QRH 画像の 完了数／総数 を合算して 📥 の横に表示
   var prog = document.getElementById('cache-prog'), t0 = Date.now(), P = { sw: [0, 0], img: [0, 0] };
   function render() {
@@ -110,13 +116,13 @@ document.getElementById('cache-btn').addEventListener('click', async function ()
   } catch (e) { ok = false; }
   btn.textContent = ok ? '✅' : '⚠️';
   prog.textContent = ok ? '100% 完了' : '一部失敗';
-  setTimeout(function () { btn.textContent = '📥'; btn.disabled = false; prog.textContent = ''; }, 2500);
+  setTimeout(function () { btn.innerHTML = '<svg class="ico"><use href="#i-download"/></svg>'; btn.disabled = false; prog.textContent = ''; }, 2500);
 });
 
 /* 🔄 キャッシュリセット: HTML/JS/CSS 等のキャッシュを破棄して最新版を取り直し、再読み込み（QRH 画像などオフライン用の画像は残す） */
 document.getElementById('refresh-btn').addEventListener('click', async function () {
   var btn = this; if (btn.disabled) return;
-  btn.disabled = true; btn.textContent = '⏳'; var ok = true;
+  btn.disabled = true; btn.dataset.h = btn.innerHTML; btn.textContent = '⏳'; var ok = true;
   try {
     if (navigator.serviceWorker) {
       var regs = await navigator.serviceWorker.getRegistrations();
