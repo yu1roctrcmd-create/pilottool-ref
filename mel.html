@@ -73,18 +73,16 @@
   <div id="mel-cd" style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
     <div style="font-weight:700;font-size:0.9em;color:var(--accent);margin-bottom:6px">🧮 Calendar Day 期限計算（Category B・C・D）</div>
     <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end">
-      <label style="display:flex;flex-direction:column;gap:2px;font-size:0.78em;color:var(--muted)">発見日時
-        <input type="datetime-local" id="mel-cd-dt" oninput="melCdCalc()" style="font:inherit;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text)"></label>
-      <label style="display:flex;flex-direction:column;gap:2px;font-size:0.78em;color:var(--muted)">入力の時刻基準
-        <select id="mel-cd-tz" onchange="melCdCalc()" style="font:inherit;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text)"><option value="0">UTC</option><option value="9">JST（UTC+9）</option></select></label>
+      <label style="display:flex;flex-direction:column;gap:2px;font-size:0.78em;color:var(--muted)">Issue Date（UTC）
+        <input type="date" id="mel-cd-dt" oninput="melCdCalc()" style="font:inherit;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text)"></label>
       <label style="display:flex;flex-direction:column;gap:2px;font-size:0.78em;color:var(--muted)">延長日数の Category
         <select id="mel-cd-extcat" onchange="melCdExtCat()" style="font:inherit;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text)"><option value="3">B（3日）</option><option value="10">C（10日）</option></select></label>
       <label style="display:flex;flex-direction:column;gap:2px;font-size:0.78em;color:var(--muted)">延長日数（自動入力・変更可）
         <input type="number" id="mel-cd-ext" min="0" max="120" step="1" value="3" oninput="melCdCalc()" style="width:80px;font:inherit;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text)"></label>
-      <button type="button" onclick="melCdNow()" style="font:inherit;font-size:0.78em;padding:7px 10px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--accent);cursor:pointer">現在時刻</button>
+      <button type="button" onclick="melCdNow()" style="font:inherit;font-size:0.78em;padding:7px 10px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--accent);cursor:pointer">今日（UTC）</button>
     </div>
-    <div id="mel-cd-out" style="margin-top:8px;font-size:0.82em;color:var(--muted)">発見日時を入力してください</div>
-    <div style="font-size:0.74em;color:var(--muted);margin-top:6px;line-height:1.6">Day of Discovery（UTC 日付）＝Day0。各 Repair Interval は Day0 の 24:00 UTC（翌日 0000Z）が起点なので、期限は <b>Day0＋日数 の 24:00 UTC</b>（B：+3日、C：+10日、D：+120日）。<b>Flight が無い日も 1 日（Calendar Day）として数える</b>。Category A は対象外。<br><b>延長日数</b>：Category（B：3日／C：10日）を選ぶと自動で入る（数字は変更可）。延長できるのは B・C のみで、D は延長不可のため、表では「延長不可」と表示。<br><b>延長</b>：Category B・C のみ、整備部門と JCAB の調整で回復期限の延長が可能（D は不可）。延長する場合は <b>JOURNEY &amp; RADIO LOG に再度その旨を記載</b>する。例（Cat B）：Day0 9/15 20:00Z → 回復期限 9/18 24:00Z → 3 日延長で 9/21 24:00Z。〔Introduction, MEL Definitions #10／Repair Time Interval〕</div>
+    <div id="mel-cd-out" style="margin-top:8px;font-size:0.82em;color:var(--muted)">Issue Date を入力してください</div>
+    <div style="font-size:0.74em;color:var(--muted);margin-top:6px;line-height:1.6">Issue Date（UTC 日付）＝Day0。各 Repair Interval は Day0 の 24:00 UTC（翌日 0000Z）が起点なので、期限は <b>Day0＋日数 の 24:00 UTC</b>（B：+3日、C：+10日、D：+120日）。<b>Flight が無い日も 1 日（Calendar Day）として数える</b>。Category A は対象外。<br><b>延長日数</b>：Category（B：3日／C：10日）を選ぶと自動で入る（数字は変更可）。延長できるのは B・C のみで、D は延長不可のため、表では「延長不可」と表示。<br><b>延長</b>：Category B・C のみ、整備部門と JCAB の調整で回復期限の延長が可能（D は不可）。延長する場合は <b>JOURNEY &amp; RADIO LOG に再度その旨を記載</b>する。例（Cat B）：Day0 9/15 20:00Z → 回復期限 9/18 24:00Z → 3 日延長で 9/21 24:00Z。〔Introduction, MEL Definitions #10／Repair Time Interval〕</div>
   </div>
 <script>
 (function(){
@@ -94,19 +92,17 @@
   function fmtD(d){return d.getUTCFullYear()+'-'+p2(d.getUTCMonth()+1)+'-'+p2(d.getUTCDate())+'（'+W[d.getUTCDay()]+'）';}
   window.melCdExtCat=function(){ document.getElementById('mel-cd-ext').value=document.getElementById('mel-cd-extcat').value; melCdCalc(); };
   window.melCdNow=function(){
-    var tz=+document.getElementById('mel-cd-tz').value, n=new Date(Date.now()+tz*3600000);
-    document.getElementById('mel-cd-dt').value=n.getUTCFullYear()+'-'+p2(n.getUTCMonth()+1)+'-'+p2(n.getUTCDate())+'T'+p2(n.getUTCHours())+':'+p2(n.getUTCMinutes());
+    var n=new Date();
+    document.getElementById('mel-cd-dt').value=n.getUTCFullYear()+'-'+p2(n.getUTCMonth()+1)+'-'+p2(n.getUTCDate());
     melCdCalc();
   };
   window.melCdCalc=function(){
     var v=document.getElementById('mel-cd-dt').value, out=document.getElementById('mel-cd-out');
-    var m=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(v||'');
-    if(!m){out.textContent='発見日時を入力してください';return;}
-    var tz=+document.getElementById('mel-cd-tz').value;
-    var utc=new Date(Date.UTC(+m[1],+m[2]-1,+m[3],+m[4],+m[5])-tz*3600000);
-    var day0=new Date(Date.UTC(utc.getUTCFullYear(),utc.getUTCMonth(),utc.getUTCDate()));
+    var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(v||'');
+    if(!m){out.textContent='Issue Date を入力してください';return;}
+    var day0=new Date(Date.UTC(+m[1],+m[2]-1,+m[3]));
     var today=new Date(); today=new Date(Date.UTC(today.getUTCFullYear(),today.getUTCMonth(),today.getUTCDate()));
-    var h='<div style="color:var(--text);margin-bottom:6px">Day of Discovery（Day0）＝ <b>'+fmtD(day0)+' UTC</b>'+(tz? '<span style="color:var(--muted)">（入力 JST '+m[1]+'-'+m[2]+'-'+m[3]+' '+m[4]+':'+m[5]+' → UTC '+p2(utc.getUTCHours())+':'+p2(utc.getUTCMinutes())+'）</span>':'')+'</div>';
+    var h='<div style="color:var(--text);margin-bottom:6px">Issue Date（Day0）＝ <b>'+fmtD(day0)+' UTC</b></div>';
     h+='<table style="border-collapse:collapse;width:100%;font-size:0.95em"><tr><th style="text-align:left;padding:4px 6px;border-bottom:1px solid var(--border);color:var(--muted)">Cat</th><th style="text-align:left;padding:4px 6px;border-bottom:1px solid var(--border);color:var(--muted)">期限（24:00 UTC）</th><th style="text-align:left;padding:4px 6px;border-bottom:1px solid var(--border);color:var(--muted)">JST</th><th style="text-align:right;padding:4px 6px;border-bottom:1px solid var(--border);color:var(--muted)">残り</th><th style="text-align:left;padding:4px 6px;border-bottom:1px solid var(--border);color:var(--muted)">延長した場合</th></tr>';
     var ext=Math.max(0,Math.floor(+document.getElementById('mel-cd-ext').value)||0);
     CATS.forEach(function(c){
