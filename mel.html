@@ -78,13 +78,13 @@
       <label style="display:flex;flex-direction:column;gap:2px;font-size:0.78em;color:var(--muted)">入力の時刻基準
         <select id="mel-cd-tz" onchange="melCdCalc()" style="font:inherit;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text)"><option value="0">UTC</option><option value="9">JST（UTC+9）</option></select></label>
       <label style="display:flex;flex-direction:column;gap:2px;font-size:0.78em;color:var(--muted)">延長日数の Category
-        <select id="mel-cd-extcat" onchange="melCdExtCat()" style="font:inherit;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text)"><option value="3">B（3日）</option><option value="10">C（10日）</option><option value="120">D（120日）</option></select></label>
+        <select id="mel-cd-extcat" onchange="melCdExtCat()" style="font:inherit;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text)"><option value="3">B（3日）</option><option value="10">C（10日）</option></select></label>
       <label style="display:flex;flex-direction:column;gap:2px;font-size:0.78em;color:var(--muted)">延長日数（自動入力・変更可）
         <input type="number" id="mel-cd-ext" min="0" max="120" step="1" value="3" oninput="melCdCalc()" style="width:80px;font:inherit;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text)"></label>
       <button type="button" onclick="melCdNow()" style="font:inherit;font-size:0.78em;padding:7px 10px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--accent);cursor:pointer">現在時刻</button>
     </div>
     <div id="mel-cd-out" style="margin-top:8px;font-size:0.82em;color:var(--muted)">発見日時を入力してください</div>
-    <div style="font-size:0.74em;color:var(--muted);margin-top:6px;line-height:1.6">Day of Discovery（UTC 日付）＝Day0。各 Repair Interval は Day0 の 24:00 UTC（翌日 0000Z）が起点なので、期限は <b>Day0＋日数 の 24:00 UTC</b>（B：+3日、C：+10日、D：+120日）。<b>Flight が無い日も 1 日（Calendar Day）として数える</b>。Category A は対象外。<br><b>延長日数</b>：Category（B：3日／C：10日／D：120日）を選ぶと自動で入る（数字は変更可）。ただし D は延長不可のため、表では「延長不可」と表示。<br><b>延長</b>：Category B・C のみ、整備部門と JCAB の調整で回復期限の延長が可能（D は不可）。延長する場合は <b>JOURNEY &amp; RADIO LOG に再度その旨を記載</b>する。例（Cat B）：Day0 9/15 20:00Z → 回復期限 9/18 24:00Z → 3 日延長で 9/21 24:00Z。〔Introduction, MEL Definitions #10／Repair Time Interval〕</div>
+    <div style="font-size:0.74em;color:var(--muted);margin-top:6px;line-height:1.6">Day of Discovery（UTC 日付）＝Day0。各 Repair Interval は Day0 の 24:00 UTC（翌日 0000Z）が起点なので、期限は <b>Day0＋日数 の 24:00 UTC</b>（B：+3日、C：+10日、D：+120日）。<b>Flight が無い日も 1 日（Calendar Day）として数える</b>。Category A は対象外。<br><b>延長日数</b>：Category（B：3日／C：10日）を選ぶと自動で入る（数字は変更可）。延長できるのは B・C のみで、D は延長不可のため、表では「延長不可」と表示。<br><b>延長</b>：Category B・C のみ、整備部門と JCAB の調整で回復期限の延長が可能（D は不可）。延長する場合は <b>JOURNEY &amp; RADIO LOG に再度その旨を記載</b>する。例（Cat B）：Day0 9/15 20:00Z → 回復期限 9/18 24:00Z → 3 日延長で 9/21 24:00Z。〔Introduction, MEL Definitions #10／Repair Time Interval〕</div>
   </div>
 <script>
 (function(){
