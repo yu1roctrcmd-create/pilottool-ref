@@ -1,4 +1,4 @@
-const CACHE = 'nca-ref-v4';   // 本体の 'nca-tools-*' とは別プレフィックス（本体SWの掃除対象外）
+const CACHE = 'nca-ref-v5';   // 本体の 'nca-tools-*' とは別プレフィックス（本体SWの掃除対象外）
 const ASSETS = [
   './emer.html',
   './mel.html',
@@ -16,6 +16,7 @@ const ASSETS = [
   './emer_img/icao_doc4444_contingency.webp',
   './emer_img/oceanic_contingencies.jpeg',
   './emer_img/weather_deviation.jpeg',
+  './emer_img/weather_deviation_doc4444.png',
   './emer_img/light_gun_signal.png',
 ];
 
