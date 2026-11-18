@@ -286,6 +286,153 @@
   <p style="font-size:0.6em;color:var(--muted);margin-top:14px">〔MEL/CDL Manual Rev.39, Section 2 Appendix 2-B (2.00-01-02.1〜.40)〕</p>
 </div>
 
+<!-- ②.6 CDL 32-10-01 Main Landing Gear Door Seals 計算ツール -->
+<div class="card" id="mel-cdl">
+  <div class="card-title">🧮 CDL 32-10-01 Main Landing Gear Door Seals 計算
+    <span style="float:right;font-size:0.7rem;font-weight:400;color:var(--muted)">計算ツール</span>
+  </div>
+  <div style="font-size:0.74em;color:var(--muted);line-height:1.7;margin-bottom:10px">
+    Main Landing Gear Door Seal（装着 78 枚）が欠損した場合の、性能制限重量の減算と速度制限の判定。Engine-out の Net Level Off Weight（AOM PD.12.10／PD.12.11）との照合も行う。<br>
+    〔MEL/CDL Manual 3.32-10-01.1〜.3／Section 3 Introduction 3.00-01-00.2／AOM PD.12.10, PD.12.11〕
+  </div>
+  <div style="padding:8px 12px;border-radius:8px;background:rgba(255,60,60,0.10);border:1px solid #ff3c3c;font-size:0.74em;line-height:1.7;margin-bottom:12px">
+    <b>⚠ Vapor barrier heat shield と P/N 149U1200（LH 側ドア）の間のシールは、一部でも欠損不可。</b>それ以外は、任意の枚数が欠損可。
+  </div>
+
+  <div style="font-weight:700;font-size:0.9em;color:var(--accent);margin-bottom:6px">① 欠損シール → 性能補正・速度制限</div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end">
+    <label style="display:flex;flex-direction:column;gap:2px;font-size:0.78em;color:var(--muted)">欠損シールの累積長さ
+      <input type="number" id="mel-cdl-len" min="0" step="0.5" inputmode="decimal" placeholder="例 7" oninput="melCdl()" style="width:110px;font:inherit;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text)">
+    </label>
+    <label style="display:flex;flex-direction:column;gap:2px;font-size:0.78em;color:var(--muted)">単位
+      <select id="mel-cdl-unit" onchange="melCdl()" style="font:inherit;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text)"><option value="in">inch</option><option value="cm">cm</option><option value="ft">ft</option></select>
+    </label>
+    <label style="display:flex;flex-direction:column;gap:2px;font-size:0.78em;color:var(--muted)">Enroute Diversion Speed
+      <select id="mel-cdl-spd" onchange="melCdl()" style="font:inherit;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text)">
+        <option value="1.6">LRC（×1.6）</option><option value="2.1">280 KIAS（×2.1）</option><option value="2.6">300 KIAS（×2.6）</option><option value="3.6">320 KIAS（×3.6）</option><option value="4.1">340 KIAS（×4.1）</option>
+      </select>
+    </label>
+  </div>
+  <label style="display:flex;align-items:flex-start;gap:8px;font-size:0.76em;color:var(--text);margin-top:8px;line-height:1.6">
+    <input type="checkbox" id="mel-cdl-sec" onchange="melCdl()" style="margin-top:3px">
+    LH/RH 側 Secondary door assembly（P/N 149U1400）の、前縁・後縁の斜めエッジのシールが欠損している
+  </label>
+  <div id="mel-cdl-out" style="margin-top:10px;font-size:0.82em;line-height:1.8;color:var(--muted)">欠損シールの累積長さを入力してください</div>
+  <div style="font-size:0.72em;color:var(--muted);margin-top:6px;line-height:1.7">
+    ・累積長さには、Longeron Box Seal と Seal Retainer を含む（CDL 53-12-01 参照）。<br>
+    ・減算は<b>欠損 12 inch（30.48 cm）ごと</b>に Takeoff 100 lb／Enroute Climb 350 lb／Approach and Landing 50 lb。<b>端数は切り上げ</b>（12 inch 未満も 1 単位）で計算（例：7 inch ≒ 0.583 ft → 1 単位）。<br>
+    ・Enroute Climb は、Diversion Speed の係数（LRC 1.6／280 KIAS 2.1／300 KIAS 2.6／320 KIAS 3.6／340 KIAS 4.1）を乗じる（350 lb × 1.6 ＝ 560 lb）。
+  </div>
+
+  <div style="font-weight:700;font-size:0.9em;color:var(--accent);margin:16px 0 6px;border-top:1px solid var(--border);padding-top:12px">② Engine-out Net Level Off Weight との照合</div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end">
+    <label style="display:flex;flex-direction:column;gap:2px;font-size:0.78em;color:var(--muted)">ケース
+      <select id="mel-cdl-eo" onchange="melCdl()" style="font:inherit;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text)">
+        <option value="1">1 ENGINE INOP（90min Rule Area 内）</option><option value="2">2 ENGINES INOP（90min Rule Area 外）</option>
+      </select>
+    </label>
+    <label style="display:flex;flex-direction:column;gap:2px;font-size:0.78em;color:var(--muted)">Highest MORA（ft）
+      <input type="number" id="mel-cdl-mora" min="0" step="100" inputmode="numeric" placeholder="例 9300" oninput="melCdl()" style="width:110px;font:inherit;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text)">
+    </label>
+    <label style="display:flex;flex-direction:column;gap:2px;font-size:0.78em;color:var(--muted)">ISA 偏差（℃）
+      <input type="number" id="mel-cdl-isa" step="1" inputmode="numeric" placeholder="例 10（10 以下可）" oninput="melCdl()" style="width:130px;font:inherit;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text)">
+    </label>
+    <label style="display:flex;flex-direction:column;gap:2px;font-size:0.78em;color:var(--muted)">Anti-Ice
+      <select id="mel-cdl-ai" onchange="melCdl()" style="font:inherit;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text)">
+        <option value="none">なし</option><option value="es">Engine Only</option><option value="ew" selected>Engine and Wing</option>
+      </select>
+    </label>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-top:8px">
+    <label style="display:flex;flex-direction:column;gap:2px;font-size:0.78em;color:var(--muted)"><span id="mel-cdl-wlbl">比較する重量：Max TOW（LB）</span>
+      <input type="number" id="mel-cdl-w" min="0" step="100" inputmode="numeric" placeholder="例 1000000" oninput="melCdlW()" style="width:150px;font:inherit;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text)">
+    </label>
+    <label style="display:flex;flex-direction:column;gap:2px;font-size:0.78em;color:var(--muted)">（補助）ZFW（LB）
+      <input type="number" id="mel-cdl-zfw" min="0" step="100" inputmode="numeric" placeholder="例 683109" oninput="melCdlSum()" style="width:130px;font:inherit;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text)">
+    </label>
+    <label style="display:flex;flex-direction:column;gap:2px;font-size:0.78em;color:var(--muted)">（補助）評価点の燃料（LB）
+      <input type="number" id="mel-cdl-fuel" min="0" step="100" inputmode="numeric" placeholder="例 117900" oninput="melCdlSum()" style="width:130px;font:inherit;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text)">
+    </label>
+  </div>
+  <div id="mel-cdl-eo-out" style="margin-top:10px;font-size:0.82em;line-height:1.8;color:var(--muted)">MORA・ISA 偏差・比較する重量を入力してください</div>
+  <div style="font-size:0.72em;color:var(--muted);margin-top:6px;line-height:1.7">
+    ・<b>1 ENGINE INOP</b>：Net Level Off Weight から Anti-Ice と CDL 減算量を引いた値を、<b>Max TOW</b> と比較。<b>2 ENGINES INOP</b>：<b>評価点の計画重量</b>（ZFW＋評価点の燃料）と比較。<br>
+    ・圧力高度は Highest MORA を、表の<b>次に高い行へ切り上げ</b>（例：9,300 ft → 10,000 ft、11,700 ft → 12,000 ft）。ISA 偏差は<b>次に高い列へ切り上げ</b>（10℃ 以下は「ISA+10℃ & below」）。いずれも保守側の読み方で、MORA を圧力高度として扱う。<br>
+    ・Net Level Off Weight の表は、AOM PD.12.10（1 ENGINE INOP、MAX CONTINUOUS THRUST）／PD.12.11（2 ENGINES INOP、同）。<br>
+    ・Anti-Ice の補正表に値がない高度（1 ENGINE：36,000 ft、2 ENGINES：6,000 ft 未満・32,000 ft）は、最も近い高度の値で代用し、その旨を表示する（要確認）。
+  </div>
+  <p style="font-size:0.6em;color:var(--muted);margin-top:10px">〔MEL/CDL Manual 3.32-10-01／AOM PD.12.10, PD.12.11〕計算値は目安。最終判断は最新の MEL/CDL Manual・AOM・OPT による。</p>
+</div>
+<script>
+(function(){
+  // ---- AOM PD.12.10：1 ENGINE INOP / MAX CONTINUOUS THRUST  Net Level Off Weight（1000 LB）。列＝ISA+10&below, +15, +20, +25, +30
+  var NLW1={36:[483.1,482.8,459.5,435.0,410.8],34:[533.4,530.8,506.1,479.9,454.3],32:[588.5,580.6,554.7,527.4,501.0],30:[645.7,626.1,598.0,569.9,542.9],28:[697.1,669.5,639.3,610.1,582.1],26:[744.8,715.0,682.0,650.7,620.0],24:[795.4,760.5,725.4,693.2,659.0],22:[845.3,808.3,772.9,736.6,700.9],20:[897.1,861.5,822.4,782.7,743.8],18:[949.7,911.6,868.7,825.1,785.1],16:[1004.9,961.1,914.2,869.4,827.5],14:[1029.0,1014.7,964.5,918.3,875.1],12:[1029.0,1029.0,1022.9,973.0,928.1],10:[1029.0,1029.0,1029.0,1029.0,981.5]};
+  var AI1={es:{10:-9.8,12:-10.2,14:-10.9,16:-10.7,18:-10.7,20:-10.8,22:-9.9,24:-9.6,26:-8.9,28:-8.3,30:-7.6,32:-7.4,34:-7.2},ew:{10:-23.1,12:-24.4,14:-26.3,16:-27.0,18:-26.3,20:-25.8,22:-24.6,24:-22.8,26:-21.7,28:-20.2,30:-18.8,32:-18.3,34:-17.9}};
+  // ---- AOM PD.12.11：2 ENGINES INOP / MAX CONTINUOUS THRUST（null＝表に値なし）
+  var NLW2={32:[440.8,440.6,421.2,null,null],30:[483.3,479.4,459.1,438.9,418.7],28:[529.0,514.3,493.0,470.6,450.1],26:[570.7,550.7,526.9,503.2,480.7],24:[610.7,588.0,562.3,537.4,512.4],22:[650.2,626.3,599.1,572.6,545.9],20:[692.8,666.1,638.1,609.4,579.9],18:[734.0,705.7,676.5,644.2,613.1],16:[776.9,746.3,713.9,679.8,647.1],14:[821.8,789.9,753.4,718.0,684.3],12:[872.9,837.2,797.9,759.9,724.2],10:[925.8,884.2,842.7,802.7,764.8],8:[966.4,923.2,879.9,838.3,797.9],6:[1009.6,963.0,918.1,873.4,832.1],4:[1029.0,1002.9,953.4,908.1,865.4],2:[1029.0,1029.0,989.9,941.4,897.3],0:[1029.0,1029.0,1027.0,977.4,931.8]};
+  var AI2={es:{6:-7.1,8:-8.0,10:-7.8,12:-7.7,14:-7.8,16:-5.8,18:-6.1,20:-5.9,22:-5.7,24:-5.3,26:-4.7,28:-4.0,30:-3.9},ew:{6:-20.8,8:-21.0,10:-27.0,12:-25.3,14:-27.3,16:-17.8,18:-17.6,20:-18.0,22:-16.6,24:-15.9,26:-14.7,28:-13.9,30:-13.2}};
+  var COLS=['ISA+10℃ & below','ISA+15℃','ISA+20℃','ISA+25℃','ISA+30℃'];
+  function $(id){return document.getElementById(id);}
+  function fmt(n){return Math.round(n).toLocaleString('en-US');}
+  function keys(t){return Object.keys(t).map(Number).sort(function(a,b){return a-b;});}
+  function rowUp(t,altFt){var k=keys(t);for(var i=0;i<k.length;i++){if(k[i]*1000>=altFt)return k[i];}return null;}   // 次に高い行へ切り上げ
+  function nearest(t,alt){var k=keys(t),b=k[0];for(var i=0;i<k.length;i++){if(Math.abs(k[i]-alt)<Math.abs(b-alt))b=k[i];}return b;}
+  function isaCol(d){return d<=10?0:d<=15?1:d<=20?2:d<=25?3:d<=30?4:null;}
+  var cdlEnroute=0;   // ①で求めた Enroute Climb 減算量（LB）
+
+  window.melCdl=function(){
+    var out=$('mel-cdl-out'), v=parseFloat($('mel-cdl-len').value), u=$('mel-cdl-unit').value, sec=$('mel-cdl-sec').checked, f=parseFloat($('mel-cdl-spd').value);
+    cdlEnroute=0;
+    if(!isFinite(v)||v<0){ out.innerHTML=sec?'<b style="color:#ff8c42">Secondary door のシール欠損あり → VMO/MMO 270 KIAS／.73 Mach に制限</b>。累積長さも入力すると、性能補正を計算します。':'欠損シールの累積長さを入力してください'; melCdlEo(); return; }
+    var inch=u==='cm'?v/2.54:u==='ft'?v*12:v;
+    var n=Math.ceil(inch/12-1e-9); if(n<0)n=0;
+    var to=n*100, ec=n*350*f, ld=n*50; cdlEnroute=ec;
+    var restr=(inch>22||sec);
+    var why=[]; if(inch>22)why.push('累積 '+inch.toFixed(1)+' inch ＞ 22 inch（55.88 cm）'); if(sec)why.push('Secondary door（P/N 149U1400）のシール欠損');
+    var h='<div>欠損累積：<b style="color:var(--text)">'+inch.toFixed(1)+' inch</b>（'+(inch*2.54).toFixed(1)+' cm／'+(inch/12).toFixed(3)+' ft）→ 12 inch 単位 <b style="color:var(--text)">'+n+'</b></div>';
+    h+='<div style="margin-top:6px;padding:8px 12px;border-radius:8px;border:1px solid '+(restr?'#ff8c42':'var(--border)')+';background:'+(restr?'rgba(255,140,66,0.10)':'transparent')+'">'
+      +(restr?'<b style="color:#ff8c42">速度制限あり：VMO/MMO を <u>270 KIAS／.73 Mach</u> に制限</b>（Gear Down Dispatch switch を Gear Down に）。理由：'+why.join('、')+'。<br>飛行計画は Appendix 2-B「Flight Planning When Airspeed Is Limited to 270KIAS」に従う。OPT は CDL 32-10-01「Main Landing Gear Door Seals <b>(Limited to 270KIAS)</b>」を選択。'
+              :'<b style="color:#5fd08a">速度制限なし</b>（累積 22 inch 以下、Secondary door のシール欠損なし）。OPT は CDL 32-10-01「Main Landing Gear Door Seals <b>(NOT Limited to 270KIAS)</b>」を選択。')+'</div>';
+    h+='<table style="width:100%;border-collapse:collapse;font-size:0.95em;margin-top:8px"><tr style="color:var(--muted);font-size:0.9em"><th style="text-align:left;padding:3px 6px">減算する制限重量</th><th style="text-align:right;padding:3px 6px">計算</th><th style="text-align:right;padding:3px 6px">減算量</th></tr>'
+      +'<tr style="border-top:1px solid var(--border)"><td style="padding:4px 6px">Takeoff</td><td style="padding:4px 6px;text-align:right;color:var(--muted)">100 lb × '+n+'</td><td style="padding:4px 6px;text-align:right;font-weight:700;color:var(--text)">−'+fmt(to)+' lb</td></tr>'
+      +'<tr style="border-top:1px solid var(--border)"><td style="padding:4px 6px">Enroute Climb</td><td style="padding:4px 6px;text-align:right;color:var(--muted)">350 lb × '+n+' × '+f+'</td><td style="padding:4px 6px;text-align:right;font-weight:700;color:var(--text)">−'+fmt(ec)+' lb</td></tr>'
+      +'<tr style="border-top:1px solid var(--border)"><td style="padding:4px 6px">Approach and Landing</td><td style="padding:4px 6px;text-align:right;color:var(--muted)">50 lb × '+n+'</td><td style="padding:4px 6px;text-align:right;font-weight:700;color:var(--text)">−'+fmt(ld)+' lb</td></tr></table>';
+    h+='<div style="font-size:0.9em;margin-top:4px">Takeoff・Landing は、Field／Climb／Obstacle／Tire Speed／Brake Energy などの<b>制限重量から減算</b>（OPT は該当の CDL 項目を選択して計算可）。Enroute は AOM PD.12 の Net Level Off Weight から減算。</div>';
+    out.innerHTML=h; melCdlEo();
+  };
+
+  window.melCdlSum=function(){var z=parseFloat($('mel-cdl-zfw').value), fu=parseFloat($('mel-cdl-fuel').value); if(isFinite(z)&&isFinite(fu)){$('mel-cdl-w').value=Math.round(z+fu);} melCdlEo();};
+  window.melCdlW=function(){melCdlEo();};
+  window.melCdlEo=function(){
+    var out=$('mel-cdl-eo-out'), mode=$('mel-cdl-eo').value, mora=parseFloat($('mel-cdl-mora').value), isa=parseFloat($('mel-cdl-isa').value), ai=$('mel-cdl-ai').value, W=parseFloat($('mel-cdl-w').value);
+    $('mel-cdl-wlbl').textContent=mode==='1'?'比較する重量：Max TOW（LB）':'比較する重量：評価点の計画重量（LB）';
+    if(!isFinite(mora)||!isFinite(isa)||!isFinite(W)){ out.innerHTML='MORA・ISA 偏差・比較する重量を入力してください'; return; }
+    var NLW=mode==='1'?NLW1:NLW2, AI=mode==='1'?AI1:AI2, label=mode==='1'?'1 ENGINE INOP（PD.12.10）':'2 ENGINES INOP（PD.12.11）';
+    var row=rowUp(NLW,mora), col=isaCol(isa);
+    if(row===null){ out.innerHTML='<b style="color:#ff4560">Highest MORA '+fmt(mora)+' ft は表の範囲（最大 '+keys(NLW).pop()*1000+' ft）を超えています。</b>'; return; }
+    if(col===null){ out.innerHTML='<b style="color:#ff4560">ISA+'+isa+'℃ は表の範囲（ISA+30℃ まで）を超えています。</b>'; return; }
+    var net=NLW[row][col];
+    if(net===null){ out.innerHTML='<b style="color:#ff4560">'+label+'：'+row+',000 ft・'+COLS[col]+' は表に値がありません（Level off 不可）。</b>'; return; }
+    net*=1000;
+    var adj=0, adjNote='';
+    if(ai!=='none'){ var a=AI[ai][row]; if(a===undefined){ var nr=nearest(AI[ai],row); a=AI[ai][nr]; adjNote='（表に '+row+',000 ft の値なし → '+nr+',000 ft の値で代用・要確認）'; } adj=a*1000; }
+    var res=net+adj-cdlEnroute, margin=res-W, ok=margin>=0;
+    var tr=function(l,r,b){return '<tr style="border-top:1px solid var(--border)"><td style="padding:4px 6px">'+l+'</td><td style="padding:4px 6px;text-align:right;'+(b?'font-weight:700;color:var(--text)':'')+'">'+r+'</td></tr>';};
+    var h='<div>'+label+'：MORA '+fmt(mora)+' ft → <b style="color:var(--text)">'+row+',000 ft</b> の行、ISA 偏差 '+isa+'℃ → <b style="color:var(--text)">'+COLS[col]+'</b> の列</div>';
+    h+='<table style="width:100%;border-collapse:collapse;font-size:0.95em;margin-top:6px">'
+      +tr('Net Level Off Weight',fmt(net)+' lb',true)
+      +tr('Anti-Ice（'+(ai==='none'?'なし':ai==='es'?'Engine Only':'Engine and Wing')+'）'+adjNote,(adj===0?'0':fmt(adj))+' lb',false)
+      +tr('CDL 32-10-01（Enroute Climb 減算）','−'+fmt(cdlEnroute)+' lb'+(cdlEnroute===0?'（①未入力＝0）':''),false)
+      +tr('<b>CDL 適用後の Level Off Weight</b>','<b style="color:var(--text)">'+fmt(res)+' lb</b>',true)
+      +tr(mode==='1'?'Max TOW':'評価点の計画重量',fmt(W)+' lb',false)+'</table>';
+    h+='<div style="margin-top:8px;padding:8px 12px;border-radius:8px;border:1px solid '+(ok?'#5fd08a':'#ff4560')+';background:'+(ok?'rgba(95,208,138,0.10)':'rgba(255,69,96,0.10)')+'">'
+      +(ok?'<b style="color:#5fd08a">✓ 余裕あり：'+fmt(res)+' ＞ '+fmt(W)+' lb（余裕 '+fmt(margin)+' lb）</b>':'<b style="color:#ff4560">✗ 不足：'+fmt(res)+' ＜ '+fmt(W)+' lb（'+fmt(-margin)+' lb 不足）</b>')+'</div>';
+    out.innerHTML=h;
+  };
+  melCdl();
+})();
+</script>
+
 </div><!-- /xw-col left -->
 <div class="xw-col">
 
