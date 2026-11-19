@@ -382,14 +382,16 @@
 
   window.melCdl=function(){
     var out=$('mel-cdl-out'), v=parseFloat($('mel-cdl-len').value), u=$('mel-cdl-unit').value, sec=$('mel-cdl-sec').checked, f=parseFloat($('mel-cdl-spd').value);
+    $('mel-cdl-len').step = u==='ft' ? '0.001' : u==='cm' ? '0.1' : '0.5';   // ft は 0.001（小数第3位）
     cdlEnroute=0;
     if(!isFinite(v)||v<0){ out.innerHTML=sec?'<b style="color:#ff8c42">Secondary door のシール欠損あり → VMO/MMO 270 KIAS／.73 Mach に制限</b>。累積長さも入力すると、性能補正を計算します。':'欠損シールの累積長さを入力してください'; melCdlEo(); return; }
+    if(u==='ft'){ v=Math.round(v*1000)/1000; }   // ft は小数第3位まで
     var inch=u==='cm'?v/2.54:u==='ft'?v*12:v;
     var n=Math.ceil(inch/12-1e-9); if(n<0)n=0;
     var to=n*100, ec=n*350*f, ld=n*50; cdlEnroute=ec;
     var restr=(inch>22||sec);
     var why=[]; if(inch>22)why.push('累積 '+inch.toFixed(1)+' inch ＞ 22 inch（55.88 cm）'); if(sec)why.push('Secondary door（P/N 149U1400）のシール欠損');
-    var h='<div>欠損累積：<b style="color:var(--text)">'+inch.toFixed(1)+' inch</b>（'+(inch*2.54).toFixed(1)+' cm／'+(inch/12).toFixed(3)+' ft）→ 12 inch 単位 <b style="color:var(--text)">'+n+'</b></div>';
+    var h='<div>欠損累積：<b style="color:var(--text)">'+(u==='ft'?inch.toFixed(3):inch.toFixed(1))+' inch</b>（'+(inch*2.54).toFixed(1)+' cm／<b style="color:var(--text)">'+(inch/12).toFixed(3)+' ft</b>）→ 12 inch 単位 <b style="color:var(--text)">'+n+'</b></div>';
     h+='<div style="margin-top:6px;padding:8px 12px;border-radius:8px;border:1px solid '+(restr?'#ff8c42':'var(--border)')+';background:'+(restr?'rgba(255,140,66,0.10)':'transparent')+'">'
       +(restr?'<b style="color:#ff8c42">速度制限あり：VMO/MMO を <u>270 KIAS／.73 Mach</u> に制限</b>（Gear Down Dispatch switch を Gear Down に）。理由：'+why.join('、')+'。<br>飛行計画は Appendix 2-B「Flight Planning When Airspeed Is Limited to 270KIAS」に従う。OPT は CDL 32-10-01「Main Landing Gear Door Seals <b>(Limited to 270KIAS)</b>」を選択。'
               :'<b style="color:#5fd08a">速度制限なし</b>（累積 22 inch 以下、Secondary door のシール欠損なし）。OPT は CDL 32-10-01「Main Landing Gear Door Seals <b>(NOT Limited to 270KIAS)</b>」を選択。')+'</div>';
