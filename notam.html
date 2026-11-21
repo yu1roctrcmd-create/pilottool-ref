@@ -464,10 +464,15 @@ function ngRender() {
     ngMap = L.map(box, { zoomSnap: 0.25 }).setView([32.5, 128], 5);
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri, Maxar, Earthstar Geographics', maxZoom: 12 }).addTo(ngMap);
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', { maxZoom: 12 }).addTo(ngMap);
-    var ap = [['RJAA', 35.7647, 140.3864], ['RJTT', 35.5533, 139.7811], ['ZSPD', 31.1434, 121.8052], ['ZSSS', 31.1979, 121.3363]];
-    ap.forEach(function (a) { L.circleMarker([a[1], a[2]], { radius: 5, color: '#fff', weight: 2, fillColor: '#111', fillOpacity: 1 }).bindTooltip(a[0], { permanent: true, direction: 'right', offset: [7, 0], className: 'ng-ap' }).addTo(ngMap); });
-    L.polyline([[35.7647, 140.3864], [31.1434, 121.8052]], { color: '#fff', weight: 1.5, dashArray: '4,6', opacity: .7 }).addTo(ngMap);
+    window.ngBase = null;
   }
+  if (window.ngBase) ngMap.removeLayer(window.ngBase);
+  window.ngBase = L.featureGroup().addTo(ngMap);
+  var lg = (typeof NOTAM_LEG_GEO !== 'undefined' && NOTAM_LEG_GEO[leg]) || null;
+  var apl = lg ? lg.airports : [['RJAA', 35.7647, 140.3864], ['RJTT', 35.5533, 139.7811], ['ZSPD', 31.1434, 121.8052], ['ZSSS', 31.1979, 121.3363]];
+  apl.forEach(function (a) { L.circleMarker([a[1], a[2]], { radius: 5, color: '#fff', weight: 2, fillColor: a[3] ? '#0a7' : '#111', fillOpacity: 1 }).bindTooltip(a[0], { permanent: true, direction: 'right', offset: [7, 0], className: 'ng-ap' }).addTo(window.ngBase); });
+  if (lg && lg.route) L.polyline(lg.route, { color: '#00d4ff', weight: 3, dashArray: '8,6', opacity: .9 }).bindTooltip(lg.routeName || '飛行経路（概略）').addTo(window.ngBase);
+  else if (!lg) L.polyline([[35.7647, 140.3864], [31.1434, 121.8052]], { color: '#fff', weight: 1.5, dashArray: '4,6', opacity: .7 }).addTo(window.ngBase);
   if (ngLayer) ngMap.removeLayer(ngLayer);
   ngLayer = L.featureGroup().addTo(ngMap);
   var P = '#a855f7', n = 0, leghtml = '';
@@ -486,7 +491,7 @@ function ngRender() {
     leghtml += '<li><span class="nm-n" style="background:' + P + '">' + n + '</span><span><b>' + ntEsc(d.id) + '</b>　' + ntEsc(d.name) + (alt ? '（' + ntEsc(alt) + '）' : '') + '<br><span style="color:var(--muted)">' + ntEsc(ngHtmlStrip(ngValid(d.id))) + '</span></span></li>';
   });
   document.getElementById('nt-geoleg').innerHTML = leghtml || '<li style="list-style:none"><span class="nt-empty">この便に、緯度経度で図示できる空域 NOTAM はありません。</span></li>';
-  if (items.length) { try { ngMap.fitBounds(ngLayer.getBounds().pad(0.15)); } catch (e) {} }
+  if (lg && lg.route) { try { ngMap.fitBounds(window.ngBase.getBounds().extend(items.length ? ngLayer.getBounds() : window.ngBase.getBounds()).pad(0.08)); } catch (e) {} } else if (items.length) { try { ngMap.fitBounds(ngLayer.getBounds().pad(0.15)); } catch (e) {} }
   setTimeout(function () { ngMap.invalidateSize(); }, 200);
 }
 function ntGo(tab) { try { if (parent && parent.refSwitch) parent.refSwitch(tab); } catch (e) {} }
