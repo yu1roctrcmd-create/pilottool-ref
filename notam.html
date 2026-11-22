@@ -104,7 +104,10 @@
     .nt-tbl th{color:var(--muted);font-size:.9em}
     .nt-tbl td:nth-child(2){white-space:nowrap;font-size:.92em}
     .nt-empty{font-size:.8em;color:var(--muted);padding:12px}
-  </style>
+  .ownship-ctl{display:flex;flex-wrap:wrap;gap:4px;align-items:flex-start;max-width:230px}
+.ownship-btn{width:34px;height:34px;border-radius:6px;border:2px solid rgba(0,0,0,.35);background:#fff;font-size:18px;line-height:1;cursor:pointer;padding:0}
+.ownship-info{flex-basis:100%;background:rgba(10,20,35,.88);color:#fff;font-size:12px;line-height:1.5;padding:6px 8px;border-radius:6px;border:1px solid #ff00ff}
+</style>
 </head>
 <body>
 
@@ -446,6 +449,55 @@ function ntIndexRender() {
     return '<tr><td>' + ntEsc(r.sec) + '</td><td class="nt-no" style="cursor:pointer" onclick="ntJump(\'' + r.card.replace(/'/g, "\\'") + '\')">' + ntEsc(r.id) + '</td><td>' + ntEsc(r.text) + '</td><td>' + r.pr + '</td></tr>';
   }).join('');
 }
+/* ═══ 現在位置（GPS）の表示：地図に自機をマゼンタの点で表示。📍で現在地へ、⏹で停止（Wi-Fi 専用 iPad は GPS なしのため位置が出ない場合あり） ═══ */
+function addOwnship(map, opts) {
+  opts = opts || {};
+  var wrapLon = !!opts.wrapLon;   // Diversion の地図は西経に +360° を足して連続表示している
+  var watchId = null, marker = null, acc = null, info = null, first = true;
+  function ll(lat, lon) { return [lat, (wrapLon && lon < 0) ? lon + 360 : lon]; }
+  var Ctl = L.Control.extend({
+    options: { position: 'topleft' },
+    onAdd: function () {
+      var box = L.DomUtil.create('div', 'ownship-ctl');
+      box.innerHTML = '<button type="button" class="ownship-btn" title="現在地を表示・現在地へ移動">📍</button><button type="button" class="ownship-btn ownship-stop" title="現在地の追跡を停止" style="display:none">⏹</button><div class="ownship-info" style="display:none"></div>';
+      L.DomEvent.disableClickPropagation(box);
+      var b = box.children[0], s = box.children[1]; info = box.children[2];
+      b.onclick = function () { if (watchId === null) start(); else if (marker) map.setView(marker.getLatLng(), Math.max(map.getZoom(), 6)); };
+      s.onclick = stop;
+      return box;
+    }
+  });
+  new Ctl().addTo(map);
+  function msg(t) { if (!info) return; info.style.display = t ? 'block' : 'none'; info.innerHTML = t || ''; }
+  function stop() {
+    if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+    if (marker) { map.removeLayer(marker); marker = null; } if (acc) { map.removeLayer(acc); acc = null; }
+    var s = info && info.parentNode.children[1]; if (s) s.style.display = 'none'; msg('');
+  }
+  function start() {
+    if (!('geolocation' in navigator)) { msg('この端末では位置情報を使えません'); return; }
+    first = true; msg('現在地を取得中…（GPS 付き端末のみ）');
+    var s = info.parentNode.children[1]; s.style.display = 'inline-block';
+    watchId = navigator.geolocation.watchPosition(function (p) {
+      var c = p.coords, pos = ll(c.latitude, c.longitude);
+      var hdg = (c.heading != null && !isNaN(c.heading) && c.speed > 2) ? c.heading : null;
+      var icon = L.divIcon({ className: '', iconSize: [28, 28], iconAnchor: [14, 14],
+        html: '<div style="width:28px;height:28px;position:relative"><div style="position:absolute;left:7px;top:7px;width:14px;height:14px;border-radius:50%;background:#ff00ff;border:3px solid #fff;box-shadow:0 0 6px rgba(0,0,0,.6)"></div>' +
+          (hdg !== null ? '<div style="position:absolute;left:0;top:0;width:28px;height:28px;transform:rotate(' + hdg + 'deg)"><div style="position:absolute;left:8px;top:-8px;width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:14px solid #ff00ff"></div></div>' : '') + '</div>' });
+      if (!marker) marker = L.marker(pos, { icon: icon, zIndexOffset: 10000, interactive: false }).addTo(map); else { marker.setLatLng(pos); marker.setIcon(icon); }
+      if (!acc) acc = L.circle(pos, { radius: c.accuracy || 0, color: '#ff00ff', weight: 1, fillColor: '#ff00ff', fillOpacity: .22, interactive: false }).addTo(map); else { acc.setLatLng(pos); acc.setRadius(c.accuracy || 0); }
+      var gs = (c.speed != null && !isNaN(c.speed)) ? Math.round(c.speed * 1.943844) + 'kt' : '—';
+      var alt = (c.altitude != null && !isNaN(c.altitude)) ? Math.round(c.altitude * 3.28084).toLocaleString() + 'ft' : '—';
+      var la = Math.abs(c.latitude), lo = Math.abs(c.longitude);
+      msg('<b>現在地</b> ' + Math.floor(la) + '°' + ((la % 1) * 60).toFixed(1) + (c.latitude >= 0 ? 'N' : 'S') + ' ' + Math.floor(lo) + '°' + ((lo % 1) * 60).toFixed(1) + (c.longitude >= 0 ? 'E' : 'W') +
+        '<br>GS ' + gs + '　GPS 高度 ' + alt + (hdg !== null ? '　TRK ' + Math.round(hdg) + '°' : '') + '<br><span style="opacity:.7">精度 ±' + Math.round(c.accuracy || 0) + 'm</span>');
+      if (first) { first = false; map.setView(pos, Math.max(map.getZoom(), 5)); }
+    }, function (e) {
+      msg(e.code === 1 ? '位置情報が許可されていません（設定 → プライバシー → 位置情報サービス）' : e.code === 2 ? '位置を取得できません（GPS 非対応の端末、または電波が弱い）' : '位置の取得がタイムアウトしました');
+    }, { enableHighAccuracy: true, maximumAge: 2000, timeout: 20000 });
+  }
+}
+
 var ngMap = null, ngLayer = null;
 function ngHtmlStrip(h) { return String(h || '').replace(/<[^>]+>/g, ''); }
 function ngValid(id) {
@@ -465,6 +517,7 @@ function ngRender() {
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri, Maxar, Earthstar Geographics', maxZoom: 12 }).addTo(ngMap);
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', { maxZoom: 12 }).addTo(ngMap);
     window.ngBase = null;
+    addOwnship(ngMap);
   }
   if (window.ngBase) ngMap.removeLayer(window.ngBase);
   window.ngBase = L.featureGroup().addTo(ngMap);
