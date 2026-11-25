@@ -1,4 +1,4 @@
-const CACHE = 'nca-ref-v10';   // 本体の 'nca-tools-*' とは別プレフィックス（本体SWの掃除対象外）
+const CACHE = 'nca-ref-v11';   // 本体の 'nca-tools-*' とは別プレフィックス（本体SWの掃除対象外）
 const ASSETS = [
   './emer.html',
   './mel.html',
